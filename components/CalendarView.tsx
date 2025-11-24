@@ -155,7 +155,7 @@ export default function CalendarView() {
     const totalHeight = getTotalCalendarHeight()
 
     return (
-      <div className="relative flex-1 overflow-x-auto overflow-y-auto bg-white">
+      <div className="relative flex-1 overflow-x-auto bg-white">
         {/* Header aule */}
         <div className="sticky top-0 z-20 bg-white border-b border-gray-200">
           <div className="flex" style={{ minWidth: `${classrooms.length * minClassroomWidth + 64}px` }}>
