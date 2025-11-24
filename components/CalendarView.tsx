@@ -141,8 +141,8 @@ export default function CalendarView() {
     const now = new Date()
     const currentMinutes = now.getHours() * 60 + now.getMinutes()
     
-    // Mostra il pin solo se siamo nel giorno corrente e l'orario è nel range 9-21
-    if (isSameDay(dayDate, now) && currentMinutes >= 9 * 60 && currentMinutes < 21 * 60) {
+    // Mostra il pin solo se siamo nel giorno corrente e l'orario è nel range 8-21
+    if (isSameDay(dayDate, now) && currentMinutes >= 8 * 60 && currentMinutes < 21 * 60) {
       return getTimePosition(currentTime)
     }
     return null
@@ -291,8 +291,9 @@ export default function CalendarView() {
     const isToday = isSameDay(currentDate, new Date())
 
     return (
-      <div className="card-modern overflow-hidden animate-fade-in">
-        <div className={`${headerColor} text-white p-3 flex items-center justify-between rounded-t-lg shadow-md`}>
+      <div className="flex flex-col h-full card-modern overflow-hidden animate-fade-in">
+        {/* Header giorno sticky */}
+        <div className={`sticky top-0 z-20 ${headerColor} text-white p-3 flex items-center justify-between rounded-t-lg shadow-md`}>
           <div>
             <div className="font-bold text-xl uppercase tracking-wide">
               {format(currentDate, 'EEEE', { locale: it })}
@@ -324,7 +325,10 @@ export default function CalendarView() {
             </button>
           </div>
         </div>
-        {renderTimeGrid(dayLessons, currentDate)}
+        {/* Griglia scrollabile */}
+        <div className="flex-1 overflow-auto">
+          {renderTimeGrid(dayLessons, currentDate)}
+        </div>
       </div>
     )
   }
@@ -354,8 +358,9 @@ export default function CalendarView() {
   }
 
   return (
-    <div>
-      <div className="mb-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+    <div className="flex flex-col h-[calc(100vh-4rem)]">
+      {/* Controlli sticky (ricerca, filtri) */}
+      <div className="sticky top-0 z-30 bg-gray-50 pb-2 mb-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         {/* Ricerca a sinistra */}
         <div className="w-full sm:w-auto">
           <button
@@ -390,7 +395,10 @@ export default function CalendarView() {
         </div>
       </div>
 
-      {renderDayView()}
+      {/* Container scrollabile con header sticky */}
+      <div className="flex-1 overflow-hidden flex flex-col">
+        {renderDayView()}
+      </div>
 
       {showForm && (
         <LessonForm
