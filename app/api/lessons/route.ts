@@ -39,12 +39,15 @@ export async function POST(request: NextRequest) {
 
   try {
     const data = await request.json()
+    console.log('Received lesson data:', JSON.stringify(data, null, 2))
     const lesson = await addLesson(data)
     return NextResponse.json(lesson, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating lesson:', error)
+    console.error('Error stack:', error?.stack)
+    const errorMessage = error?.message || 'Errore durante la creazione della lezione'
     return NextResponse.json(
-      { error: 'Errore durante la creazione della lezione' },
+      { error: errorMessage },
       { status: 500 }
     )
   }
