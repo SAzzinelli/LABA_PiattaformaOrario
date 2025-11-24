@@ -22,7 +22,7 @@ Cordiali saluti.`)
   }
 
   return (
-    <footer className="bg-laba-primary text-white mt-auto shadow-lg">
+    <footer className="bg-laba-primary text-white mt-auto shadow-lg sticky bottom-0 z-40">
       <div className="container mx-auto px-2 py-3">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="text-sm opacity-90 font-medium animate-fade-in">

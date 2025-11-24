@@ -43,6 +43,9 @@ export default function CalendarView() {
   // Filtri
   const [filterCourse, setFilterCourse] = useState('')
   const [filterYear, setFilterYear] = useState<number | null>(null)
+  
+  // Ricerca
+  const [showSearch, setShowSearch] = useState(false)
 
   const timeSlots = generateTimeSlots()
   const classrooms = getBaseClassrooms()
@@ -198,12 +201,14 @@ export default function CalendarView() {
           {/* Righe orari */}
           {timeSlots.map((time, timeIndex) => {
             const isHour = time.endsWith(':00')
+            const isHalfHour = time.endsWith(':30')
 
             return (
               <div key={time} className="flex border-b border-gray-100" style={{ height: '60px' }}>
                 {/* Colonna orari */}
                 <div className="w-16 flex-shrink-0 border-r border-gray-200 p-1 text-xs text-gray-600 flex items-center">
                   {isHour && <span className="font-semibold">{time}</span>}
+                  {isHalfHour && <span className="text-gray-400 text-[10px]">{time}</span>}
                 </div>
 
                 {/* Colonne aule */}
@@ -300,9 +305,36 @@ export default function CalendarView() {
     setFilterYear(null)
   }
 
+  const handleSearchSelect = (lesson: Lesson, dayOfWeek: number) => {
+    // Calcola la data del giorno della settimana
+    const today = new Date()
+    const currentDay = today.getDay()
+    const diff = dayOfWeek - currentDay
+    const targetDate = new Date(today)
+    targetDate.setDate(today.getDate() + diff)
+    
+    setCurrentDate(targetDate)
+    setEditingLesson(lesson)
+    setShowForm(true)
+  }
+
   return (
     <div>
-      <div className="mb-2 flex flex-col sm:flex-row justify-end items-start sm:items-center gap-3">
+      <div className="mb-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        {/* Ricerca a sinistra */}
+        <div className="w-full sm:w-auto">
+          <button
+            onClick={() => setShowSearch(true)}
+            className="btn-modern flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-laba-primary text-sm font-medium shadow-md border border-gray-200 relative overflow-hidden"
+          >
+            <svg className="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <span className="relative z-10">Cerca Lezione</span>
+          </button>
+        </div>
+
+        {/* Filtri a destra */}
         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
           <LessonFilters
             course={filterCourse}
@@ -331,6 +363,13 @@ export default function CalendarView() {
           onClose={handleFormClose}
         />
       )}
+
+      <SearchOverlay
+        isOpen={showSearch}
+        onClose={() => setShowSearch(false)}
+        onSelectLesson={handleSearchSelect}
+        lessons={lessons}
+      />
     </div>
   )
 }

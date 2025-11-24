@@ -71,7 +71,7 @@ export default function CustomDropdown({
       </button>
 
       {isOpen && !disabled && (
-        <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto animate-scale-in">
+        <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto animate-scale-in" style={{ minWidth: 'max-content' }}>
           {options.map((option) => (
             <button
               key={option.value}
@@ -85,6 +85,7 @@ export default function CustomDropdown({
                   ? 'bg-laba-primary text-white font-medium'
                   : 'text-gray-900 hover:bg-gray-50'
               }`}
+              style={{ whiteSpace: 'nowrap' }}
             >
               {option.label}
             </button>
