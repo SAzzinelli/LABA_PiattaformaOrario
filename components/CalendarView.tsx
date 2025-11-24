@@ -50,8 +50,8 @@ export default function CalendarView() {
   // Calcola la larghezza minima basata sul nome più lungo
   const getMinClassroomWidth = () => {
     const maxLength = Math.max(...classrooms.map(c => c.length))
-    // Approssimativamente 8px per carattere + padding
-    return Math.max(140, maxLength * 8 + 32)
+    // Approssimativamente 6px per carattere + padding ridotto
+    return Math.max(110, maxLength * 6 + 24)
   }
   const minClassroomWidth = getMinClassroomWidth()
 
@@ -162,7 +162,7 @@ export default function CalendarView() {
               return (
                 <div
                   key={classroom}
-                  className={`flex-shrink-0 border-r border-gray-200 last:border-r-0 p-2 text-center font-semibold text-xs bg-gray-50 whitespace-nowrap ${
+                  className={`flex-shrink-0 border-r border-gray-200 last:border-r-0 p-1.5 text-center font-semibold text-xs bg-gray-50 whitespace-nowrap ${
                     isFirstExternal ? 'border-l-4 border-l-gray-400' : ''
                   }`}
                   style={{ width: `${minClassroomWidth}px`, minWidth: `${minClassroomWidth}px` }}
@@ -252,7 +252,7 @@ export default function CalendarView() {
 
     return (
       <div className="card-modern overflow-hidden animate-fade-in">
-        <div className={`${headerColor} text-white p-4 flex items-center justify-between rounded-t-lg shadow-md`}>
+        <div className={`${headerColor} text-white p-3 flex items-center justify-between rounded-t-lg shadow-md`}>
           <div>
             <div className="font-bold text-xl uppercase tracking-wide">
               {format(currentDate, 'EEEE', { locale: it })}
@@ -302,7 +302,7 @@ export default function CalendarView() {
 
   return (
     <div>
-      <div className="mb-4 flex flex-col sm:flex-row justify-end items-start sm:items-center gap-3">
+      <div className="mb-2 flex flex-col sm:flex-row justify-end items-start sm:items-center gap-3">
         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
           <LessonFilters
             course={filterCourse}

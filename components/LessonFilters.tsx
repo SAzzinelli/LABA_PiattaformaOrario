@@ -37,7 +37,7 @@ export default function LessonFilters({
   ]
 
   return (
-    <div className="mb-4 animate-fade-in">
+    <div className="mb-2 animate-fade-in">
       <div className="flex items-center justify-between">
         <button
           onClick={() => setIsOpen(!isOpen)}

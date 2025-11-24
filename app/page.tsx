@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header />
-      <main className="container mx-auto px-4 py-6 flex-1">
+      <main className="container mx-auto px-2 py-2 flex-1">
         <CalendarView />
       </main>
       <Footer />
