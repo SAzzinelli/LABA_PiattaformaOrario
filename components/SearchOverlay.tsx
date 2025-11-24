@@ -77,11 +77,12 @@ export default function SearchOverlay({ isOpen, onClose, onSelectLesson, lessons
       {/* Overlay contenuto */}
       <div className="fixed inset-0 z-[100] flex items-start justify-center pt-20 px-4 animate-scale-in pointer-events-none">
         <div 
-          className="card-modern w-full max-w-3xl max-h-[70vh] overflow-hidden pointer-events-auto shadow-2xl bg-white"
+          className="card-modern w-full max-w-3xl max-h-[70vh] overflow-hidden pointer-events-auto shadow-2xl bg-white rounded-xl"
+          style={{ borderRadius: '12px', overflow: 'hidden' }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="bg-laba-primary text-white p-4 flex items-center justify-between">
+          <div className="bg-laba-primary text-white p-4 flex items-center justify-between rounded-t-xl" style={{ borderRadius: '12px 12px 0 0' }}>
             <h2 className="text-xl font-bold">Cerca Lezione</h2>
             <button
               onClick={onClose}

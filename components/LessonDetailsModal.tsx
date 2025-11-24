@@ -45,11 +45,12 @@ export default function LessonDetailsModal({ isOpen, onClose, lesson, dayDate }:
       {/* Overlay contenuto */}
       <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 animate-scale-in pointer-events-none">
         <div
-          className="card-modern w-full max-w-2xl max-h-[85vh] overflow-hidden pointer-events-auto bg-white shadow-2xl"
+          className="card-modern w-full max-w-2xl max-h-[85vh] overflow-hidden pointer-events-auto bg-white shadow-2xl rounded-xl"
+          style={{ borderRadius: '12px', overflow: 'hidden' }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="bg-laba-primary text-white p-6 flex items-center justify-between">
+          <div className="bg-laba-primary text-white p-6 flex items-center justify-between rounded-t-xl" style={{ borderRadius: '12px 12px 0 0' }}>
             <div>
               <h2 className="text-2xl font-bold mb-1">{lesson.title}</h2>
               <div className="text-sm opacity-90">
@@ -95,7 +96,7 @@ export default function LessonDetailsModal({ isOpen, onClose, lesson, dayDate }:
               {/* Dettagli */}
               <div className="space-y-4">
                 <div className="border-b border-gray-200 pb-4">
-                  <div className="text-sm font-semibold text-gray-500 mb-2">Professore</div>
+                  <div className="text-sm font-semibold text-gray-500 mb-2">Prof.</div>
                   <div className="text-lg text-gray-900">{lesson.professor}</div>
                 </div>
 
@@ -113,4 +114,5 @@ export default function LessonDetailsModal({ isOpen, onClose, lesson, dayDate }:
     </>
   )
 }
+
 

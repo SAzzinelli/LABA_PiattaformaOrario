@@ -344,8 +344,15 @@ export default function CalendarView() {
     targetDate.setDate(today.getDate() + diff)
     
     setCurrentDate(targetDate)
-    setEditingLesson(lesson)
-    setShowForm(true)
+    
+    // Se l'utente è loggato, apri modale modifica, altrimenti apri modale dettagli
+    if (isAuthenticated) {
+      setEditingLesson(lesson)
+      setShowForm(true)
+    } else {
+      setSelectedLesson(lesson)
+      setShowLessonDetails(true)
+    }
   }
 
   return (

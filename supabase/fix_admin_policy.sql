@@ -22,3 +22,4 @@ ALTER TABLE admin_users DISABLE ROW LEVEL SECURITY;
 -- VALUES ('admin@labafirenze.com', '$2a$10$placeholder')
 -- ON CONFLICT (email) DO NOTHING;
 
+
