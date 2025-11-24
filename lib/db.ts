@@ -39,16 +39,16 @@ function dbRowToLesson(row: any): Lesson {
 // Convert Lesson interface to database row
 function lessonToDbRow(lesson: Omit<Lesson, 'id'> | Partial<Lesson>): any {
   const row: any = {}
-  if ('title' in lesson) row.title = lesson.title
-  if ('startTime' in lesson) row.start_time = lesson.startTime
-  if ('endTime' in lesson) row.end_time = lesson.endTime
-  if ('dayOfWeek' in lesson) row.day_of_week = lesson.dayOfWeek
-  if ('classroom' in lesson) row.classroom = lesson.classroom
-  if ('professor' in lesson) row.professor = lesson.professor
-  if ('course' in lesson) row.course = lesson.course || null
-  if ('year' in lesson) row.year = lesson.year || null
-  if ('group' in lesson) row.group_name = lesson.group || null
-  if ('notes' in lesson) row.notes = lesson.notes || null
+  if ('title' in lesson && lesson.title) row.title = lesson.title
+  if ('startTime' in lesson && lesson.startTime) row.start_time = lesson.startTime
+  if ('endTime' in lesson && lesson.endTime) row.end_time = lesson.endTime
+  if ('dayOfWeek' in lesson && lesson.dayOfWeek !== undefined) row.day_of_week = lesson.dayOfWeek
+  if ('classroom' in lesson && lesson.classroom) row.classroom = lesson.classroom
+  if ('professor' in lesson && lesson.professor) row.professor = lesson.professor
+  if ('course' in lesson) row.course = lesson.course && lesson.course.trim() !== '' ? lesson.course : null
+  if ('year' in lesson) row.year = lesson.year && lesson.year > 0 ? lesson.year : null
+  if ('group' in lesson) row.group_name = lesson.group && lesson.group.trim() !== '' ? lesson.group : null
+  if ('notes' in lesson) row.notes = lesson.notes && lesson.notes.trim() !== '' ? lesson.notes : null
   return row
 }
 
@@ -85,6 +85,10 @@ export async function getLessons(filters?: LessonFilters): Promise<Lesson[]> {
 export async function addLesson(lesson: Omit<Lesson, 'id'>): Promise<Lesson> {
   try {
     const row = lessonToDbRow(lesson)
+    
+    // Log per debug
+    console.log('Adding lesson with row:', JSON.stringify(row, null, 2))
+    
     const { data, error } = await supabase
       .from('lessons')
       .insert(row)
@@ -93,7 +97,12 @@ export async function addLesson(lesson: Omit<Lesson, 'id'>): Promise<Lesson> {
 
     if (error) {
       console.error('Error adding lesson:', error)
-      throw error
+      console.error('Error details:', JSON.stringify(error, null, 2))
+      throw new Error(error.message || 'Errore durante l\'inserimento della lezione')
+    }
+
+    if (!data) {
+      throw new Error('Nessun dato restituito dopo l\'inserimento')
     }
 
     return dbRowToLesson(data)
