@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { CLASSROOMS } from '@/lib/classrooms'
 
 interface Lesson {
   id: string
@@ -193,14 +194,20 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
               <label htmlFor="classroom" className="block text-sm font-medium text-gray-700 mb-1">
                 Aula *
               </label>
-              <input
+              <select
                 id="classroom"
-                type="text"
                 value={formData.classroom}
                 onChange={(e) => setFormData({ ...formData, classroom: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-laba-primary"
                 required
-              />
+              >
+                <option value="">Seleziona un'aula</option>
+                {CLASSROOMS.map((classroom) => (
+                  <option key={classroom} value={classroom}>
+                    {classroom}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

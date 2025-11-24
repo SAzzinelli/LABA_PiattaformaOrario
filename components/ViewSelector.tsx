@@ -1,6 +1,6 @@
 'use client'
 
-type ViewType = 'day' | 'week' | 'month' | 'year'
+type ViewType = 'day' | 'week'
 
 interface ViewSelectorProps {
   view: ViewType
@@ -11,8 +11,6 @@ export default function ViewSelector({ view, onViewChange }: ViewSelectorProps) 
   const views: { value: ViewType; label: string }[] = [
     { value: 'day', label: 'Giorno' },
     { value: 'week', label: 'Settimana' },
-    { value: 'month', label: 'Mese' },
-    { value: 'year', label: 'Anno' },
   ]
 
   return (
