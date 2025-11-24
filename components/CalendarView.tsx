@@ -5,7 +5,7 @@ import { format, isSameDay } from 'date-fns'
 import { it } from 'date-fns/locale'
 import LessonForm from './LessonForm'
 import LessonFilters from './LessonFilters'
-import { CLASSROOMS, getBaseClassrooms } from '@/lib/classrooms'
+import { CLASSROOMS, getBaseClassrooms, getFirstExternalIndex } from '@/lib/classrooms'
 import { generateTimeSlots, getTimePosition, getCurrentTime } from '@/lib/timeSlots'
 
 interface Lesson {
@@ -139,6 +139,7 @@ export default function CalendarView() {
 
   const renderTimeGrid = (dayLessons: Lesson[], dayDate: Date) => {
     const currentTimePos = getCurrentTimePosition(dayDate)
+    const firstExternalIndex = getFirstExternalIndex()
 
     return (
       <div className="relative flex-1 overflow-x-auto">
@@ -146,12 +147,16 @@ export default function CalendarView() {
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
           <div className="flex" style={{ minWidth: `${classrooms.length * 140}px` }}>
             <div className="w-16 flex-shrink-0 border-r border-gray-200"></div>
-            {classrooms.map((classroom) => {
+            {classrooms.map((classroom, index) => {
               const classroomLessons = getLessonsForClassroom(dayLessons, classroom)
+              const isFirstExternal = index === firstExternalIndex
+              
               return (
                 <div
                   key={classroom}
-                  className="flex-1 min-w-[140px] border-r border-gray-200 last:border-r-0 p-2 text-center font-semibold text-xs bg-gray-50"
+                  className={`flex-1 min-w-[140px] border-r border-gray-200 last:border-r-0 p-2 text-center font-semibold text-xs bg-gray-50 ${
+                    isFirstExternal ? 'border-l-4 border-l-gray-400' : ''
+                  }`}
                 >
                   {classroom}
                   {classroomLessons.length > 0 && (
@@ -193,8 +198,9 @@ export default function CalendarView() {
                 </div>
 
                 {/* Colonne aule */}
-                {classrooms.map((classroom) => {
+                {classrooms.map((classroom, index) => {
                   const classroomLessons = getLessonsForClassroom(dayLessons, classroom)
+                  const isFirstExternal = index === firstExternalIndex
                   
                   // Trova la lezione che inizia in questo slot
                   const lessonStarting = classroomLessons.find(lesson => {
@@ -205,7 +211,9 @@ export default function CalendarView() {
                   return (
                     <div
                       key={classroom}
-                      className="flex-1 min-w-[140px] border-r border-gray-100 last:border-r-0 relative"
+                      className={`flex-1 min-w-[140px] border-r border-gray-100 last:border-r-0 relative ${
+                        isFirstExternal ? 'border-l-4 border-l-gray-400' : ''
+                      }`}
                     >
                       {lessonStarting && (
                         <LessonEventCard
