@@ -155,32 +155,34 @@ export default function CalendarView() {
 
     return (
       <div className="flex-1 flex flex-col bg-white border border-gray-200 rounded-b-lg overflow-hidden">
+        {/* Header aule sticky - FUORI dal container scrollabile */}
+        <div className="sticky top-0 z-40 bg-white border-b border-gray-300 shadow-sm">
+          <div className="overflow-x-auto">
+            <div className="flex" style={{ minWidth: `${classrooms.length * minClassroomWidth + 64}px` }}>
+              {/* Colonna orari nell'header */}
+              <div className="sticky left-0 z-50 w-16 flex-shrink-0 border-r border-gray-300 bg-gray-50"></div>
+              
+              {/* Header aule */}
+              {classrooms.map((classroom) => (
+                <div
+                  key={classroom}
+                  className="flex-shrink-0 border-r border-gray-200 last:border-r-0 px-2 py-2 text-center text-xs font-medium text-gray-700 bg-gray-50 whitespace-nowrap"
+                  style={{ width: `${minClassroomWidth}px`, minWidth: `${minClassroomWidth}px` }}
+                >
+                  {classroom}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Container scrollabile */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto relative">
           {/* Tabella con struttura pulita */}
           <div className="relative" style={{ minWidth: `${classrooms.length * minClassroomWidth + 64}px`, height: `${totalHeight}px` }}>
             
-            {/* Header aule sticky */}
-            <div className="sticky top-0 z-40 bg-white border-b border-gray-300">
-              <div className="flex">
-                {/* Colonna orari nell'header */}
-                <div className="sticky left-0 z-50 w-16 flex-shrink-0 border-r border-gray-300 bg-gray-50"></div>
-                
-                {/* Header aule */}
-                {classrooms.map((classroom) => (
-                  <div
-                    key={classroom}
-                    className="flex-shrink-0 border-r border-gray-200 last:border-r-0 px-2 py-2 text-center text-xs font-medium text-gray-700 bg-gray-50 whitespace-nowrap"
-                    style={{ width: `${minClassroomWidth}px`, minWidth: `${minClassroomWidth}px` }}
-                  >
-                    {classroom}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Colonna orari sticky */}
-            <div className="sticky left-0 top-0 z-30 w-16 border-r border-gray-300 bg-white">
+            {/* Colonna orari sticky con sfondo completo */}
+            <div className="sticky left-0 z-30 w-16 border-r border-gray-300 bg-white shadow-sm" style={{ height: `${totalHeight}px` }}>
               {timeLines.map((line) => (
                 <div
                   key={line.time}
