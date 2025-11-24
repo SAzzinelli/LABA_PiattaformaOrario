@@ -70,7 +70,7 @@ export default function SearchOverlay({ isOpen, onClose, onSelectLesson, lessons
     <>
       {/* Backdrop blurrato */}
       <div 
-        className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 animate-fade-in"
+        className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-md z-50 animate-fade-in"
         onClick={onClose}
       />
       
