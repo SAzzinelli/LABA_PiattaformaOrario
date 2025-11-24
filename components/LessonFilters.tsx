@@ -37,8 +37,8 @@ export default function LessonFilters({
   ]
 
   return (
-    <div className="mb-2 animate-fade-in relative">
-      <div className="flex items-center justify-between">
+    <div className="mb-2 animate-fade-in relative inline-block">
+      <div className="flex items-center justify-between gap-2">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="btn-modern flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-laba-primary text-sm font-medium shadow-md border border-gray-200 relative overflow-hidden"
@@ -70,7 +70,7 @@ export default function LessonFilters({
       </div>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 card-modern p-5 animate-slide-in z-50 min-w-[400px]">
+        <div className="absolute right-0 top-full mt-2 card-modern p-5 animate-slide-in z-[100] min-w-[400px] shadow-2xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2.5">
