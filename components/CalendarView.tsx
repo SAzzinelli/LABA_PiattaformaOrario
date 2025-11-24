@@ -5,6 +5,7 @@ import { format, isSameDay } from 'date-fns'
 import { it } from 'date-fns/locale'
 import LessonForm from './LessonForm'
 import LessonFilters from './LessonFilters'
+import SearchOverlay from './SearchOverlay'
 import { CLASSROOMS, getBaseClassrooms, getFirstExternalIndex } from '@/lib/classrooms'
 import { generateTimeSlots, getTimePosition, getCurrentTime } from '@/lib/timeSlots'
 
