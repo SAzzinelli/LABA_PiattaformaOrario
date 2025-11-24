@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --laba-primary: #033157;
+}
+
+body {
+  color: var(--laba-primary);
+  background: #f5f5f5;
+}
+
