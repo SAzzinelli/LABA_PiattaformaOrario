@@ -39,7 +39,12 @@ export default function Header() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <h1 className="text-xl font-bold text-white">LABA - Orario Lezioni</h1>
+              <img 
+                src="/logoSito.svg" 
+                alt="LABA" 
+                className="h-8 w-auto brightness-0 invert"
+              />
+              <span className="text-xl font-bold text-white">Orario Lezioni</span>
             </div>
             <nav className="flex items-center gap-4">
               {isAuthenticated ? (
