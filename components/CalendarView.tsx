@@ -46,6 +46,14 @@ export default function CalendarView() {
 
   const timeSlots = generateTimeSlots()
   const classrooms = getBaseClassrooms()
+  
+  // Calcola la larghezza minima basata sul nome più lungo
+  const getMinClassroomWidth = () => {
+    const maxLength = Math.max(...classrooms.map(c => c.length))
+    // Approssimativamente 8px per carattere + padding
+    return Math.max(140, maxLength * 8 + 32)
+  }
+  const minClassroomWidth = getMinClassroomWidth()
 
   useEffect(() => {
     checkAuth()
@@ -145,7 +153,7 @@ export default function CalendarView() {
       <div className="relative flex-1 overflow-x-auto">
         {/* Header aule */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
-          <div className="flex" style={{ minWidth: `${classrooms.length * 140}px` }}>
+          <div className="flex" style={{ minWidth: `${classrooms.length * minClassroomWidth}px` }}>
             <div className="w-16 flex-shrink-0 border-r border-gray-200"></div>
             {classrooms.map((classroom, index) => {
               const classroomLessons = getLessonsForClassroom(dayLessons, classroom)
@@ -154,9 +162,10 @@ export default function CalendarView() {
               return (
                 <div
                   key={classroom}
-                  className={`flex-1 min-w-[140px] border-r border-gray-200 last:border-r-0 p-2 text-center font-semibold text-xs bg-gray-50 ${
+                  className={`flex-shrink-0 border-r border-gray-200 last:border-r-0 p-2 text-center font-semibold text-xs bg-gray-50 whitespace-nowrap ${
                     isFirstExternal ? 'border-l-4 border-l-gray-400' : ''
                   }`}
+                  style={{ width: `${minClassroomWidth}px`, minWidth: `${minClassroomWidth}px` }}
                 >
                   {classroom}
                   {classroomLessons.length > 0 && (
@@ -169,7 +178,7 @@ export default function CalendarView() {
         </div>
 
         {/* Griglia orari */}
-        <div className="relative" style={{ minWidth: `${classrooms.length * 140}px` }}>
+        <div className="relative" style={{ minWidth: `${classrooms.length * minClassroomWidth}px` }}>
           {/* Pin orario corrente */}
           {currentTimePos !== null && (
             <div
@@ -211,9 +220,10 @@ export default function CalendarView() {
                   return (
                     <div
                       key={classroom}
-                      className={`flex-1 min-w-[140px] border-r border-gray-100 last:border-r-0 relative ${
+                      className={`flex-shrink-0 border-r border-gray-100 last:border-r-0 relative ${
                         isFirstExternal ? 'border-l-4 border-l-gray-400' : ''
                       }`}
+                      style={{ width: `${minClassroomWidth}px`, minWidth: `${minClassroomWidth}px` }}
                     >
                       {lessonStarting && (
                         <LessonEventCard
@@ -243,19 +253,38 @@ export default function CalendarView() {
     return (
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         <div className={`${headerColor} text-white p-3 flex items-center justify-between rounded-t-lg`}>
-          <div>
-            <div className="font-bold text-lg uppercase">
-              {format(currentDate, 'EEEE', { locale: it })}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => navigateDate('prev')}
+                className="px-2 py-1 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95"
+                title="Giorno precedente"
+              >
+                ←
+              </button>
+              <button
+                onClick={() => setCurrentDate(new Date())}
+                className="px-3 py-1 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95"
+              >
+                Oggi
+              </button>
+              <button
+                onClick={() => navigateDate('next')}
+                className="px-2 py-1 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95"
+                title="Giorno successivo"
+              >
+                →
+              </button>
             </div>
-            <div className="text-sm opacity-90">
-              {format(currentDate, 'd MMMM yyyy', { locale: it })}
+            <div>
+              <div className="font-bold text-lg uppercase">
+                {format(currentDate, 'EEEE', { locale: it })}
+              </div>
+              <div className="text-sm opacity-90">
+                {format(currentDate, 'd MMMM yyyy', { locale: it })}
+              </div>
             </div>
           </div>
-          {isToday && (
-            <span className="bg-white text-laba-primary px-3 py-1 rounded-full text-xs font-semibold">
-              Oggi
-            </span>
-          )}
         </div>
         {renderTimeGrid(dayLessons, currentDate)}
       </div>
@@ -276,29 +305,6 @@ export default function CalendarView() {
   return (
     <div>
       <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <button
-            onClick={() => navigateDate('prev')}
-            className="px-3 py-2 rounded-full bg-laba-primary text-white text-sm font-medium transition-all duration-200 hover:bg-opacity-90 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
-            title="Giorno precedente"
-          >
-            ←
-          </button>
-          <button
-            onClick={() => setCurrentDate(new Date())}
-            className="px-4 py-2 rounded-full bg-gray-200 text-gray-700 text-sm font-medium transition-all duration-200 hover:bg-gray-300 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
-          >
-            Oggi
-          </button>
-          <button
-            onClick={() => navigateDate('next')}
-            className="px-3 py-2 rounded-full bg-laba-primary text-white text-sm font-medium transition-all duration-200 hover:bg-opacity-90 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
-            title="Giorno successivo"
-          >
-            →
-          </button>
-        </div>
-
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <LessonFilters
             course={filterCourse}
