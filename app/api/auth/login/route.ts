@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyCredentials, createToken } from '@/lib/auth'
+import { verifyCredentials, createToken, initializeAdmin } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +11,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Inizializza l'admin se non esiste (solo al primo login)
+    await initializeAdmin()
 
     const isValid = await verifyCredentials(email, password)
 

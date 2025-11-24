@@ -20,12 +20,13 @@ export async function PUT(
   try {
     const { id } = await params
     const data = await request.json()
-    const lesson = updateLesson(id, data)
+    const lesson = await updateLesson(id, data)
     if (!lesson) {
       return NextResponse.json({ error: 'Lezione non trovata' }, { status: 404 })
     }
     return NextResponse.json(lesson)
   } catch (error) {
+    console.error('Error updating lesson:', error)
     return NextResponse.json(
       { error: 'Errore durante l\'aggiornamento della lezione' },
       { status: 500 }
@@ -50,12 +51,13 @@ export async function DELETE(
 
   try {
     const { id } = await params
-    const success = deleteLesson(id)
+    const success = await deleteLesson(id)
     if (!success) {
       return NextResponse.json({ error: 'Lezione non trovata' }, { status: 404 })
     }
     return NextResponse.json({ success: true })
   } catch (error) {
+    console.error('Error deleting lesson:', error)
     return NextResponse.json(
       { error: 'Errore durante l\'eliminazione della lezione' },
       { status: 500 }

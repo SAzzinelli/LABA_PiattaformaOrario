@@ -3,8 +3,16 @@ import { getLessons, addLesson } from '@/lib/db'
 import { verifyToken } from '@/lib/auth'
 
 export async function GET() {
-  const lessons = getLessons()
-  return NextResponse.json(lessons)
+  try {
+    const lessons = await getLessons()
+    return NextResponse.json(lessons)
+  } catch (error) {
+    console.error('Error fetching lessons:', error)
+    return NextResponse.json(
+      { error: 'Errore durante il recupero delle lezioni' },
+      { status: 500 }
+    )
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -21,9 +29,10 @@ export async function POST(request: NextRequest) {
 
   try {
     const data = await request.json()
-    const lesson = addLesson(data)
+    const lesson = await addLesson(data)
     return NextResponse.json(lesson, { status: 201 })
   } catch (error) {
+    console.error('Error creating lesson:', error)
     return NextResponse.json(
       { error: 'Errore durante la creazione della lezione' },
       { status: 500 }
