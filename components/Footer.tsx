@@ -1,3 +1,5 @@
+'use client'
+
 export default function Footer() {
   const handleReportIssue = () => {
     const subject = encodeURIComponent('Incongruenza orario delle lezioni')
