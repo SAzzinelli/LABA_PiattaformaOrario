@@ -71,7 +71,7 @@ export default function CustomDropdown({
       </button>
 
       {isOpen && !disabled && (
-        <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto animate-scale-in" style={{ minWidth: 'max-content' }}>
+        <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto animate-scale-in max-w-[300px]">
           {options.map((option) => (
             <button
               key={option.value}
@@ -80,14 +80,13 @@ export default function CustomDropdown({
                 onChange(option.value)
                 setIsOpen(false)
               }}
-              className={`w-full px-4 py-2.5 text-left text-sm smooth-transition whitespace-nowrap ${
+              className={`w-full px-4 py-2.5 text-left text-sm smooth-transition ${
                 value === option.value
                   ? 'bg-laba-primary text-white font-medium'
                   : 'text-gray-900 hover:bg-gray-50'
               }`}
-              style={{ whiteSpace: 'nowrap' }}
             >
-              {option.label}
+              <span className="block truncate">{option.label}</span>
             </button>
           ))}
         </div>

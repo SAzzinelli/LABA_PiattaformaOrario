@@ -70,7 +70,7 @@ export default function LessonFilters({
       </div>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 card-modern p-5 animate-slide-in z-[100] min-w-[400px] shadow-2xl">
+        <div className="absolute right-0 top-full mt-2 card-modern p-5 animate-slide-in z-[100] w-[400px] max-w-[90vw] shadow-2xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2.5">

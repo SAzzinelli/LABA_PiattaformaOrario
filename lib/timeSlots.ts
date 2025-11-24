@@ -8,6 +8,28 @@ export function generateTimeSlots(): string[] {
   return slots
 }
 
+// Genera tutti gli orari (ore e mezze ore) per le linee
+export function generateTimeLines(): Array<{ time: string; isHour: boolean; position: number }> {
+  const lines: Array<{ time: string; isHour: boolean; position: number }> = []
+  for (let hour = 9; hour <= 21; hour++) {
+    // Linea per l'ora intera
+    lines.push({
+      time: `${hour.toString().padStart(2, '0')}:00`,
+      isHour: true,
+      position: (hour - 9) * 60 * 2, // Ogni ora = 120px
+    })
+    // Linea per la mezz'ora (solo se non è l'ultima ora)
+    if (hour < 21) {
+      lines.push({
+        time: `${hour.toString().padStart(2, '0')}:30`,
+        isHour: false,
+        position: ((hour - 9) * 60 + 30) * 2, // Mezz'ora dopo l'ora
+      })
+    }
+  }
+  return lines
+}
+
 // Converte orario HH:mm in minuti dall'inizio del giorno
 export function timeToMinutes(time: string): number {
   const [hours, minutes] = time.split(':').map(Number)
@@ -29,11 +51,17 @@ export function getLessonSlots(startTime: string, endTime: string): number {
   return Math.ceil(duration / 30) // Ogni slot è 30 minuti
 }
 
-// Calcola la posizione verticale di un orario nella griglia
+// Calcola la posizione verticale in pixel di un orario nella griglia
+// Ogni ora = 120px, ogni minuto = 2px
 export function getTimePosition(time: string): number {
   const minutes = timeToMinutes(time)
   const startMinutes = 9 * 60 // 9:00
-  return (minutes - startMinutes) / 30 // Posizione in slot (ogni slot = 30 min)
+  return (minutes - startMinutes) * 2 // Posizione in pixel (2px per minuto)
+}
+
+// Altezza totale del calendario in pixel (9:00 - 21:00 = 12 ore = 1440px)
+export function getTotalCalendarHeight(): number {
+  return 12 * 60 * 2 // 12 ore * 60 minuti * 2px = 1440px
 }
 
 // Ottiene l'orario corrente in formato HH:mm
