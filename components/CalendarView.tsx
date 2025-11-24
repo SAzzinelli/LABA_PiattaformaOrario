@@ -155,9 +155,9 @@ export default function CalendarView() {
     const totalHeight = getTotalCalendarHeight()
 
     return (
-      <div className="relative flex-1 overflow-x-auto bg-white">
-        {/* Header aule */}
-        <div className="sticky top-0 z-20 bg-white border-b border-gray-200">
+      <div className="relative flex-1 overflow-x-auto overflow-y-auto bg-white">
+        {/* Header aule sticky */}
+        <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
           <div className="flex" style={{ minWidth: `${classrooms.length * minClassroomWidth + 64}px` }}>
             {/* Colonna vuota per gli orari */}
             <div className="w-16 flex-shrink-0 border-r border-gray-200 bg-gray-50"></div>
@@ -188,11 +188,11 @@ export default function CalendarView() {
           }}
         >
           {/* Colonna orari sticky sulla sinistra */}
-          <div className="sticky left-0 top-0 bottom-0 w-16 border-r border-gray-200 bg-white z-10">
+          <div className="sticky left-0 top-0 bottom-0 w-16 border-r border-gray-200 bg-white z-30 shadow-sm">
             {timeLines.map((line) => (
               <div
                 key={line.time}
-                className="absolute left-0 right-0 flex items-start pr-2"
+                className="absolute left-0 right-0 flex items-start pr-2 bg-white"
                 style={{ 
                   top: `${line.position - (line.isHour ? 0 : 6)}px`,
                 }}
