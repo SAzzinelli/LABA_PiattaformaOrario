@@ -165,14 +165,11 @@ export default function CalendarView() {
             {/* Header aule */}
             {classrooms.map((classroom, index) => {
               const classroomLessons = getLessonsForClassroom(dayLessons, classroom)
-              const isFirstExternal = index === firstExternalIndex
               
               return (
                 <div
                   key={classroom}
-                  className={`flex-shrink-0 border-r border-gray-200 last:border-r-0 px-2 py-2 text-center text-xs font-medium text-gray-700 bg-gray-50 whitespace-nowrap ${
-                    isFirstExternal ? 'border-l-2 border-l-gray-400' : ''
-                  }`}
+                  className="flex-shrink-0 border-r border-gray-200 last:border-r-0 px-2 py-2 text-center text-xs font-medium text-gray-700 bg-gray-50 whitespace-nowrap"
                   style={{ width: `${minClassroomWidth}px`, minWidth: `${minClassroomWidth}px` }}
                 >
                   {classroom}
@@ -190,8 +187,8 @@ export default function CalendarView() {
             height: `${totalHeight}px`
           }}
         >
-          {/* Colonna orari fissa sulla sinistra */}
-          <div className="absolute left-0 top-0 bottom-0 w-16 border-r border-gray-200 bg-white z-10">
+          {/* Colonna orari sticky sulla sinistra */}
+          <div className="sticky left-0 top-0 bottom-0 w-16 border-r border-gray-200 bg-white z-10">
             {timeLines.map((line) => (
               <div
                 key={line.time}
@@ -239,14 +236,11 @@ export default function CalendarView() {
           {/* Colonne aule con eventi */}
           {classrooms.map((classroom, classroomIndex) => {
             const classroomLessons = getLessonsForClassroom(dayLessons, classroom)
-            const isFirstExternal = classroomIndex === firstExternalIndex
 
             return (
               <div
                 key={classroom}
-                className={`absolute top-0 bottom-0 flex-shrink-0 ${
-                  isFirstExternal ? 'border-l-2 border-l-gray-400' : ''
-                }`}
+                className="absolute top-0 bottom-0 flex-shrink-0 border-r border-gray-200 last:border-r-0"
                 style={{ 
                   left: `${64 + classroomIndex * minClassroomWidth}px`,
                   width: `${minClassroomWidth}px`,
