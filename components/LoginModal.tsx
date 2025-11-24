@@ -47,7 +47,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
           <h2 className="text-2xl font-bold text-laba-primary">Login Admin</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-2xl"
+            className="w-8 h-8 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200 flex items-center justify-center text-2xl"
           >
             ×
           </button>
@@ -63,7 +63,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-laba-primary"
+              className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
               required
             />
           </div>
@@ -77,7 +77,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-laba-primary"
+              className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
               required
             />
           </div>
@@ -92,14 +92,14 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-laba-primary text-white py-2 px-4 rounded hover:bg-opacity-90 disabled:opacity-50"
+              className="flex-1 rounded-full bg-laba-primary text-white py-2 px-4 text-sm font-medium transition-all duration-200 hover:bg-opacity-90 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
             >
               {loading ? 'Accesso in corso...' : 'Accedi'}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+              className="px-4 py-2 rounded-full border border-gray-300 text-sm font-medium transition-all duration-200 hover:bg-gray-50 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
             >
               Annulla
             </button>

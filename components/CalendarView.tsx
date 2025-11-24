@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { format, startOfWeek, addDays, isSameDay } from 'date-fns'
 import { it } from 'date-fns/locale'
 import ViewSelector from './ViewSelector'
-import LoginModal from './LoginModal'
 import LessonForm from './LessonForm'
 import { CLASSROOMS, getBaseClassrooms } from '@/lib/classrooms'
 import { generateTimeSlots, getTimePosition, getLessonSlots, getCurrentTime, timeToMinutes } from '@/lib/timeSlots'
@@ -38,7 +37,6 @@ export default function CalendarView() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [showLogin, setShowLogin] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null)
   const [currentTime, setCurrentTime] = useState(getCurrentTime())
@@ -70,21 +68,6 @@ export default function CalendarView() {
     setLessons(data)
   }
 
-  const handleLogin = () => {
-    setShowLogin(true)
-  }
-
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' })
-    setIsAuthenticated(false)
-    setShowForm(false)
-    setEditingLesson(null)
-  }
-
-  const handleLoginSuccess = () => {
-    setIsAuthenticated(true)
-    setShowLogin(false)
-  }
 
   const handleAddLesson = () => {
     setEditingLesson(null)
@@ -305,48 +288,33 @@ export default function CalendarView() {
     <div>
       <div className="mb-6 flex justify-between items-center">
         <ViewSelector view={view} onViewChange={setView} />
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigateDate('prev')}
-              className="px-4 py-2 bg-laba-primary text-white rounded hover:bg-opacity-90"
+              className="px-4 py-2 rounded-full bg-laba-primary text-white text-sm font-medium transition-all duration-200 hover:bg-opacity-90 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
             >
               ←
             </button>
             <button
               onClick={() => setCurrentDate(new Date())}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+              className="px-4 py-2 rounded-full bg-gray-200 text-gray-700 text-sm font-medium transition-all duration-200 hover:bg-gray-300 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
             >
               Oggi
             </button>
             <button
               onClick={() => navigateDate('next')}
-              className="px-4 py-2 bg-laba-primary text-white rounded hover:bg-opacity-90"
+              className="px-4 py-2 rounded-full bg-laba-primary text-white text-sm font-medium transition-all duration-200 hover:bg-opacity-90 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
             >
               →
             </button>
           </div>
-          {isAuthenticated ? (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleAddLesson}
-                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-              >
-                + Aggiungi Lezione
-              </button>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                Logout
-              </button>
-            </div>
-          ) : (
+          {isAuthenticated && (
             <button
-              onClick={handleLogin}
-              className="px-4 py-2 bg-laba-primary text-white rounded hover:bg-opacity-90"
+              onClick={handleAddLesson}
+              className="px-4 py-2 rounded-full bg-green-500 text-white text-sm font-medium transition-all duration-200 hover:bg-green-600 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
             >
-              Login Admin
+              + Aggiungi Lezione
             </button>
           )}
         </div>
@@ -354,13 +322,6 @@ export default function CalendarView() {
 
       {view === 'day' && renderDayView()}
       {view === 'week' && renderWeekView()}
-
-      {showLogin && (
-        <LoginModal
-          onClose={() => setShowLogin(false)}
-          onSuccess={handleLoginSuccess}
-        />
-      )}
 
       {showForm && (
         <LessonForm

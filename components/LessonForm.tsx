@@ -103,7 +103,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-2xl"
+            className="w-8 h-8 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200 flex items-center justify-center text-2xl"
           >
             ×
           </button>
@@ -120,7 +120,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-laba-primary"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
                 required
               />
             </div>
@@ -133,7 +133,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
                 id="dayOfWeek"
                 value={formData.dayOfWeek}
                 onChange={(e) => setFormData({ ...formData, dayOfWeek: parseInt(e.target.value) })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-laba-primary"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
                 required
               >
                 {DAYS_OF_WEEK.map((day) => (
@@ -155,7 +155,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
                 type="time"
                 value={formData.startTime}
                 onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-laba-primary"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
                 required
               />
             </div>
@@ -169,7 +169,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
                 type="time"
                 value={formData.endTime}
                 onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-laba-primary"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
                 required
               />
             </div>
@@ -185,7 +185,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
                 type="text"
                 value={formData.professor}
                 onChange={(e) => setFormData({ ...formData, professor: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-laba-primary"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
                 required
               />
             </div>
@@ -198,7 +198,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
                 id="classroom"
                 value={formData.classroom}
                 onChange={(e) => setFormData({ ...formData, classroom: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-laba-primary"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
                 required
               >
                 <option value="">Seleziona un'aula</option>
@@ -220,7 +220,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
               type="text"
               value={formData.group}
               onChange={(e) => setFormData({ ...formData, group: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-laba-primary"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
               placeholder="Es: Gruppo A, Gruppo B, oppure lascia vuoto"
             />
           </div>
@@ -234,7 +234,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-laba-primary"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
               placeholder="Note aggiuntive sulla lezione..."
             />
           </div>
@@ -249,14 +249,14 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-laba-primary text-white py-2 px-4 rounded hover:bg-opacity-90 disabled:opacity-50"
+              className="flex-1 rounded-full bg-laba-primary text-white py-2 px-4 text-sm font-medium transition-all duration-200 hover:bg-opacity-90 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
             >
               {loading ? 'Salvataggio...' : lesson ? 'Salva Modifiche' : 'Crea Lezione'}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+              className="px-4 py-2 rounded-full border border-gray-300 text-sm font-medium transition-all duration-200 hover:bg-gray-50 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
             >
               Annulla
             </button>
