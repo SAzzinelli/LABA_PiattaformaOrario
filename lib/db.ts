@@ -17,7 +17,6 @@ export interface Lesson {
 export interface LessonFilters {
   course?: string
   year?: number
-  group?: string
 }
 
 // Convert database row to Lesson interface
@@ -65,9 +64,6 @@ export async function getLessons(filters?: LessonFilters): Promise<Lesson[]> {
     }
     if (filters?.year !== undefined) {
       query = query.eq('year', filters.year)
-    }
-    if (filters?.group) {
-      query = query.eq('group_name', filters.group)
     }
 
     const { data, error } = await query

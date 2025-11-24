@@ -43,7 +43,6 @@ export default function CalendarView() {
   // Filtri
   const [filterCourse, setFilterCourse] = useState('')
   const [filterYear, setFilterYear] = useState<number | null>(null)
-  const [filterGroup, setFilterGroup] = useState('')
 
   const timeSlots = generateTimeSlots()
   const classrooms = getBaseClassrooms()
@@ -62,7 +61,7 @@ export default function CalendarView() {
 
   useEffect(() => {
     loadLessons()
-  }, [filterCourse, filterYear, filterGroup])
+  }, [filterCourse, filterYear])
 
   const checkAuth = async () => {
     const res = await fetch('/api/auth/check')
@@ -74,7 +73,6 @@ export default function CalendarView() {
     const params = new URLSearchParams()
     if (filterCourse) params.append('course', filterCourse)
     if (filterYear !== null) params.append('year', filterYear.toString())
-    if (filterGroup) params.append('group', filterGroup)
     
     const res = await fetch(`/api/lessons?${params.toString()}`)
     const data = await res.json()
@@ -265,26 +263,16 @@ export default function CalendarView() {
   const handleResetFilters = () => {
     setFilterCourse('')
     setFilterYear(null)
-    setFilterGroup('')
   }
 
   return (
     <div>
-      <LessonFilters
-        course={filterCourse}
-        year={filterYear}
-        group={filterGroup}
-        onCourseChange={setFilterCourse}
-        onYearChange={setFilterYear}
-        onGroupChange={setFilterGroup}
-        onReset={handleResetFilters}
-      />
-
-      <div className="mb-4 flex justify-between items-center">
-        <div className="flex items-center gap-2">
+      <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => navigateDate('prev')}
-            className="px-4 py-2 rounded-full bg-laba-primary text-white text-sm font-medium transition-all duration-200 hover:bg-opacity-90 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
+            className="px-3 py-2 rounded-full bg-laba-primary text-white text-sm font-medium transition-all duration-200 hover:bg-opacity-90 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
+            title="Giorno precedente"
           >
             ←
           </button>
@@ -296,19 +284,31 @@ export default function CalendarView() {
           </button>
           <button
             onClick={() => navigateDate('next')}
-            className="px-4 py-2 rounded-full bg-laba-primary text-white text-sm font-medium transition-all duration-200 hover:bg-opacity-90 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
+            className="px-3 py-2 rounded-full bg-laba-primary text-white text-sm font-medium transition-all duration-200 hover:bg-opacity-90 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
+            title="Giorno successivo"
           >
             →
           </button>
         </div>
-        {isAuthenticated && (
-          <button
-            onClick={handleAddLesson}
-            className="px-4 py-2 rounded-full bg-green-500 text-white text-sm font-medium transition-all duration-200 hover:bg-green-600 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
-          >
-            + Aggiungi Lezione
-          </button>
-        )}
+
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <LessonFilters
+            course={filterCourse}
+            year={filterYear}
+            onCourseChange={setFilterCourse}
+            onYearChange={setFilterYear}
+            onReset={handleResetFilters}
+          />
+          
+          {isAuthenticated && (
+            <button
+              onClick={handleAddLesson}
+              className="px-4 py-2 rounded-full bg-green-500 text-white text-sm font-medium transition-all duration-200 hover:bg-green-600 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md whitespace-nowrap"
+            >
+              + Aggiungi Lezione
+            </button>
+          )}
+        </div>
       </div>
 
       {renderDayView()}

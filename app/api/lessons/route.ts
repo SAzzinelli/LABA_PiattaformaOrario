@@ -13,9 +13,6 @@ export async function GET(request: NextRequest) {
     if (searchParams.get('year')) {
       filters.year = parseInt(searchParams.get('year') || '0')
     }
-    if (searchParams.get('group')) {
-      filters.group = searchParams.get('group') || undefined
-    }
     
     const lessons = await getLessons(Object.keys(filters).length > 0 ? filters : undefined)
     return NextResponse.json(lessons)
