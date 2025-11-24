@@ -22,17 +22,17 @@ Cordiali saluti.`)
   }
 
   return (
-    <footer className="bg-laba-primary text-white mt-auto">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
-          <div className="text-sm opacity-90">
+    <footer className="bg-laba-primary text-white mt-auto shadow-lg">
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="text-sm opacity-90 font-medium animate-fade-in">
             LABA Firenze 2026 - versione α 0.123
           </div>
           <button
             onClick={handleReportIssue}
-            className="px-4 py-2 rounded-full bg-white text-laba-primary text-sm font-medium transition-all duration-200 hover:bg-gray-100 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md whitespace-nowrap"
+            className="btn-modern px-6 py-2.5 rounded-full bg-white text-laba-primary text-sm font-medium shadow-md whitespace-nowrap relative overflow-hidden"
           >
-            Segnala Incongruenza
+            <span className="relative z-10">Segnala Incongruenza</span>
           </button>
         </div>
       </div>

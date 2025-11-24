@@ -251,36 +251,36 @@ export default function CalendarView() {
     const isToday = isSameDay(currentDate, new Date())
 
     return (
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className={`${headerColor} text-white p-3 flex items-center justify-between rounded-t-lg`}>
-          <div className="flex items-center gap-3">
+      <div className="card-modern overflow-hidden animate-fade-in">
+        <div className={`${headerColor} text-white p-4 flex items-center justify-between rounded-t-lg shadow-md`}>
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => navigateDate('prev')}
-                className="px-2 py-1 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95"
+                className="btn-modern px-3 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm"
                 title="Giorno precedente"
               >
-                ←
+                <span className="relative z-10">←</span>
               </button>
               <button
                 onClick={() => setCurrentDate(new Date())}
-                className="px-3 py-1 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95"
+                className="btn-modern px-4 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm"
               >
-                Oggi
+                <span className="relative z-10">Oggi</span>
               </button>
               <button
                 onClick={() => navigateDate('next')}
-                className="px-2 py-1 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95"
+                className="btn-modern px-3 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm"
                 title="Giorno successivo"
               >
-                →
+                <span className="relative z-10">→</span>
               </button>
             </div>
             <div>
-              <div className="font-bold text-lg uppercase">
+              <div className="font-bold text-xl uppercase tracking-wide">
                 {format(currentDate, 'EEEE', { locale: it })}
               </div>
-              <div className="text-sm opacity-90">
+              <div className="text-sm opacity-90 mt-0.5">
                 {format(currentDate, 'd MMMM yyyy', { locale: it })}
               </div>
             </div>
@@ -317,9 +317,9 @@ export default function CalendarView() {
           {isAuthenticated && (
             <button
               onClick={handleAddLesson}
-              className="px-4 py-2 rounded-full bg-green-500 text-white text-sm font-medium transition-all duration-200 hover:bg-green-600 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md whitespace-nowrap"
+              className="btn-modern px-6 py-2.5 rounded-full bg-green-500 text-white text-sm font-medium shadow-md whitespace-nowrap relative overflow-hidden"
             >
-              + Aggiungi Lezione
+              <span className="relative z-10">+ Aggiungi Lezione</span>
             </button>
           )}
         </div>
@@ -350,7 +350,7 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit }: LessonEventCard
 
   return (
     <div
-      className="absolute left-1 right-1 rounded-lg shadow-md border-l-4 border-laba-primary bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 transition-all cursor-pointer overflow-hidden z-10"
+      className="absolute left-1 right-1 rounded-lg shadow-md border-l-4 border-laba-primary bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 smooth-transition cursor-pointer overflow-hidden z-10 hover-lift group"
       style={{
         top: `${startSlot * 60}px`,
         height: `${Math.max(height, 60)}px`,
@@ -358,21 +358,21 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit }: LessonEventCard
       onClick={() => onEdit && onEdit(lesson)}
       title={`${lesson.title} - ${lesson.startTime}-${lesson.endTime} - ${lesson.classroom}`}
     >
-      <div className="p-2 h-full flex flex-col justify-between">
+      <div className="p-2.5 h-full flex flex-col justify-between">
         <div>
-          <div className="text-xs font-semibold text-laba-primary mb-1">
+          <div className="text-xs font-semibold text-laba-primary mb-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
             {lesson.startTime} - {lesson.endTime}
           </div>
-          <div className="text-sm font-bold text-gray-800 line-clamp-2">
+          <div className="text-sm font-bold text-gray-800 line-clamp-2 group-hover:text-laba-primary transition-colors">
             {lesson.title}
           </div>
         </div>
         <div className="mt-auto">
-          <div className="text-xs text-gray-600 truncate">
+          <div className="text-xs text-gray-600 truncate group-hover:text-gray-700 transition-colors">
             {lesson.professor}
           </div>
           {lesson.group && (
-            <div className="text-xs text-purple-600 mt-1">
+            <div className="text-xs text-purple-600 mt-1 group-hover:text-purple-700 transition-colors">
               {lesson.group}
             </div>
           )}

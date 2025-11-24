@@ -37,23 +37,23 @@ export default function LessonFilters({
   ]
 
   return (
-    <div className="mb-4">
+    <div className="mb-4 animate-fade-in">
       <div className="flex items-center justify-between">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-white text-laba-primary text-sm font-medium transition-all duration-200 hover:bg-gray-50 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md border border-gray-200"
+          className="btn-modern flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-laba-primary text-sm font-medium shadow-md border border-gray-200 relative overflow-hidden"
         >
           <svg
-            className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+            className={`w-4 h-4 smooth-transition ${isOpen ? 'rotate-180' : ''}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
-          <span>Filtri</span>
+          <span className="relative z-10">Filtri</span>
           {hasActiveFilters && (
-            <span className="ml-1 px-2 py-0.5 bg-laba-primary text-white text-xs rounded-full">
+            <span className="ml-1 px-2.5 py-0.5 bg-laba-primary text-white text-xs rounded-full relative z-10">
               {[course && '1', year !== null && '1'].filter(Boolean).length}
             </span>
           )}
@@ -62,18 +62,18 @@ export default function LessonFilters({
         {hasActiveFilters && (
           <button
             onClick={onReset}
-            className="px-4 py-2 rounded-full bg-gray-200 text-gray-700 text-sm font-medium transition-all duration-200 hover:bg-gray-300 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
+            className="btn-modern px-5 py-2.5 rounded-full bg-gray-200 text-gray-700 text-sm font-medium shadow-md relative overflow-hidden"
           >
-            Reset Filtri
+            <span className="relative z-10">Reset Filtri</span>
           </button>
         )}
       </div>
 
       {isOpen && (
-        <div className="mt-3 bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mt-4 card-modern p-5 animate-scale-in">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2.5">
                 Corso
               </label>
               <CustomDropdown
@@ -90,7 +90,7 @@ export default function LessonFilters({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2.5">
                 Anno
               </label>
               <CustomDropdown

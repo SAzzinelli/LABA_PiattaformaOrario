@@ -106,15 +106,15 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
+    <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+      <div className="card-modern p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-scale-in shadow-2xl">
+        <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-laba-primary">
             {lesson ? 'Modifica Lezione' : 'Nuova Lezione'}
           </h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200 flex items-center justify-center text-2xl"
+            className="w-10 h-10 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 smooth-transition flex items-center justify-center text-2xl hover-scale"
           >
             ×
           </button>
@@ -131,7 +131,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
+                className="input-modern w-full px-4 py-2.5 rounded-lg"
                 required
               />
             </div>
@@ -144,7 +144,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
                 id="dayOfWeek"
                 value={formData.dayOfWeek}
                 onChange={(e) => setFormData({ ...formData, dayOfWeek: parseInt(e.target.value) })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
+                className="input-modern w-full px-4 py-2.5 rounded-lg"
                 required
               >
                 {DAYS_OF_WEEK.map((day) => (
@@ -166,7 +166,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
                 type="time"
                 value={formData.startTime}
                 onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
+                className="input-modern w-full px-4 py-2.5 rounded-lg"
                 required
               />
             </div>
@@ -180,7 +180,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
                 type="time"
                 value={formData.endTime}
                 onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
+                className="input-modern w-full px-4 py-2.5 rounded-lg"
                 required
               />
             </div>
@@ -196,7 +196,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
                 type="text"
                 value={formData.professor}
                 onChange={(e) => setFormData({ ...formData, professor: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
+                className="input-modern w-full px-4 py-2.5 rounded-lg"
                 required
               />
             </div>
@@ -209,7 +209,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
                 id="classroom"
                 value={formData.classroom}
                 onChange={(e) => setFormData({ ...formData, classroom: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
+                className="input-modern w-full px-4 py-2.5 rounded-lg"
                 required
               >
                 <option value="">Seleziona un'aula</option>
@@ -233,7 +233,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
                 onChange={(e) => {
                   setFormData({ ...formData, course: e.target.value, year: null })
                 }}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
+                className="input-modern w-full px-4 py-2.5 rounded-lg"
               >
                 <option value="">Nessun corso specifico</option>
                 <optgroup label="Triennali">
@@ -283,7 +283,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
               type="text"
               value={formData.group}
               onChange={(e) => setFormData({ ...formData, group: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
+                className="input-modern w-full px-4 py-2.5 rounded-lg"
               placeholder="Es: Gruppo A, Gruppo B, oppure lascia vuoto"
             />
           </div>
@@ -297,7 +297,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
+                className="input-modern w-full px-4 py-2.5 rounded-lg"
               placeholder="Note aggiuntive sulla lezione..."
             />
           </div>
@@ -312,16 +312,16 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 rounded-full bg-laba-primary text-white py-2 px-4 text-sm font-medium transition-all duration-200 hover:bg-opacity-90 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
+              className="btn-modern flex-1 rounded-full bg-laba-primary text-white py-2.5 px-6 text-sm font-medium disabled:opacity-50 disabled:hover:scale-100 shadow-md relative overflow-hidden"
             >
-              {loading ? 'Salvataggio...' : lesson ? 'Salva Modifiche' : 'Crea Lezione'}
+              <span className="relative z-10">{loading ? 'Salvataggio...' : lesson ? 'Salva Modifiche' : 'Crea Lezione'}</span>
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-full border border-gray-300 text-sm font-medium transition-all duration-200 hover:bg-gray-50 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
+              className="btn-modern px-5 py-2.5 rounded-full border-2 border-gray-300 text-sm font-medium shadow-md relative overflow-hidden"
             >
-              Annulla
+              <span className="relative z-10">Annulla</span>
             </button>
           </div>
         </form>
