@@ -56,7 +56,7 @@ export default function CustomDropdown({
         }`}
       >
         <div className="flex items-center justify-between">
-          <span className={selectedOption ? 'text-gray-900 font-medium' : 'text-gray-500'}>
+          <span className={`${selectedOption ? 'text-gray-900 font-medium' : 'text-gray-500'} truncate whitespace-nowrap`}>
             {selectedOption ? selectedOption.label : placeholder}
           </span>
           <svg
@@ -80,7 +80,7 @@ export default function CustomDropdown({
                 onChange(option.value)
                 setIsOpen(false)
               }}
-              className={`w-full px-4 py-2.5 text-left text-sm smooth-transition ${
+              className={`w-full px-4 py-2.5 text-left text-sm smooth-transition whitespace-nowrap ${
                 value === option.value
                   ? 'bg-laba-primary text-white font-medium'
                   : 'text-gray-900 hover:bg-gray-50'

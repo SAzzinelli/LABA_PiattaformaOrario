@@ -253,37 +253,35 @@ export default function CalendarView() {
     return (
       <div className="card-modern overflow-hidden animate-fade-in">
         <div className={`${headerColor} text-white p-4 flex items-center justify-between rounded-t-lg shadow-md`}>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => navigateDate('prev')}
-                className="btn-modern px-3 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm"
-                title="Giorno precedente"
-              >
-                <span className="relative z-10">←</span>
-              </button>
-              <button
-                onClick={() => setCurrentDate(new Date())}
-                className="btn-modern px-4 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm"
-              >
-                <span className="relative z-10">Oggi</span>
-              </button>
-              <button
-                onClick={() => navigateDate('next')}
-                className="btn-modern px-3 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm"
-                title="Giorno successivo"
-              >
-                <span className="relative z-10">→</span>
-              </button>
+          <div>
+            <div className="font-bold text-xl uppercase tracking-wide">
+              {format(currentDate, 'EEEE', { locale: it })}
             </div>
-            <div>
-              <div className="font-bold text-xl uppercase tracking-wide">
-                {format(currentDate, 'EEEE', { locale: it })}
-              </div>
-              <div className="text-sm opacity-90 mt-0.5">
-                {format(currentDate, 'd MMMM yyyy', { locale: it })}
-              </div>
+            <div className="text-sm opacity-90 mt-0.5">
+              {format(currentDate, 'd MMMM yyyy', { locale: it })}
             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigateDate('prev')}
+              className="btn-modern px-3 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm"
+              title="Giorno precedente"
+            >
+              <span className="relative z-10">←</span>
+            </button>
+            <button
+              onClick={() => setCurrentDate(new Date())}
+              className="btn-modern px-4 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm"
+            >
+              <span className="relative z-10">Oggi</span>
+            </button>
+            <button
+              onClick={() => navigateDate('next')}
+              className="btn-modern px-3 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm"
+              title="Giorno successivo"
+            >
+              <span className="relative z-10">→</span>
+            </button>
           </div>
         </div>
         {renderTimeGrid(dayLessons, currentDate)}
@@ -304,8 +302,8 @@ export default function CalendarView() {
 
   return (
     <div>
-      <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+      <div className="mb-4 flex flex-col sm:flex-row justify-end items-start sm:items-center gap-3">
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
           <LessonFilters
             course={filterCourse}
             year={filterYear}
