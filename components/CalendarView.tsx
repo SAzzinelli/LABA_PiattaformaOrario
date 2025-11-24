@@ -295,10 +295,11 @@ export default function CalendarView() {
         </div>
         {/* Container calendario con header sticky */}
         <div className="flex-1 flex flex-col bg-white border border-gray-200 rounded-b-lg overflow-hidden">
-          {/* Header aule sticky - FUORI dal container scrollabile */}
-          <div className="sticky top-0 z-40 bg-white border-b border-gray-300 shadow-sm">
-          <div className="overflow-x-auto hide-scrollbar">
-            <div className="flex" style={{ minWidth: `${classrooms.length * minClassroomWidth + 64}px` }}>
+          {/* Container scrollabile unico per header e contenuto */}
+          <div className="flex-1 overflow-auto relative hide-scrollbar">
+            {/* Header aule sticky - dentro il container scrollabile */}
+            <div className="sticky top-0 z-40 bg-white border-b border-gray-300 shadow-sm">
+              <div className="flex" style={{ minWidth: `${classrooms.length * minClassroomWidth + 64}px` }}>
                 {/* Colonna orari nell'header */}
                 <div className="sticky left-0 z-50 w-16 flex-shrink-0 border-r border-gray-300 bg-gray-50"></div>
                 
@@ -314,10 +315,8 @@ export default function CalendarView() {
                 ))}
               </div>
             </div>
-          </div>
 
-          {/* Container scrollabile */}
-          <div className="flex-1 overflow-auto relative hide-scrollbar">
+            {/* Contenuto griglia */}
             {renderTimeGrid(dayLessons, currentDate)}
           </div>
         </div>
