@@ -117,11 +117,11 @@ export function getFirstExternalIndex(): number {
   // Conta le aule interne base (senza varianti)
   const internalBase = new Set<string>()
   INTERNAL_CLASSROOMS.forEach(aula => {
-    if (aula === 'Magna 1' || aula === 'Magna 2') {
-      internalBase.add('Aula Magna')
-    } else if (aula === 'Conference 1' || aula === 'Conference 2') {
+    // Gestisce le varianti di Conference
+    if (aula === 'Conference 1' || aula === 'Conference 2') {
       internalBase.add('Conference')
     } else {
+      // Aula Magna, Photo LAB 1, Photo LAB 2, Visual HUB, Movie Hall, 3D LAB, Multimedia LAB, Digital HUB
       internalBase.add(aula)
     }
   })
