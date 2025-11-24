@@ -184,6 +184,16 @@ body {
   background: #a8a8a8;
 }
 
+/* Nascondi scrollbar ma mantieni scroll funzionante */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
 /* Text selection */
 ::selection {
   background: rgba(3, 49, 87, 0.2);
