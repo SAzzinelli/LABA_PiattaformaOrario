@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { CLASSROOMS } from '@/lib/classrooms'
+import { ALL_COURSES, getYearsForCourse, isTriennale, isBiennale } from '@/lib/courses'
 
 interface Lesson {
   id: string
@@ -11,6 +12,8 @@ interface Lesson {
   dayOfWeek: number
   classroom: string
   professor: string
+  course?: string
+  year?: number
   group?: string
   notes?: string
 }
@@ -38,6 +41,8 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
     dayOfWeek: 1,
     classroom: '',
     professor: '',
+    course: '',
+    year: null as number | null,
     group: '',
     notes: '',
   })
@@ -53,11 +58,15 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
         dayOfWeek: lesson.dayOfWeek,
         classroom: lesson.classroom,
         professor: lesson.professor,
+        course: lesson.course || '',
+        year: lesson.year || null,
         group: lesson.group || '',
         notes: lesson.notes || '',
       })
     }
   }, [lesson])
+
+  const availableYears = formData.course ? getYearsForCourse(formData.course as any) : []
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -67,6 +76,8 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
     try {
       const payload = {
         ...formData,
+        course: formData.course || undefined,
+        year: formData.year || undefined,
         group: formData.group || undefined,
         notes: formData.notes || undefined,
       }
@@ -205,6 +216,58 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
                 {CLASSROOMS.map((classroom) => (
                   <option key={classroom} value={classroom}>
                     {classroom}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="course" className="block text-sm font-medium text-gray-700 mb-1">
+                Corso
+              </label>
+              <select
+                id="course"
+                value={formData.course}
+                onChange={(e) => {
+                  setFormData({ ...formData, course: e.target.value, year: null })
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200"
+              >
+                <option value="">Nessun corso specifico</option>
+                <optgroup label="Triennali">
+                  {ALL_COURSES.filter(c => isTriennale(c)).map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Biennali">
+                  {ALL_COURSES.filter(c => isBiennale(c)).map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </optgroup>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
+                Anno
+              </label>
+              <select
+                id="year"
+                value={formData.year || ''}
+                onChange={(e) => setFormData({ ...formData, year: e.target.value ? parseInt(e.target.value) : null })}
+                disabled={!formData.course}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="">Tutti gli anni</option>
+                {availableYears.map((y) => (
+                  <option key={y} value={y}>
+                    {y}° Anno
                   </option>
                 ))}
               </select>

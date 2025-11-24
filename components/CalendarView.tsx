@@ -1,14 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { format, startOfWeek, addDays, isSameDay } from 'date-fns'
+import { format, isSameDay } from 'date-fns'
 import { it } from 'date-fns/locale'
-import ViewSelector from './ViewSelector'
 import LessonForm from './LessonForm'
+import LessonFilters from './LessonFilters'
 import { CLASSROOMS, getBaseClassrooms } from '@/lib/classrooms'
-import { generateTimeSlots, getTimePosition, getLessonSlots, getCurrentTime, timeToMinutes } from '@/lib/timeSlots'
-
-type ViewType = 'day' | 'week'
+import { generateTimeSlots, getTimePosition, getCurrentTime } from '@/lib/timeSlots'
 
 interface Lesson {
   id: string
@@ -18,6 +16,8 @@ interface Lesson {
   dayOfWeek: number
   classroom: string
   professor: string
+  course?: string
+  year?: number
   group?: string
   notes?: string
 }
@@ -33,13 +33,17 @@ const dayHeaderColors: Record<number, string> = {
 }
 
 export default function CalendarView() {
-  const [view, setView] = useState<ViewType>('week')
   const [currentDate, setCurrentDate] = useState(new Date())
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null)
   const [currentTime, setCurrentTime] = useState(getCurrentTime())
+  
+  // Filtri
+  const [filterCourse, setFilterCourse] = useState('')
+  const [filterYear, setFilterYear] = useState<number | null>(null)
+  const [filterGroup, setFilterGroup] = useState('')
 
   const timeSlots = generateTimeSlots()
   const classrooms = getBaseClassrooms()
@@ -56,6 +60,10 @@ export default function CalendarView() {
     return () => clearInterval(interval)
   }, [])
 
+  useEffect(() => {
+    loadLessons()
+  }, [filterCourse, filterYear, filterGroup])
+
   const checkAuth = async () => {
     const res = await fetch('/api/auth/check')
     const data = await res.json()
@@ -63,11 +71,15 @@ export default function CalendarView() {
   }
 
   const loadLessons = async () => {
-    const res = await fetch('/api/lessons')
+    const params = new URLSearchParams()
+    if (filterCourse) params.append('course', filterCourse)
+    if (filterYear !== null) params.append('year', filterYear.toString())
+    if (filterGroup) params.append('group', filterGroup)
+    
+    const res = await fetch(`/api/lessons?${params.toString()}`)
     const data = await res.json()
     setLessons(data)
   }
-
 
   const handleAddLesson = () => {
     setEditingLesson(null)
@@ -134,18 +146,18 @@ export default function CalendarView() {
       <div className="relative flex-1 overflow-x-auto">
         {/* Header aule */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
-          <div className="flex" style={{ minWidth: `${classrooms.length * 200}px` }}>
-            <div className="w-24 flex-shrink-0 border-r border-gray-200"></div>
+          <div className="flex" style={{ minWidth: `${classrooms.length * 140}px` }}>
+            <div className="w-16 flex-shrink-0 border-r border-gray-200"></div>
             {classrooms.map((classroom) => {
               const classroomLessons = getLessonsForClassroom(dayLessons, classroom)
               return (
                 <div
                   key={classroom}
-                  className="flex-1 min-w-[200px] border-r border-gray-200 last:border-r-0 p-2 text-center font-semibold text-sm bg-gray-50"
+                  className="flex-1 min-w-[140px] border-r border-gray-200 last:border-r-0 p-2 text-center font-semibold text-xs bg-gray-50"
                 >
                   {classroom}
                   {classroomLessons.length > 0 && (
-                    <span className="ml-2 text-xs text-gray-500">({classroomLessons.length})</span>
+                    <span className="ml-1 text-xs text-gray-500">({classroomLessons.length})</span>
                   )}
                 </div>
               )
@@ -154,7 +166,7 @@ export default function CalendarView() {
         </div>
 
         {/* Griglia orari */}
-        <div className="relative" style={{ minWidth: `${classrooms.length * 200}px` }}>
+        <div className="relative" style={{ minWidth: `${classrooms.length * 140}px` }}>
           {/* Pin orario corrente */}
           {currentTimePos !== null && (
             <div
@@ -162,8 +174,8 @@ export default function CalendarView() {
               style={{ top: `${currentTimePos * 60}px` }}
             >
               <div className="flex">
-                <div className="w-24 flex-shrink-0 flex items-center">
-                  <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                <div className="w-16 flex-shrink-0 flex items-center">
+                  <div className="w-2 h-2 bg-red-500 rounded-full mr-1"></div>
                   <span className="text-xs font-semibold text-red-600">{currentTime}</span>
                 </div>
                 <div className="flex-1 border-t-2 border-red-500"></div>
@@ -178,7 +190,7 @@ export default function CalendarView() {
             return (
               <div key={time} className="flex border-b border-gray-100" style={{ height: '60px' }}>
                 {/* Colonna orari */}
-                <div className="w-24 flex-shrink-0 border-r border-gray-200 p-1 text-xs text-gray-600 flex items-center">
+                <div className="w-16 flex-shrink-0 border-r border-gray-200 p-1 text-xs text-gray-600 flex items-center">
                   {isHour && <span className="font-semibold">{time}</span>}
                 </div>
 
@@ -195,7 +207,7 @@ export default function CalendarView() {
                   return (
                     <div
                       key={classroom}
-                      className="flex-1 min-w-[200px] border-r border-gray-100 last:border-r-0 relative"
+                      className="flex-1 min-w-[140px] border-r border-gray-100 last:border-r-0 relative"
                     >
                       {lessonStarting && (
                         <LessonEventCard
@@ -220,108 +232,86 @@ export default function CalendarView() {
     const dayLessons = getLessonsForDay(currentDate)
     const dayOfWeek = currentDate.getDay()
     const headerColor = dayHeaderColors[dayOfWeek] || 'bg-laba-primary'
+    const isToday = isSameDay(currentDate, new Date())
 
     return (
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className={`${headerColor} text-white p-4`}>
-          <h2 className="text-2xl font-bold">
-            {format(currentDate, 'EEEE d MMMM yyyy', { locale: it })}
-          </h2>
+        <div className={`${headerColor} text-white p-3 flex items-center justify-between rounded-t-lg`}>
+          <div>
+            <div className="font-bold text-lg uppercase">
+              {format(currentDate, 'EEEE', { locale: it })}
+            </div>
+            <div className="text-sm opacity-90">
+              {format(currentDate, 'd MMMM yyyy', { locale: it })}
+            </div>
+          </div>
+          {isToday && (
+            <span className="bg-white text-laba-primary px-3 py-1 rounded-full text-xs font-semibold">
+              Oggi
+            </span>
+          )}
         </div>
         {renderTimeGrid(dayLessons, currentDate)}
       </div>
     )
   }
 
-  const renderWeekView = () => {
-    const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 })
-    const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
-
-    return (
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="space-y-4">
-          {weekDays.map((day, index) => {
-            const dayLessons = getLessonsForDay(day)
-            const dayOfWeek = day.getDay()
-            const headerColor = dayHeaderColors[dayOfWeek] || 'bg-laba-primary'
-            const isToday = isSameDay(day, new Date())
-
-            return (
-              <div key={index} className="border-b border-gray-200 last:border-b-0">
-                <div className={`${headerColor} text-white p-3 flex items-center justify-between`}>
-                  <div>
-                    <div className="font-bold text-lg">
-                      {format(day, 'EEEE', { locale: it })}
-                    </div>
-                    <div className="text-sm opacity-90">
-                      {format(day, 'd MMMM yyyy', { locale: it })}
-                    </div>
-                  </div>
-                  {isToday && (
-                    <span className="bg-white text-laba-primary px-3 py-1 rounded-full text-xs font-semibold">
-                      Oggi
-                    </span>
-                  )}
-                </div>
-                {renderTimeGrid(dayLessons, day)}
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    )
-  }
-
   const navigateDate = (direction: 'prev' | 'next') => {
     let newDate = new Date(currentDate)
-    
-    if (view === 'day') {
-      newDate.setDate(newDate.getDate() + (direction === 'next' ? 1 : -1))
-    } else {
-      newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7))
-    }
-    
+    newDate.setDate(newDate.getDate() + (direction === 'next' ? 1 : -1))
     setCurrentDate(newDate)
+  }
+
+  const handleResetFilters = () => {
+    setFilterCourse('')
+    setFilterYear(null)
+    setFilterGroup('')
   }
 
   return (
     <div>
-      <div className="mb-6 flex justify-between items-center">
-        <ViewSelector view={view} onViewChange={setView} />
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigateDate('prev')}
-              className="px-4 py-2 rounded-full bg-laba-primary text-white text-sm font-medium transition-all duration-200 hover:bg-opacity-90 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
-            >
-              ←
-            </button>
-            <button
-              onClick={() => setCurrentDate(new Date())}
-              className="px-4 py-2 rounded-full bg-gray-200 text-gray-700 text-sm font-medium transition-all duration-200 hover:bg-gray-300 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
-            >
-              Oggi
-            </button>
-            <button
-              onClick={() => navigateDate('next')}
-              className="px-4 py-2 rounded-full bg-laba-primary text-white text-sm font-medium transition-all duration-200 hover:bg-opacity-90 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
-            >
-              →
-            </button>
-          </div>
-          {isAuthenticated && (
-            <button
-              onClick={handleAddLesson}
-              className="px-4 py-2 rounded-full bg-green-500 text-white text-sm font-medium transition-all duration-200 hover:bg-green-600 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
-            >
-              + Aggiungi Lezione
-            </button>
-          )}
+      <LessonFilters
+        course={filterCourse}
+        year={filterYear}
+        group={filterGroup}
+        onCourseChange={setFilterCourse}
+        onYearChange={setFilterYear}
+        onGroupChange={setFilterGroup}
+        onReset={handleResetFilters}
+      />
+
+      <div className="mb-4 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigateDate('prev')}
+            className="px-4 py-2 rounded-full bg-laba-primary text-white text-sm font-medium transition-all duration-200 hover:bg-opacity-90 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
+          >
+            ←
+          </button>
+          <button
+            onClick={() => setCurrentDate(new Date())}
+            className="px-4 py-2 rounded-full bg-gray-200 text-gray-700 text-sm font-medium transition-all duration-200 hover:bg-gray-300 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
+          >
+            Oggi
+          </button>
+          <button
+            onClick={() => navigateDate('next')}
+            className="px-4 py-2 rounded-full bg-laba-primary text-white text-sm font-medium transition-all duration-200 hover:bg-opacity-90 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
+          >
+            →
+          </button>
         </div>
+        {isAuthenticated && (
+          <button
+            onClick={handleAddLesson}
+            className="px-4 py-2 rounded-full bg-green-500 text-white text-sm font-medium transition-all duration-200 hover:bg-green-600 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
+          >
+            + Aggiungi Lezione
+          </button>
+        )}
       </div>
 
-      {view === 'day' && renderDayView()}
-      {view === 'week' && renderWeekView()}
+      {renderDayView()}
 
       {showForm && (
         <LessonForm

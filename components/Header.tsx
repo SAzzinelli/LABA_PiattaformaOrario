@@ -35,11 +35,11 @@ export default function Header() {
 
   return (
     <>
-      <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+      <header className="bg-laba-primary text-white shadow-lg sticky top-0 z-50">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <h1 className="text-xl font-bold text-laba-primary">LABA - Orario Lezioni</h1>
+              <h1 className="text-xl font-bold text-white">LABA - Orario Lezioni</h1>
             </div>
             <nav className="flex items-center gap-4">
               {isAuthenticated ? (
@@ -54,7 +54,7 @@ export default function Header() {
               ) : (
                 <button
                   onClick={handleLogin}
-                  className="px-4 py-2 rounded-full bg-laba-primary text-white text-sm font-medium transition-all duration-200 hover:bg-opacity-90 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
+                  className="px-4 py-2 rounded-full bg-white text-laba-primary text-sm font-medium transition-all duration-200 hover:bg-gray-100 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
                 >
                   Login Admin
                 </button>

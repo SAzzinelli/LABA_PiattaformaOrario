@@ -8,8 +8,16 @@ export interface Lesson {
   dayOfWeek: number // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
   classroom: string
   professor: string
+  course?: string // Corso (es. "Graphic Design & Multimedia")
+  year?: number // Anno (1, 2, 3 per triennali, 1, 2 per biennali)
   group?: string // optional, if not present means "tutti"
   notes?: string
+}
+
+export interface LessonFilters {
+  course?: string
+  year?: number
+  group?: string
 }
 
 // Convert database row to Lesson interface
@@ -22,6 +30,8 @@ function dbRowToLesson(row: any): Lesson {
     dayOfWeek: row.day_of_week,
     classroom: row.classroom,
     professor: row.professor,
+    course: row.course || undefined,
+    year: row.year || undefined,
     group: row.group_name || undefined,
     notes: row.notes || undefined,
   }
@@ -36,16 +46,31 @@ function lessonToDbRow(lesson: Omit<Lesson, 'id'> | Partial<Lesson>): any {
   if ('dayOfWeek' in lesson) row.day_of_week = lesson.dayOfWeek
   if ('classroom' in lesson) row.classroom = lesson.classroom
   if ('professor' in lesson) row.professor = lesson.professor
+  if ('course' in lesson) row.course = lesson.course || null
+  if ('year' in lesson) row.year = lesson.year || null
   if ('group' in lesson) row.group_name = lesson.group || null
   if ('notes' in lesson) row.notes = lesson.notes || null
   return row
 }
 
-export async function getLessons(): Promise<Lesson[]> {
+export async function getLessons(filters?: LessonFilters): Promise<Lesson[]> {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('lessons')
       .select('*')
+
+    // Applica filtri se presenti
+    if (filters?.course) {
+      query = query.eq('course', filters.course)
+    }
+    if (filters?.year !== undefined) {
+      query = query.eq('year', filters.year)
+    }
+    if (filters?.group) {
+      query = query.eq('group_name', filters.group)
+    }
+
+    const { data, error } = await query
       .order('day_of_week', { ascending: true })
       .order('start_time', { ascending: true })
 

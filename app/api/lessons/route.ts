@@ -1,10 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getLessons, addLesson } from '@/lib/db'
+import { getLessons, addLesson, LessonFilters } from '@/lib/db'
 import { verifyToken } from '@/lib/auth'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const lessons = await getLessons()
+    const searchParams = request.nextUrl.searchParams
+    const filters: LessonFilters = {}
+    
+    if (searchParams.get('course')) {
+      filters.course = searchParams.get('course') || undefined
+    }
+    if (searchParams.get('year')) {
+      filters.year = parseInt(searchParams.get('year') || '0')
+    }
+    if (searchParams.get('group')) {
+      filters.group = searchParams.get('group') || undefined
+    }
+    
+    const lessons = await getLessons(Object.keys(filters).length > 0 ? filters : undefined)
     return NextResponse.json(lessons)
   } catch (error) {
     console.error('Error fetching lessons:', error)
