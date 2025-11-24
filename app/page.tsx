@@ -1,6 +1,5 @@
 import CalendarView from '@/components/CalendarView'
 import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 
 export default function Home() {
   return (
@@ -9,7 +8,6 @@ export default function Home() {
       <main className="container mx-auto px-2 py-2 flex-1">
         <CalendarView />
       </main>
-      <Footer />
     </div>
   )
 }

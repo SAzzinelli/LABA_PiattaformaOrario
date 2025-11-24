@@ -37,14 +37,14 @@ export default function Header() {
     <>
       <header className="bg-laba-primary text-white shadow-lg sticky top-0 z-50">
         <div className="container mx-auto px-2">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-14">
             <div className="flex items-center gap-4 animate-fade-in">
               <img 
                 src="/logoSito.svg" 
                 alt="LABA" 
-                className="h-10 w-auto brightness-0 invert transition-transform duration-300 hover:scale-110"
+                className="h-8 w-auto brightness-0 invert transition-transform duration-300 hover:scale-110"
               />
-              <span className="text-xl font-semibold text-white tracking-tight">Orario Lezioni</span>
+              <span className="text-lg font-semibold text-white tracking-tight">Orario Lezioni</span>
             </div>
             <nav className="flex items-center gap-4">
               {isAuthenticated ? (
