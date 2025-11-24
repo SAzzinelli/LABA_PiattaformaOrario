@@ -155,11 +155,14 @@ export default function CalendarView() {
     const totalHeight = getTotalCalendarHeight()
 
     return (
-      <div className="relative flex-1 overflow-x-auto overflow-y-auto">
+      <div className="relative flex-1 overflow-x-auto overflow-y-auto bg-white">
         {/* Header aule */}
-        <div className="sticky top-0 z-10 bg-white border-b-2 border-gray-300">
-          <div className="flex" style={{ minWidth: `${classrooms.length * minClassroomWidth}px` }}>
-            <div className="w-16 flex-shrink-0 border-r-2 border-gray-300"></div>
+        <div className="sticky top-0 z-20 bg-white border-b border-gray-200">
+          <div className="flex" style={{ minWidth: `${classrooms.length * minClassroomWidth + 64}px` }}>
+            {/* Colonna vuota per gli orari */}
+            <div className="w-16 flex-shrink-0 border-r border-gray-200 bg-gray-50"></div>
+            
+            {/* Header aule */}
             {classrooms.map((classroom, index) => {
               const classroomLessons = getLessonsForClassroom(dayLessons, classroom)
               const isFirstExternal = index === firstExternalIndex
@@ -167,71 +170,73 @@ export default function CalendarView() {
               return (
                 <div
                   key={classroom}
-                  className={`flex-shrink-0 border-r border-gray-200 last:border-r-0 p-1.5 text-center font-semibold text-xs bg-gray-50 whitespace-nowrap ${
-                    isFirstExternal ? 'border-l-4 border-l-gray-400' : ''
+                  className={`flex-shrink-0 border-r border-gray-200 last:border-r-0 px-2 py-2 text-center text-xs font-medium text-gray-700 bg-gray-50 whitespace-nowrap ${
+                    isFirstExternal ? 'border-l-2 border-l-gray-400' : ''
                   }`}
                   style={{ width: `${minClassroomWidth}px`, minWidth: `${minClassroomWidth}px` }}
                 >
                   {classroom}
-                  {classroomLessons.length > 0 && (
-                    <span className="ml-1 text-xs text-gray-500">({classroomLessons.length})</span>
-                  )}
                 </div>
               )
             })}
           </div>
         </div>
 
-        {/* Griglia orari con linee precise */}
+        {/* Griglia calendario */}
         <div 
-          className="relative" 
+          className="relative bg-white" 
           style={{ 
-            minWidth: `${classrooms.length * minClassroomWidth}px`,
+            minWidth: `${classrooms.length * minClassroomWidth + 64}px`,
             height: `${totalHeight}px`
           }}
         >
-          {/* Linee orizzontali per ore e mezze ore */}
+          {/* Colonna orari fissa sulla sinistra */}
+          <div className="absolute left-0 top-0 bottom-0 w-16 border-r border-gray-200 bg-white z-10">
+            {timeLines.map((line) => (
+              <div
+                key={line.time}
+                className="absolute left-0 right-0 flex items-start pr-2"
+                style={{ 
+                  top: `${line.position - (line.isHour ? 0 : 6)}px`,
+                }}
+              >
+                {line.isHour ? (
+                  <span className="text-xs font-medium text-gray-600 ml-auto">{line.time}</span>
+                ) : (
+                  <span className="text-[10px] text-gray-400 ml-auto">{line.time}</span>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Linee orizzontali sottili che attraversano tutto il calendario */}
           {timeLines.map((line) => (
             <div
-              key={line.time}
-              className="absolute left-0 right-0 pointer-events-none z-10"
+              key={`line-${line.time}`}
+              className="absolute left-16 right-0 pointer-events-none z-0"
               style={{ 
                 top: `${line.position}px`,
-                borderTop: line.isHour ? '2px solid #9ca3af' : '1px solid #e5e7eb'
+                borderTop: line.isHour ? '1px solid #e5e7eb' : '1px solid #f3f4f6'
               }}
-            >
-              <div className="flex">
-                {/* Etichetta orario sulla sinistra */}
-                <div className="w-16 flex-shrink-0 border-r-2 border-gray-300 bg-white flex items-center px-1">
-                  {line.isHour ? (
-                    <span className="text-xs font-semibold text-gray-700">{line.time}</span>
-                  ) : (
-                    <span className="text-[10px] text-gray-400">{line.time}</span>
-                  )}
-                </div>
-                {/* Linea che attraversa tutte le colonne */}
-                <div className="flex-1"></div>
-              </div>
-            </div>
+            />
           ))}
 
           {/* Pin orario corrente */}
           {currentTimePos !== null && (
             <div
-              className="absolute left-0 right-0 z-20 pointer-events-none"
+              className="absolute left-16 right-0 z-30 pointer-events-none"
               style={{ top: `${currentTimePos}px` }}
             >
               <div className="flex">
-                <div className="w-16 flex-shrink-0 flex items-center bg-white">
-                  <div className="w-2 h-2 bg-red-500 rounded-full mr-1"></div>
-                  <span className="text-xs font-semibold text-red-600">{currentTime}</span>
+                <div className="w-16 flex-shrink-0 flex items-center bg-white pr-2">
+                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full ml-auto"></div>
                 </div>
-                <div className="flex-1 border-t-2 border-red-500"></div>
+                <div className="flex-1 border-t border-red-500"></div>
               </div>
             </div>
           )}
 
-          {/* Colonne aule con eventi posizionati in pixel esatti */}
+          {/* Colonne aule con eventi */}
           {classrooms.map((classroom, classroomIndex) => {
             const classroomLessons = getLessonsForClassroom(dayLessons, classroom)
             const isFirstExternal = classroomIndex === firstExternalIndex
@@ -239,11 +244,11 @@ export default function CalendarView() {
             return (
               <div
                 key={classroom}
-                className={`absolute top-0 bottom-0 flex-shrink-0 border-r border-gray-100 last:border-r-0 ${
-                  isFirstExternal ? 'border-l-4 border-l-gray-400' : ''
+                className={`absolute top-0 bottom-0 flex-shrink-0 ${
+                  isFirstExternal ? 'border-l-2 border-l-gray-400' : ''
                 }`}
                 style={{ 
-                  left: `${16 + classroomIndex * minClassroomWidth}px`,
+                  left: `${64 + classroomIndex * minClassroomWidth}px`,
                   width: `${minClassroomWidth}px`,
                   minWidth: `${minClassroomWidth}px`
                 }}
@@ -256,10 +261,10 @@ export default function CalendarView() {
                   return (
                     <div
                       key={lesson.id}
-                      className="absolute left-0 right-0 px-1"
+                      className="absolute left-0.5 right-0.5 z-20"
                       style={{
                         top: `${startPos}px`,
-                        height: `${height}px`,
+                        height: `${Math.max(height, 20)}px`,
                       }}
                     >
                       <LessonEventCard
@@ -274,9 +279,6 @@ export default function CalendarView() {
               </div>
             )
           })}
-
-          {/* Colonna orari fissa sulla sinistra con sfondo bianco */}
-          <div className="absolute left-0 top-0 bottom-0 w-16 border-r-2 border-gray-300 bg-white z-10 pointer-events-none"></div>
         </div>
       </div>
     )
@@ -421,33 +423,26 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit }: LessonEventCard
 
   return (
     <div
-      className="absolute left-1 right-1 rounded-lg shadow-md border-l-4 border-laba-primary bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 smooth-transition cursor-pointer overflow-hidden z-10 hover-lift group"
+      className="absolute left-0 right-0 rounded cursor-pointer overflow-hidden group border-l-2 border-laba-primary bg-blue-50 hover:bg-blue-100 smooth-transition"
       style={{
-        top: '0px', // La posizione è gestita dal container padre
-        height: `${Math.max(height, 30)}px`, // Altezza minima 30px (15 minuti)
+        top: '0px',
+        height: `${Math.max(height, 20)}px`,
       }}
       onClick={() => onEdit && onEdit(lesson)}
       title={`${lesson.title} - ${lesson.startTime}-${lesson.endTime} - ${lesson.classroom}`}
     >
-      <div className="p-2.5 h-full flex flex-col justify-between">
-        <div>
-          <div className="text-xs font-semibold text-laba-primary mb-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
-            {lesson.startTime} - {lesson.endTime}
-          </div>
-          <div className="text-sm font-bold text-gray-800 line-clamp-2 group-hover:text-laba-primary transition-colors">
-            {lesson.title}
-          </div>
+      <div className="px-1.5 py-0.5 h-full flex flex-col">
+        <div className="text-[10px] font-medium text-laba-primary leading-tight">
+          {lesson.startTime}
         </div>
-        <div className="mt-auto">
-          <div className="text-xs text-gray-600 truncate group-hover:text-gray-700 transition-colors">
+        <div className="text-xs font-semibold text-gray-900 leading-tight truncate">
+          {lesson.title}
+        </div>
+        {height > 40 && (
+          <div className="text-[10px] text-gray-600 truncate mt-0.5">
             {lesson.professor}
           </div>
-          {lesson.group && (
-            <div className="text-xs text-purple-600 mt-1 group-hover:text-purple-700 transition-colors">
-              {lesson.group}
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   )
