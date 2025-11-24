@@ -1,0 +1,116 @@
+'use client'
+
+import { format } from 'date-fns'
+import { it } from 'date-fns/locale'
+
+interface Lesson {
+  id: string
+  title: string
+  startTime: string
+  endTime: string
+  dayOfWeek: number
+  classroom: string
+  professor: string
+  course?: string
+  year?: number
+  group?: string
+  notes?: string
+}
+
+interface LessonDetailsModalProps {
+  isOpen: boolean
+  onClose: () => void
+  lesson: Lesson | null
+  dayDate: Date
+}
+
+const DAYS = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato']
+
+export default function LessonDetailsModal({ isOpen, onClose, lesson, dayDate }: LessonDetailsModalProps) {
+  if (!isOpen || !lesson) return null
+
+  // Formatta orario senza secondi (solo HH:mm)
+  const formatTime = (time: string) => {
+    return time.substring(0, 5) // Prende solo HH:mm
+  }
+
+  return (
+    <>
+      {/* Backdrop blurrato */}
+      <div
+        className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-lg z-[100] animate-fade-in"
+        onClick={onClose}
+      />
+
+      {/* Overlay contenuto */}
+      <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 animate-scale-in pointer-events-none">
+        <div
+          className="card-modern w-full max-w-2xl max-h-[85vh] overflow-hidden pointer-events-auto bg-white shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="bg-laba-primary text-white p-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold mb-1">{lesson.title}</h2>
+              <div className="text-sm opacity-90">
+                {DAYS[lesson.dayOfWeek]} - {format(dayDate, 'd MMMM yyyy', { locale: it })}
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="w-10 h-10 rounded-full text-white hover:bg-white hover:bg-opacity-20 smooth-transition flex items-center justify-center text-2xl"
+            >
+              ×
+            </button>
+          </div>
+
+          {/* Contenuto */}
+          <div className="p-6 overflow-y-auto max-h-[calc(85vh-120px)]">
+            <div className="space-y-6">
+              {/* Pill con informazioni importanti */}
+              <div className="flex flex-wrap gap-3">
+                <span className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
+                  {formatTime(lesson.startTime)} - {formatTime(lesson.endTime)}
+                </span>
+                <span className="px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
+                  {lesson.classroom}
+                </span>
+                {lesson.course && (
+                  <span className="px-4 py-2 bg-purple-100 text-purple-800 rounded-full text-sm font-semibold">
+                    {lesson.course}
+                  </span>
+                )}
+                {lesson.year && (
+                  <span className="px-4 py-2 bg-orange-100 text-orange-800 rounded-full text-sm font-semibold">
+                    {lesson.year}° Anno
+                  </span>
+                )}
+                {lesson.group && (
+                  <span className="px-4 py-2 bg-pink-100 text-pink-800 rounded-full text-sm font-semibold">
+                    Gruppo {lesson.group}
+                  </span>
+                )}
+              </div>
+
+              {/* Dettagli */}
+              <div className="space-y-4">
+                <div className="border-b border-gray-200 pb-4">
+                  <div className="text-sm font-semibold text-gray-500 mb-2">Professore</div>
+                  <div className="text-lg text-gray-900">{lesson.professor}</div>
+                </div>
+
+                {lesson.notes && (
+                  <div className="border-b border-gray-200 pb-4">
+                    <div className="text-sm font-semibold text-gray-500 mb-2">Note</div>
+                    <div className="text-base text-gray-900 whitespace-pre-wrap">{lesson.notes}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+

@@ -6,6 +6,7 @@ import { it } from 'date-fns/locale'
 import LessonForm from './LessonForm'
 import LessonFilters from './LessonFilters'
 import SearchOverlay from './SearchOverlay'
+import LessonDetailsModal from './LessonDetailsModal'
 import { CLASSROOMS, getBaseClassrooms, getFirstExternalIndex } from '@/lib/classrooms'
 import { generateTimeLines, getTimePosition, getCurrentTime, getTotalCalendarHeight } from '@/lib/timeSlots'
 
@@ -47,6 +48,10 @@ export default function CalendarView() {
   
   // Ricerca
   const [showSearch, setShowSearch] = useState(false)
+  
+  // Dettagli lezione (per utenti non loggati)
+  const [showLessonDetails, setShowLessonDetails] = useState(false)
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
 
   const classrooms = getBaseClassrooms()
   
@@ -232,6 +237,10 @@ export default function CalendarView() {
                       startSlot={startPos}
                       endSlot={endPos}
                       onEdit={isAuthenticated ? handleEditLesson : undefined}
+                      onView={!isAuthenticated ? () => {
+                        setSelectedLesson(lesson)
+                        setShowLessonDetails(true)
+                      } : undefined}
                     />
                   </div>
                 )
@@ -396,6 +405,16 @@ export default function CalendarView() {
         onSelectLesson={handleSearchSelect}
         lessons={lessons}
       />
+
+      <LessonDetailsModal
+        isOpen={showLessonDetails}
+        onClose={() => {
+          setShowLessonDetails(false)
+          setSelectedLesson(null)
+        }}
+        lesson={selectedLesson}
+        dayDate={currentDate}
+      />
     </div>
   )
 }
@@ -406,11 +425,25 @@ interface LessonEventCardProps {
   startSlot: number
   endSlot: number
   onEdit?: (lesson: Lesson) => void
+  onView?: () => void
 }
 
-function LessonEventCard({ lesson, startSlot, endSlot, onEdit }: LessonEventCardProps) {
+function LessonEventCard({ lesson, startSlot, endSlot, onEdit, onView }: LessonEventCardProps) {
   // startSlot e endSlot sono già in pixel (2px per minuto)
   const height = endSlot - startSlot
+
+  // Formatta orario senza secondi (solo HH:mm)
+  const formatTime = (time: string) => {
+    return time.substring(0, 5) // Prende solo HH:mm
+  }
+
+  const handleClick = () => {
+    if (onEdit) {
+      onEdit(lesson)
+    } else if (onView) {
+      onView()
+    }
+  }
 
   return (
     <div
@@ -419,20 +452,27 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit }: LessonEventCard
         top: '0px',
         height: `${Math.max(height, 20)}px`,
       }}
-      onClick={() => onEdit && onEdit(lesson)}
-      title={`${lesson.title} - ${lesson.startTime}-${lesson.endTime} - ${lesson.classroom}`}
+      onClick={handleClick}
+      title={`${lesson.title} - ${formatTime(lesson.startTime)}-${formatTime(lesson.endTime)} - ${lesson.classroom}`}
     >
       <div className="px-1.5 py-0.5 h-full flex flex-col">
         <div className="text-[10px] font-medium text-laba-primary leading-tight">
-          {lesson.startTime}
+          {formatTime(lesson.startTime)} - {formatTime(lesson.endTime)}
         </div>
         <div className="text-xs font-semibold text-gray-900 leading-tight truncate">
           {lesson.title}
         </div>
         {height > 40 && (
-          <div className="text-[10px] text-gray-600 truncate mt-0.5">
-            {lesson.professor}
-          </div>
+          <>
+            <div className="text-[10px] text-gray-600 truncate mt-0.5">
+              {lesson.professor}
+            </div>
+            {lesson.group && (
+              <div className="text-[10px] text-purple-600 truncate mt-0.5">
+                {lesson.group}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
