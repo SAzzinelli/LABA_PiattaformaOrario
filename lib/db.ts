@@ -68,7 +68,7 @@ export async function getLessons(filters?: LessonFilters): Promise<Lesson[]> {
       // Backward compatibility
       query = query.eq('course', filters.course)
     }
-    
+
     if (filters?.years && filters.years.length > 0) {
       // Filtra per anni specifici - include anche lezioni senza anno (generiche)
       // Mostra lezioni con gli anni selezionati O senza anno specificato
@@ -99,10 +99,10 @@ export async function getLessons(filters?: LessonFilters): Promise<Lesson[]> {
 export async function addLesson(lesson: Omit<Lesson, 'id'>): Promise<Lesson> {
   try {
     const row = lessonToDbRow(lesson)
-    
+
     // Log per debug
-    console.log('Adding lesson with row:', JSON.stringify(row, null, 2))
-    
+    // console.log('Adding lesson with row:', JSON.stringify(row, null, 2))
+
     const { data, error } = await supabase
       .from('lessons')
       .insert(row)
@@ -172,7 +172,7 @@ export async function updateLessonAndFuture(
 
     // Identifica le caratteristiche originali per trovare le lezioni future
     const originalLesson = dbRowToLesson(currentLesson)
-    
+
     // Costruisci la query per trovare tutte le lezioni future con le stesse caratteristiche
     let query = supabase
       .from('lessons')
@@ -213,10 +213,10 @@ export async function updateLessonAndFuture(
 
     // Prepara i dati da aggiornare
     const updateRow = lessonToDbRow(lesson)
-    
+
     // Ottieni gli ID delle lezioni future da aggiornare
     const futureIds = (futureLessons || []).map(l => l.id)
-    
+
     if (futureIds.length === 0) {
       // Nessuna lezione futura trovata, aggiorna solo quella corrente
       const updated = await updateLesson(id, lesson)
