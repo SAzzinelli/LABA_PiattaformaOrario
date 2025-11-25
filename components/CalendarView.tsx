@@ -285,21 +285,8 @@ export default function CalendarView() {
               </div>
             </div>
             
-            {/* Dropdown aule al centro */}
-            <div className="flex items-center justify-center sm:flex-1 sm:justify-center order-3 sm:order-2">
-              <CustomMultiSelect
-                values={selectedClassrooms}
-                options={classrooms.map(c => ({ value: c, label: c }))}
-                placeholder="Aule"
-                onChange={setSelectedClassrooms}
-                className="w-full sm:w-auto"
-                buttonClassName="bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-xs sm:text-sm font-medium backdrop-blur-sm rounded-full px-3 sm:px-4 py-1.5 border-0"
-                showSelectedCount={false}
-              />
-            </div>
-            
-            {/* Pulsanti navigazione */}
-            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 order-2 sm:order-3 justify-end sm:justify-start">
+            {/* Pulsanti navigazione al centro */}
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 justify-center order-2 sm:order-2">
               <button
                 onClick={() => navigateDate('prev')}
                 className="btn-modern px-2 sm:px-3 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm whitespace-nowrap"
@@ -320,6 +307,19 @@ export default function CalendarView() {
               >
                 <span className="relative z-10">→</span>
               </button>
+            </div>
+            
+            {/* Dropdown aule a destra */}
+            <div className="flex items-center justify-end order-3 sm:order-3">
+              <CustomMultiSelect
+                values={selectedClassrooms}
+                options={classrooms.map(c => ({ value: c, label: c }))}
+                placeholder="Aule"
+                onChange={setSelectedClassrooms}
+                className="w-full sm:w-auto"
+                buttonClassName="bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-xs font-medium backdrop-blur-sm rounded-full px-2 sm:px-3 py-1.5 border-0"
+                showSelectedCount={false}
+              />
             </div>
           </div>
         </div>
