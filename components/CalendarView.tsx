@@ -273,7 +273,7 @@ export default function CalendarView() {
     return (
       <div className="flex flex-col h-full card-modern overflow-hidden animate-fade-in">
         {/* Header giorno sticky */}
-        <div className={`sticky top-0 z-20 ${headerColor} text-white p-2 sm:p-3 rounded-t-lg shadow-md`}>
+        <div className={`sticky top-0 z-20 ${headerColor} text-white p-2 sm:p-3 rounded-t-lg shadow-md hover:transform-none`}>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
             {/* Data */}
             <div className="min-w-0 flex-shrink">
