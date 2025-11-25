@@ -104,6 +104,14 @@ export default function CalendarView() {
     
     const res = await fetch(`/api/lessons?${params.toString()}`)
     const data = await res.json()
+    
+    // Debug: log per verificare i filtri e i risultati
+    console.log('Filtri applicati:', { courses: filterCourses, years: filterYears })
+    console.log('Lezioni ricevute:', data.length)
+    if (data.length > 0) {
+      console.log('Prima lezione:', data[0])
+    }
+    
     setLessons(data)
   }
 
