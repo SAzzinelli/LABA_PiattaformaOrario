@@ -88,7 +88,7 @@ export default function LessonDetailsModal({ isOpen, onClose, lesson, dayDate }:
                 )}
                 {lesson.group && (
                   <span className="px-4 py-2 bg-pink-100 text-pink-800 rounded-full text-sm font-semibold">
-                    Gruppo {lesson.group}
+                    {lesson.group.startsWith('Gruppo ') ? lesson.group : `Gruppo ${lesson.group}`}
                   </span>
                 )}
               </div>
