@@ -38,16 +38,16 @@ export default function LessonDetailsModal({ isOpen, onClose, lesson, dayDate }:
   // Ottieni il colore del corso per l'header
   const courseColor = getCourseColor(lesson.course)
 
-  // Mappa colori header per stili inline (meno vividi, come le pillole)
+  // Mappa colori header per stili inline (colori medi per buon contrasto con testo bianco)
   const headerColorMap: Record<string, string> = {
-    'bg-purple-200': '#e9d5ff',
-    'bg-red-200': '#fecaca',
-    'bg-pink-200': '#fce7f3',
-    'bg-blue-200': '#bfdbfe',
-    'bg-green-200': '#bbf7d0',
-    'bg-yellow-200': '#fef08a',
-    'bg-orange-200': '#fed7aa',
-    'bg-indigo-200': '#c7d2fe',
+    'bg-purple-500': '#a855f7',
+    'bg-red-500': '#ef4444',
+    'bg-pink-500': '#ec4899',
+    'bg-blue-500': '#3b82f6',
+    'bg-green-500': '#22c55e',
+    'bg-yellow-500': '#eab308',
+    'bg-orange-500': '#f97316',
+    'bg-indigo-500': '#6366f1',
     'bg-laba-primary': '#033157',
   }
 
