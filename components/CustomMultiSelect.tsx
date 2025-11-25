@@ -16,6 +16,7 @@ interface CustomMultiSelectProps {
   onChange: (values: string[]) => void
   className?: string
   buttonClassName?: string
+  showSelectedCount?: boolean
 }
 
 export default function CustomMultiSelect({
@@ -26,6 +27,7 @@ export default function CustomMultiSelect({
   onChange,
   className = '',
   buttonClassName = '',
+  showSelectedCount = true,
 }: CustomMultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 })
@@ -34,11 +36,13 @@ export default function CustomMultiSelect({
   const menuRef = useRef<HTMLDivElement>(null)
 
   const selectedOptions = options.filter(opt => values.includes(opt.value))
-  const displayText = selectedOptions.length > 0 
-    ? selectedOptions.length === 1 
-      ? selectedOptions[0].label
-      : `${selectedOptions.length} selezionati`
-    : placeholder
+  const displayText = showSelectedCount
+    ? (selectedOptions.length > 0 
+        ? selectedOptions.length === 1 
+          ? selectedOptions[0].label
+          : `${selectedOptions.length} selezionati`
+        : placeholder)
+    : placeholder // Se showSelectedCount è false, mostra sempre il placeholder
 
   // Calcola posizione quando si apre
   useEffect(() => {
@@ -102,9 +106,9 @@ export default function CustomMultiSelect({
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        className={`input-modern w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border-2 text-left text-xs sm:text-sm font-medium ${
-          disabled ? 'bg-gray-100 cursor-not-allowed opacity-60' : 'hover:border-laba-primary cursor-pointer hover-lift'
-        } ${buttonClassName || 'bg-white'}`}
+        className={`w-full text-left text-xs sm:text-sm font-medium whitespace-nowrap ${
+          disabled ? 'bg-gray-100 cursor-not-allowed opacity-60' : 'cursor-pointer'
+        } ${buttonClassName || 'input-modern px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border-2 bg-white hover:border-laba-primary hover-lift'}`}
       >
         <div className="flex items-center justify-between gap-2 min-w-0">
           <span className={`${selectedOptions.length > 0 ? 'text-gray-900 font-medium' : 'text-gray-500'} truncate`} title={displayText}>

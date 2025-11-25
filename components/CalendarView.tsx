@@ -290,10 +290,11 @@ export default function CalendarView() {
               <CustomMultiSelect
                 values={selectedClassrooms}
                 options={classrooms.map(c => ({ value: c, label: c }))}
-                placeholder={selectedClassrooms.length === classrooms.length ? "Tutte le aule" : `${selectedClassrooms.length} aule`}
+                placeholder="Aule"
                 onChange={setSelectedClassrooms}
-                className="w-full sm:min-w-[120px] sm:max-w-[140px]"
-                buttonClassName="bg-blue-200 bg-opacity-50 border-blue-300 text-gray-800"
+                className="w-full sm:w-auto"
+                buttonClassName="bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-xs sm:text-sm font-medium backdrop-blur-sm rounded-full px-3 sm:px-4 py-1.5 border-0"
+                showSelectedCount={false}
               />
             </div>
             
