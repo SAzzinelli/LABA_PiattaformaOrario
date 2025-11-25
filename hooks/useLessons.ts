@@ -15,9 +15,9 @@ export interface Lesson {
   notes?: string
 }
 
-export function useLessons() {
-  const [lessons, setLessons] = useState<Lesson[]>([])
-  const [loading, setLoading] = useState(true)
+export function useLessons(initialLessons: Lesson[] = []) {
+  const [lessons, setLessons] = useState<Lesson[]>(initialLessons)
+  const [loading, setLoading] = useState(initialLessons.length === 0)
   const [filterCourses, setFilterCourses] = useState<string[]>([])
   const [filterYears, setFilterYears] = useState<number[]>([])
 
@@ -31,10 +31,10 @@ export function useLessons() {
       if (filterYears.length > 0) {
         filterYears.forEach(year => params.append('year', year.toString()))
       }
-      
+
       const res = await fetch(`/api/lessons?${params.toString()}`)
       if (!res.ok) throw new Error('Failed to fetch lessons')
-      
+
       const data = await res.json()
       setLessons(data)
     } catch (error) {

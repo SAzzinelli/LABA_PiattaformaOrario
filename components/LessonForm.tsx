@@ -20,6 +20,7 @@ interface Lesson {
 
 interface LessonFormProps {
   lesson?: Lesson | null
+  existingLessons?: Lesson[]
   onClose: () => void
 }
 
@@ -33,7 +34,7 @@ const DAYS_OF_WEEK = [
   { value: 6, label: 'Sabato' },
 ]
 
-export default function LessonForm({ lesson, onClose }: LessonFormProps) {
+export default function LessonForm({ lesson, existingLessons = [], onClose }: LessonFormProps) {
   const [formData, setFormData] = useState({
     title: '',
     startTime: '',
@@ -69,9 +70,44 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
 
   const availableYears = formData.course ? getYearsForCourse(formData.course as any) : []
 
+  const checkConflict = () => {
+    if (!formData.classroom || !formData.startTime || !formData.endTime) return null
+
+    const start = parseInt(formData.startTime.replace(':', ''))
+    const end = parseInt(formData.endTime.replace(':', ''))
+
+    const conflict = existingLessons.find(l => {
+      // Ignora la lezione che stiamo modificando
+      if (lesson && l.id === lesson.id) return false
+
+      // Stesso giorno
+      if (l.dayOfWeek !== formData.dayOfWeek) return false
+
+      // Stessa aula
+      if (l.classroom !== formData.classroom) return false
+
+      const lStart = parseInt(l.startTime.replace(':', ''))
+      const lEnd = parseInt(l.endTime.replace(':', ''))
+
+      // Sovrapposizione temporale
+      return (start < lEnd && end > lStart)
+    })
+
+    return conflict
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    // Controllo conflitti
+    const conflict = checkConflict()
+    if (conflict) {
+      if (!confirm(`Attenzione: c'è già una lezione in ${conflict.classroom} dalle ${conflict.startTime} alle ${conflict.endTime} ("${conflict.title}"). Vuoi procedere comunque?`)) {
+        return
+      }
+    }
+
     setLoading(true)
 
     try {
@@ -285,7 +321,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
               type="text"
               value={formData.group}
               onChange={(e) => setFormData({ ...formData, group: e.target.value })}
-                className="input-modern w-full px-4 py-2.5 rounded-lg"
+              className="input-modern w-full px-4 py-2.5 rounded-lg"
               placeholder="Es: Gruppo A, Gruppo B, oppure lascia vuoto"
             />
           </div>
@@ -299,7 +335,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
-                className="input-modern w-full px-4 py-2.5 rounded-lg"
+              className="input-modern w-full px-4 py-2.5 rounded-lg"
               placeholder="Note aggiuntive sulla lezione..."
             />
           </div>
@@ -308,33 +344,33 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
           {lesson && (
             <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
               <label className="block text-sm font-medium text-gray-700 mb-3">
-              Modifica:
-            </label>
-            <div className="flex gap-4">
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="radio"
-                  name="updateScope"
-                  value="single"
-                  checked={updateScope === 'single'}
-                  onChange={(e) => setUpdateScope(e.target.value as 'single' | 'future')}
-                  className="mr-2 w-4 h-4 text-laba-primary focus:ring-laba-primary"
-                />
-                <span className="text-sm text-gray-700">Solo questa lezione</span>
+                Modifica:
               </label>
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="radio"
-                  name="updateScope"
-                  value="future"
-                  checked={updateScope === 'future'}
-                  onChange={(e) => setUpdateScope(e.target.value as 'single' | 'future')}
-                  className="mr-2 w-4 h-4 text-laba-primary focus:ring-laba-primary"
-                />
-                <span className="text-sm text-gray-700">Tutte le lezioni future con le stesse caratteristiche</span>
-              </label>
+              <div className="flex gap-4">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="updateScope"
+                    value="single"
+                    checked={updateScope === 'single'}
+                    onChange={(e) => setUpdateScope(e.target.value as 'single' | 'future')}
+                    className="mr-2 w-4 h-4 text-laba-primary focus:ring-laba-primary"
+                  />
+                  <span className="text-sm text-gray-700">Solo questa lezione</span>
+                </label>
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="updateScope"
+                    value="future"
+                    checked={updateScope === 'future'}
+                    onChange={(e) => setUpdateScope(e.target.value as 'single' | 'future')}
+                    className="mr-2 w-4 h-4 text-laba-primary focus:ring-laba-primary"
+                  />
+                  <span className="text-sm text-gray-700">Tutte le lezioni future con le stesse caratteristiche</span>
+                </label>
+              </div>
             </div>
-          </div>
           )}
 
           {error && (

@@ -9,8 +9,15 @@ import { getBaseClassrooms } from '@/lib/classrooms'
 import { useLessons, Lesson } from '@/hooks/useLessons'
 import CalendarHeader from './CalendarHeader'
 import CalendarGrid from './CalendarGrid'
+import AgendaView from './AgendaView'
+import CalendarSkeleton from './CalendarSkeleton'
+import { generateICS } from '@/lib/ics'
 
-export default function CalendarView() {
+interface CalendarViewProps {
+  initialLessons?: Lesson[]
+}
+
+export default function CalendarView({ initialLessons = [] }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [showForm, setShowForm] = useState(false)
@@ -25,7 +32,7 @@ export default function CalendarView() {
     filterYears,
     setFilterYears,
     refreshLessons
-  } = useLessons()
+  } = useLessons(initialLessons)
 
   // Filtro aule
   const [selectedClassrooms, setSelectedClassrooms] = useState<string[]>([])
@@ -114,6 +121,18 @@ export default function CalendarView() {
     }
   }
 
+  const handleExport = () => {
+    const icsContent = generateICS(lessons)
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', 'orario_laba.ics')
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Controlli sticky (ricerca, filtri) */}
@@ -141,6 +160,17 @@ export default function CalendarView() {
             onReset={handleResetFilters}
           />
 
+          <button
+            onClick={handleExport}
+            className="btn-modern px-4 sm:px-5 py-2.5 rounded-full bg-white text-gray-700 text-sm font-medium shadow-md border border-gray-200 whitespace-nowrap relative overflow-hidden w-full sm:w-auto flex items-center justify-center gap-2"
+            title="Esporta Calendario"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Esporta</span>
+          </button>
+
           {/* Aggiungi Lezione (solo admin) */}
           {isAuthenticated && (
             <button
@@ -165,25 +195,39 @@ export default function CalendarView() {
           />
 
           {loading ? (
-            <div className="flex-1 flex items-center justify-center bg-white">
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-12 h-12 border-4 border-laba-primary border-t-transparent rounded-full animate-spin"></div>
-                <div className="text-gray-500 font-medium animate-pulse">Caricamento lezioni...</div>
-              </div>
-            </div>
+            <CalendarSkeleton />
           ) : (
-            <CalendarGrid
-              lessons={lessons}
-              currentDate={currentDate}
-              visibleClassrooms={visibleClassrooms}
-              minClassroomWidth={minClassroomWidth}
-              isAuthenticated={isAuthenticated}
-              onEditLesson={handleEditLesson}
-              onViewLesson={(lesson) => {
-                setSelectedLesson(lesson)
-                setShowLessonDetails(true)
-              }}
-            />
+            <>
+              {/* Vista Desktop */}
+              <div className="hidden md:flex flex-1 flex-col overflow-hidden">
+                <CalendarGrid
+                  lessons={lessons}
+                  currentDate={currentDate}
+                  visibleClassrooms={visibleClassrooms}
+                  minClassroomWidth={minClassroomWidth}
+                  isAuthenticated={isAuthenticated}
+                  onEditLesson={handleEditLesson}
+                  onViewLesson={(lesson) => {
+                    setSelectedLesson(lesson)
+                    setShowLessonDetails(true)
+                  }}
+                />
+              </div>
+
+              {/* Vista Mobile */}
+              <div className="md:hidden flex-1 flex flex-col overflow-hidden bg-gray-50">
+                <AgendaView
+                  lessons={lessons}
+                  currentDate={currentDate}
+                  isAuthenticated={isAuthenticated}
+                  onEditLesson={handleEditLesson}
+                  onViewLesson={(lesson) => {
+                    setSelectedLesson(lesson)
+                    setShowLessonDetails(true)
+                  }}
+                />
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -191,6 +235,7 @@ export default function CalendarView() {
       {showForm && (
         <LessonForm
           lesson={editingLesson}
+          existingLessons={lessons}
           onClose={handleFormClose}
         />
       )}
