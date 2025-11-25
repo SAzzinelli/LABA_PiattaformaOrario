@@ -498,7 +498,7 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit, onView }: LessonE
 
   return (
     <div
-      className={`absolute left-0 right-0 rounded cursor-pointer overflow-hidden group border-l-4 ${courseColor.border} ${courseColor.bg} hover:opacity-90 smooth-transition`}
+      className={`absolute left-0 right-0 rounded cursor-pointer overflow-hidden group border-l-4 ${courseColor.border} ${courseColor.bg} hover:opacity-90 smooth-transition hover:-translate-y-0.5 hover:shadow-md`}
       style={{
         top: '0px',
         height: `${Math.max(height, 20)}px`,
