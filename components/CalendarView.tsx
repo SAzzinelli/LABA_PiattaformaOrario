@@ -454,6 +454,7 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit, onView }: LessonE
       style={{
         top: '0px',
         height: `${Math.max(height, 20)}px`,
+        borderLeftColor: courseColor.borderColor,
       }}
       onClick={handleClick}
       title={`${lesson.title} - ${formatTime(lesson.startTime)}-${formatTime(lesson.endTime)} - ${lesson.classroom}`}

@@ -38,16 +38,16 @@ export default function LessonDetailsModal({ isOpen, onClose, lesson, dayDate }:
   // Ottieni il colore del corso per l'header
   const courseColor = getCourseColor(lesson.course)
 
-  // Mappa colori header per stili inline (fallback se Tailwind non include le classi)
+  // Mappa colori header per stili inline (meno vividi, come le pillole)
   const headerColorMap: Record<string, string> = {
-    'bg-purple-600': '#9333ea',
-    'bg-red-600': '#dc2626',
-    'bg-pink-600': '#db2777',
-    'bg-blue-600': '#2563eb',
-    'bg-green-600': '#16a34a',
-    'bg-yellow-600': '#ca8a04',
-    'bg-orange-600': '#ea580c',
-    'bg-indigo-600': '#4f46e5',
+    'bg-purple-200': '#e9d5ff',
+    'bg-red-200': '#fecaca',
+    'bg-pink-200': '#fce7f3',
+    'bg-blue-200': '#bfdbfe',
+    'bg-green-200': '#bbf7d0',
+    'bg-yellow-200': '#fef08a',
+    'bg-orange-200': '#fed7aa',
+    'bg-indigo-200': '#c7d2fe',
     'bg-laba-primary': '#033157',
   }
 
