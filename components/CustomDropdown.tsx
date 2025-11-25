@@ -46,7 +46,7 @@ export default function CustomDropdown({
   }, [isOpen])
 
   return (
-    <div ref={dropdownRef} className={`relative ${className}`}>
+    <div ref={dropdownRef} className={`relative ${className}`} style={{ minWidth: '200px', maxWidth: '300px' }}>
       <button
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
@@ -56,11 +56,11 @@ export default function CustomDropdown({
         }`}
       >
         <div className="flex items-center justify-between">
-          <span className={`${selectedOption ? 'text-gray-900 font-medium' : 'text-gray-500'} truncate whitespace-nowrap`}>
+          <span className={`${selectedOption ? 'text-gray-900 font-medium' : 'text-gray-500'} truncate whitespace-nowrap`} title={selectedOption ? selectedOption.label : placeholder}>
             {selectedOption ? selectedOption.label : placeholder}
           </span>
           <svg
-            className={`w-4 h-4 text-gray-500 smooth-transition ${isOpen ? 'rotate-180' : ''}`}
+            className={`w-4 h-4 text-gray-500 smooth-transition flex-shrink-0 ml-2 ${isOpen ? 'rotate-180' : ''}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -71,7 +71,7 @@ export default function CustomDropdown({
       </button>
 
       {isOpen && !disabled && (
-        <div className="absolute z-50 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto animate-scale-in" style={{ minWidth: 'max-content', width: 'max-content' }}>
+        <div className="absolute z-50 mt-2 w-full bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto animate-scale-in">
           {options.map((option) => (
             <button
               key={option.value}
@@ -85,8 +85,9 @@ export default function CustomDropdown({
                   ? 'bg-laba-primary text-white font-medium'
                   : 'text-gray-900 hover:bg-gray-50'
               }`}
+              title={option.label}
             >
-              <span className="block whitespace-nowrap">{option.label}</span>
+              <span className="block truncate">{option.label}</span>
             </button>
           ))}
         </div>
