@@ -48,6 +48,35 @@ export default function CustomMultiSelect({
         : placeholder)
     : placeholder // Se showSelectedCount è false, mostra sempre il placeholder
 
+  const allSelected = values.length === options.length && options.length > 0
+  const noneSelected = values.length === 0
+
+  const handleSelectAll = () => {
+    onChange(options.map(opt => opt.value))
+  }
+
+  const handleDeselectAll = () => {
+    onChange([])
+  }
+
+  const handleInvertSelection = () => {
+    const allValues = options.map(opt => opt.value)
+    const newValues = allValues.filter(v => !values.includes(v))
+    onChange(newValues)
+  }
+
+  const handleClear = () => {
+    onChange([])
+  }
+
+  const handleToggleOption = (optionValue: string) => {
+    if (values.includes(optionValue)) {
+      onChange(values.filter(v => v !== optionValue))
+    } else {
+      onChange([...values, optionValue])
+    }
+  }
+
   // Calcola posizione quando si apre
   useEffect(() => {
     if (isOpen && buttonRef.current) {
@@ -94,14 +123,6 @@ export default function CustomMultiSelect({
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [isOpen])
-
-  const handleToggleOption = (optionValue: string) => {
-    if (values.includes(optionValue)) {
-      onChange(values.filter(v => v !== optionValue))
-    } else {
-      onChange([...values, optionValue])
-    }
-  }
 
   return (
     <div ref={dropdownRef} className={`relative ${className}`} style={{ minWidth: '200px', maxWidth: '300px' }}>
