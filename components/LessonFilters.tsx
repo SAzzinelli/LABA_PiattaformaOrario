@@ -35,23 +35,25 @@ export default function LessonFilters({
   ]
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3 relative z-50">
       {/* Corso */}
       <div className="flex items-center gap-2">
         <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
           Corso:
         </label>
-        <CustomDropdown
-          value={course}
-          options={courseOptions}
-          placeholder="Tutti i corsi"
-          onChange={(value) => {
-            onCourseChange(value)
-            if (value === '') {
-              onYearChange(null)
-            }
-          }}
-        />
+        <div className="relative">
+          <CustomDropdown
+            value={course}
+            options={courseOptions}
+            placeholder="Tutti i corsi"
+            onChange={(value) => {
+              onCourseChange(value)
+              if (value === '') {
+                onYearChange(null)
+              }
+            }}
+          />
+        </div>
       </div>
 
       {/* Anno */}
@@ -59,13 +61,15 @@ export default function LessonFilters({
         <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
           Anno:
         </label>
-        <CustomDropdown
-          value={year?.toString() || ''}
-          options={yearOptions}
-          placeholder="Tutti gli anni"
-          disabled={!course}
-          onChange={(value) => onYearChange(value ? parseInt(value) : null)}
-        />
+        <div className="relative">
+          <CustomDropdown
+            value={year?.toString() || ''}
+            options={yearOptions}
+            placeholder="Tutti gli anni"
+            disabled={!course}
+            onChange={(value) => onYearChange(value ? parseInt(value) : null)}
+          />
+        </div>
       </div>
 
       {/* Reset */}

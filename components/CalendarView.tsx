@@ -292,16 +292,16 @@ export default function CalendarView() {
           {/* Container scrollabile unico per header e contenuto */}
           <div className="flex-1 overflow-auto relative hide-scrollbar">
             {/* Header aule sticky - dentro il container scrollabile */}
-            <div className="sticky top-0 z-40 bg-white border-b border-gray-300 shadow-sm">
+            <div className="sticky top-0 z-20 bg-white border-b border-gray-300 shadow-sm">
               <div className="flex" style={{ minWidth: `${classrooms.length * minClassroomWidth + 64}px` }}>
                 {/* Colonna orari nell'header */}
-                <div className="sticky left-0 z-50 w-16 flex-shrink-0 border-r border-gray-300 bg-gray-50"></div>
+                <div className="sticky left-0 z-30 w-16 flex-shrink-0 border-r border-gray-300 bg-gray-50"></div>
                 
                 {/* Header aule */}
                 {classrooms.map((classroom) => (
                   <div
                     key={classroom}
-                    className="flex-shrink-0 border-r border-gray-200 last:border-r-0 px-2 py-2 text-center text-xs font-medium text-gray-700 bg-gray-50 whitespace-nowrap"
+                    className="flex-shrink-0 border-r border-gray-200 last:border-r-0 px-2 py-2 text-center text-xs font-bold text-gray-700 bg-gray-50 whitespace-nowrap"
                     style={{ width: `${minClassroomWidth}px`, minWidth: `${minClassroomWidth}px` }}
                   >
                     {classroom}
@@ -352,7 +352,7 @@ export default function CalendarView() {
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Controlli sticky (ricerca, filtri) */}
-      <div className="sticky top-0 z-30 bg-gray-50 pb-2 mb-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div className="sticky top-0 z-10 bg-gray-50 pb-2 mb-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         {/* Ricerca a sinistra */}
         <div className="w-full sm:w-auto">
           <button
