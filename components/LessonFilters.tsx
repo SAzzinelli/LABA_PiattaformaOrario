@@ -24,8 +24,14 @@ export default function LessonFilters({
   // Opzioni corsi
   const courseOptions = [
     { value: '', label: 'Tutti i corsi' },
-    ...ALL_COURSES.filter(c => isTriennale(c)).map(c => ({ value: c, label: c })),
-    ...ALL_COURSES.filter(c => isBiennale(c)).map(c => ({ value: c, label: c })),
+    ...ALL_COURSES.filter(c => isTriennale(c)).map(c => ({ 
+      value: c, 
+      label: c === 'Graphic Design & Multimedia' ? 'Graphic Design' : c 
+    })),
+    ...ALL_COURSES.filter(c => isBiennale(c)).map(c => ({ 
+      value: c, 
+      label: c === 'Graphic Design & Multimedia' ? 'Graphic Design' : c 
+    })),
   ]
 
   // Opzioni anni
