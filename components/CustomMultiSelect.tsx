@@ -17,6 +17,8 @@ interface CustomMultiSelectProps {
   className?: string
   buttonClassName?: string
   showSelectedCount?: boolean
+  showSelectAll?: boolean
+  showClear?: boolean
 }
 
 export default function CustomMultiSelect({
@@ -28,6 +30,8 @@ export default function CustomMultiSelect({
   className = '',
   buttonClassName = '',
   showSelectedCount = true,
+  showSelectAll = false,
+  showClear = false,
 }: CustomMultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 })
@@ -147,38 +151,92 @@ export default function CustomMultiSelect({
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {options.map((option) => {
-              const isSelected = values.includes(option.value)
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleToggleOption(option.value)
-                  }}
-                  className={`w-full px-4 py-2.5 text-left text-sm smooth-transition flex items-center gap-2 ${
-                    isSelected
-                      ? 'bg-laba-primary text-white font-medium'
-                      : 'text-gray-900 hover:bg-gray-50'
-                  }`}
-                  title={option.label}
-                >
-                  <div className={`w-4 h-4 border-2 rounded flex items-center justify-center flex-shrink-0 ${
-                    isSelected 
-                      ? 'border-white bg-white' 
-                      : 'border-gray-400'
-                  }`}>
-                    {isSelected && (
-                      <svg className="w-3 h-3 text-laba-primary" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
+            {/* Opzioni rapide */}
+            {(showSelectAll || showClear) && (
+              <div className="border-b border-gray-200 px-2 py-1.5 flex items-center gap-1">
+                {showSelectAll && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (allSelected) {
+                          handleDeselectAll()
+                        } else {
+                          handleSelectAll()
+                        }
+                      }}
+                      className="px-2 py-1 text-xs text-laba-primary hover:bg-laba-primary hover:text-white rounded smooth-transition whitespace-nowrap"
+                    >
+                      {allSelected ? 'Deseleziona tutte' : 'Seleziona tutte'}
+                    </button>
+                    {!allSelected && !noneSelected && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleInvertSelection()
+                        }}
+                        className="px-2 py-1 text-xs text-laba-primary hover:bg-laba-primary hover:text-white rounded smooth-transition whitespace-nowrap"
+                      >
+                        Inverti
+                      </button>
                     )}
-                  </div>
-                  <span className="block truncate flex-1">{option.label}</span>
-                </button>
-              )
-            })}
+                  </>
+                )}
+                {showClear && !noneSelected && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleClear()
+                    }}
+                    className="ml-auto px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded smooth-transition flex items-center gap-1"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Annulla
+                  </button>
+                )}
+              </div>
+            )}
+            
+            {/* Lista opzioni */}
+            <div className="max-h-48 overflow-auto">
+              {options.map((option) => {
+                const isSelected = values.includes(option.value)
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleToggleOption(option.value)
+                    }}
+                    className={`w-full px-4 py-2.5 text-left text-sm smooth-transition flex items-center gap-2 ${
+                      isSelected
+                        ? 'bg-laba-primary text-white font-medium'
+                        : 'text-gray-900 hover:bg-gray-50'
+                    }`}
+                    title={option.label}
+                  >
+                    <div className={`w-4 h-4 border-2 rounded flex items-center justify-center flex-shrink-0 ${
+                      isSelected 
+                        ? 'border-white bg-white' 
+                        : 'border-gray-400'
+                    }`}>
+                      {isSelected && (
+                        <svg className="w-3 h-3 text-laba-primary" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                    <span className="block truncate flex-1">{option.label}</span>
+                  </button>
+                )
+              })}
+            </div>
           </div>
         </>,
         document.body
