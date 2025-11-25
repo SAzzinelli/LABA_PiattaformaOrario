@@ -24,3 +24,4 @@ ALTER TABLE admin_users DISABLE ROW LEVEL SECURITY;
 
 
 
+

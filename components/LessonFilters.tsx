@@ -1,29 +1,43 @@
 'use client'
 
 import { ALL_COURSES, getYearsForCourse, isTriennale, isBiennale } from '@/lib/courses'
-import CustomDropdown from './CustomDropdown'
+import CustomMultiSelect from './CustomMultiSelect'
 
 interface LessonFiltersProps {
-  course: string
-  year: number | null
-  onCourseChange: (course: string) => void
-  onYearChange: (year: number | null) => void
+  courses: string[]
+  years: number[]
+  onCoursesChange: (courses: string[]) => void
+  onYearsChange: (years: number[]) => void
   onReset: () => void
 }
 
 export default function LessonFilters({
-  course,
-  year,
-  onCourseChange,
-  onYearChange,
+  courses,
+  years,
+  onCoursesChange,
+  onYearsChange,
   onReset,
 }: LessonFiltersProps) {
-  const availableYears = course ? getYearsForCourse(course as any) : []
-  const hasActiveFilters = course || year !== null
+  // Ottieni tutti gli anni disponibili per i corsi selezionati
+  const allAvailableYears = new Set<number>()
+  if (courses.length > 0) {
+    courses.forEach(course => {
+      const yearsForCourse = getYearsForCourse(course as any)
+      yearsForCourse.forEach(year => allAvailableYears.add(year))
+    })
+  } else {
+    // Se nessun corso è selezionato, mostra tutti gli anni possibili
+    ALL_COURSES.forEach(course => {
+      const yearsForCourse = getYearsForCourse(course as any)
+      yearsForCourse.forEach(year => allAvailableYears.add(year))
+    })
+  }
+  const availableYears = Array.from(allAvailableYears).sort()
+
+  const hasActiveFilters = courses.length > 0 || years.length > 0
 
   // Opzioni corsi
   const courseOptions = [
-    { value: '', label: 'Tutti i corsi' },
     ...ALL_COURSES.filter(c => isTriennale(c)).map(c => ({ 
       value: c, 
       label: c === 'Graphic Design & Multimedia' ? 'Graphic Design' : c 
@@ -35,50 +49,59 @@ export default function LessonFilters({
   ]
 
   // Opzioni anni
-  const yearOptions = [
-    { value: '', label: 'Tutti gli anni' },
-    ...availableYears.map(y => ({ value: y.toString(), label: `${y}° Anno` })),
-  ]
+  const yearOptions = availableYears.map(y => ({ 
+    value: y.toString(), 
+    label: `${y}° Anno` 
+  }))
 
   return (
-    <div className="flex items-center gap-3">
-      {/* Corso */}
-      <div className="flex items-center gap-2">
-        <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+      {/* Corsi */}
+      <div className="flex items-center gap-2 flex-1 sm:flex-initial min-w-0">
+        <label className="text-sm font-medium text-gray-700 whitespace-nowrap flex-shrink-0">
           Corso:
         </label>
-        <CustomDropdown
-          value={course}
-          options={courseOptions}
-          placeholder="Tutti i corsi"
-          onChange={(value) => {
-            onCourseChange(value)
-            if (value === '') {
-              onYearChange(null)
-            }
-          }}
-        />
+        <div className="flex-1 sm:flex-initial min-w-0">
+          <CustomMultiSelect
+            values={courses}
+            options={courseOptions}
+            placeholder="Tutti i corsi"
+            onChange={(selectedCourses) => {
+              onCoursesChange(selectedCourses)
+              // Se vengono deselezionati tutti i corsi, resetta anche gli anni
+              if (selectedCourses.length === 0) {
+                onYearsChange([])
+              }
+            }}
+            className="w-full sm:w-auto"
+          />
+        </div>
       </div>
 
-      {/* Anno */}
-      <div className="flex items-center gap-2">
-        <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+      {/* Anni */}
+      <div className="flex items-center gap-2 flex-1 sm:flex-initial min-w-0">
+        <label className="text-sm font-medium text-gray-700 whitespace-nowrap flex-shrink-0">
           Anno:
         </label>
-        <CustomDropdown
-          value={year?.toString() || ''}
-          options={yearOptions}
-          placeholder="Tutti gli anni"
-          disabled={!course}
-          onChange={(value) => onYearChange(value ? parseInt(value) : null)}
-        />
+        <div className="flex-1 sm:flex-initial min-w-0">
+          <CustomMultiSelect
+            values={years.map(y => y.toString())}
+            options={yearOptions}
+            placeholder="Tutti gli anni"
+            disabled={courses.length === 0}
+            onChange={(selectedYears) => {
+              onYearsChange(selectedYears.map(y => parseInt(y)))
+            }}
+            className="w-full sm:w-auto"
+          />
+        </div>
       </div>
 
       {/* Reset */}
       {hasActiveFilters && (
         <button
           onClick={onReset}
-          className="btn-modern px-4 py-2 rounded-full bg-gray-200 text-gray-700 text-sm font-medium shadow-md relative overflow-hidden whitespace-nowrap"
+          className="btn-modern px-4 py-2 rounded-full bg-gray-200 text-gray-700 text-sm font-medium shadow-md relative overflow-hidden whitespace-nowrap w-full sm:w-auto"
         >
           <span className="relative z-10">Reset</span>
         </button>

@@ -36,22 +36,22 @@ export default function Header() {
   return (
     <>
       <header className="bg-laba-primary text-white shadow-lg sticky top-0 z-50">
-        <div className="container mx-auto px-2">
-          <div className="flex items-center justify-between h-14">
-            <div className="flex items-center gap-4 animate-fade-in">
+        <div className="container mx-auto px-2 sm:px-4">
+          <div className="flex items-center justify-between h-14 gap-2">
+            <div className="flex items-center gap-2 sm:gap-4 animate-fade-in min-w-0 flex-shrink">
               <img 
                 src="/logoSito.svg" 
                 alt="LABA" 
-                className="h-8 w-auto brightness-0 invert transition-transform duration-300 hover:scale-110"
+                className="h-6 sm:h-8 w-auto brightness-0 invert transition-transform duration-300 hover:scale-110 flex-shrink-0"
               />
-              <span className="text-lg font-semibold text-white tracking-tight">Orario Lezioni</span>
+              <span className="text-base sm:text-lg font-semibold text-white tracking-tight truncate">Orario Lezioni</span>
             </div>
-            <nav className="flex items-center gap-4">
+            <nav className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
               {isAuthenticated ? (
                 <>
                   <button
                     onClick={handleLogout}
-                    className="btn-modern px-6 py-2.5 rounded-full bg-red-500 text-white text-sm font-medium shadow-md relative overflow-hidden"
+                    className="btn-modern px-4 sm:px-6 py-2 sm:py-2.5 rounded-full bg-red-500 text-white text-xs sm:text-sm font-medium shadow-md relative overflow-hidden whitespace-nowrap"
                   >
                     <span className="relative z-10">Logout</span>
                   </button>
@@ -59,7 +59,7 @@ export default function Header() {
               ) : (
                 <button
                   onClick={handleLogin}
-                  className="btn-modern px-6 py-2.5 rounded-full bg-white text-laba-primary text-sm font-medium shadow-md relative overflow-hidden"
+                  className="btn-modern px-4 sm:px-6 py-2 sm:py-2.5 rounded-full bg-white text-laba-primary text-xs sm:text-sm font-medium shadow-md relative overflow-hidden whitespace-nowrap"
                 >
                   <span className="relative z-10">Login Admin</span>
                 </button>

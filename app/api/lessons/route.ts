@@ -7,11 +7,15 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const filters: LessonFilters = {}
     
-    if (searchParams.get('course')) {
-      filters.course = searchParams.get('course') || undefined
+    // Supporta filtri multipli per corsi e anni
+    const courses = searchParams.getAll('course')
+    const years = searchParams.getAll('year').map(y => parseInt(y)).filter(y => !isNaN(y))
+    
+    if (courses.length > 0) {
+      filters.courses = courses
     }
-    if (searchParams.get('year')) {
-      filters.year = parseInt(searchParams.get('year') || '0')
+    if (years.length > 0) {
+      filters.years = years
     }
     
     const lessons = await getLessons(Object.keys(filters).length > 0 ? filters : undefined)

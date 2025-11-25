@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { updateLesson, deleteLesson } from '@/lib/db'
+import { updateLesson, deleteLesson, updateLessonAndFuture } from '@/lib/db'
 import { verifyToken } from '@/lib/auth'
 
 export async function PUT(
@@ -20,11 +20,23 @@ export async function PUT(
   try {
     const { id } = await params
     const data = await request.json()
-    const lesson = await updateLesson(id, data)
-    if (!lesson) {
-      return NextResponse.json({ error: 'Lezione non trovata' }, { status: 404 })
+    const { updateScope, ...lessonData } = data
+    
+    // Se updateScope è 'future', aggiorna tutte le lezioni future con le stesse caratteristiche
+    if (updateScope === 'future') {
+      const result = await updateLessonAndFuture(id, lessonData)
+      if (!result) {
+        return NextResponse.json({ error: 'Lezione non trovata' }, { status: 404 })
+      }
+      return NextResponse.json({ updated: result.count, lessons: result.lessons })
+    } else {
+      // Aggiorna solo la lezione corrente
+      const lesson = await updateLesson(id, lessonData)
+      if (!lesson) {
+        return NextResponse.json({ error: 'Lezione non trovata' }, { status: 404 })
+      }
+      return NextResponse.json(lesson)
     }
-    return NextResponse.json(lesson)
   } catch (error) {
     console.error('Error updating lesson:', error)
     return NextResponse.json(

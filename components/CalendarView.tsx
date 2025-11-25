@@ -7,6 +7,7 @@ import LessonForm from './LessonForm'
 import LessonFilters from './LessonFilters'
 import SearchOverlay from './SearchOverlay'
 import LessonDetailsModal from './LessonDetailsModal'
+import CustomMultiSelect from './CustomMultiSelect'
 import { CLASSROOMS, getBaseClassrooms, getFirstExternalIndex } from '@/lib/classrooms'
 import { generateTimeLines, getTimePosition, getCurrentTime, getTotalCalendarHeight } from '@/lib/timeSlots'
 import { getCourseColor } from '@/lib/courseColors'
@@ -37,8 +38,11 @@ export default function CalendarView() {
   const [currentTime, setCurrentTime] = useState(getCurrentTime())
   
   // Filtri
-  const [filterCourse, setFilterCourse] = useState('')
-  const [filterYear, setFilterYear] = useState<number | null>(null)
+  const [filterCourses, setFilterCourses] = useState<string[]>([])
+  const [filterYears, setFilterYears] = useState<number[]>([])
+  
+  // Filtro aule
+  const [selectedClassrooms, setSelectedClassrooms] = useState<string[]>([])
   
   // Ricerca
   const [showSearch, setShowSearch] = useState(false)
@@ -48,6 +52,16 @@ export default function CalendarView() {
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
 
   const classrooms = getBaseClassrooms()
+  
+  // Inizializza selectedClassrooms con tutte le aule se è vuoto
+  useEffect(() => {
+    if (selectedClassrooms.length === 0 && classrooms.length > 0) {
+      setSelectedClassrooms(classrooms)
+    }
+  }, [classrooms.length])
+  
+  // Filtra le aule da mostrare
+  const visibleClassrooms = classrooms.filter(c => selectedClassrooms.includes(c))
   
   // Calcola la larghezza minima basata sul nome più lungo
   const getMinClassroomWidth = () => {
@@ -71,7 +85,7 @@ export default function CalendarView() {
 
   useEffect(() => {
     loadLessons()
-  }, [filterCourse, filterYear])
+  }, [filterCourses, filterYears])
 
   const checkAuth = async () => {
     const res = await fetch('/api/auth/check')
@@ -81,8 +95,12 @@ export default function CalendarView() {
 
   const loadLessons = async () => {
     const params = new URLSearchParams()
-    if (filterCourse) params.append('course', filterCourse)
-    if (filterYear !== null) params.append('year', filterYear.toString())
+    if (filterCourses.length > 0) {
+      filterCourses.forEach(course => params.append('course', course))
+    }
+    if (filterYears.length > 0) {
+      filterYears.forEach(year => params.append('year', year.toString()))
+    }
     
     const res = await fetch(`/api/lessons?${params.toString()}`)
     const data = await res.json()
@@ -153,7 +171,7 @@ export default function CalendarView() {
     const totalHeight = getTotalCalendarHeight()
 
     return (
-      <div className="relative" style={{ minWidth: `${classrooms.length * minClassroomWidth + 64}px`, height: `${totalHeight}px` }}>
+      <div className="relative" style={{ minWidth: `${visibleClassrooms.length * minClassroomWidth + 64}px`, height: `${totalHeight}px` }}>
         {/* Colonna orari sticky con sfondo completo */}
         <div className="sticky left-0 z-30 w-16 border-r border-gray-300 bg-white shadow-sm" style={{ height: `${totalHeight}px` }}>
           {timeLines.map((line) => (
@@ -199,7 +217,7 @@ export default function CalendarView() {
         )}
 
         {/* Colonne aule con eventi */}
-        {classrooms.map((classroom, classroomIndex) => {
+        {visibleClassrooms.map((classroom, classroomIndex) => {
           const classroomLessons = getLessonsForClassroom(dayLessons, classroom)
 
           return (
@@ -255,36 +273,54 @@ export default function CalendarView() {
     return (
       <div className="flex flex-col h-full card-modern overflow-hidden animate-fade-in">
         {/* Header giorno sticky */}
-        <div className={`sticky top-0 z-20 ${headerColor} text-white p-3 flex items-center justify-between rounded-t-lg shadow-md`}>
-          <div>
-            <div className="font-bold text-xl uppercase tracking-wide">
-              {format(currentDate, 'EEEE', { locale: it })}
+        <div className={`sticky top-0 z-20 ${headerColor} text-white p-2 sm:p-3 rounded-t-lg shadow-md`}>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-3">
+            {/* Data */}
+            <div className="min-w-0 flex-shrink">
+              <div className="font-bold text-base sm:text-lg md:text-xl uppercase tracking-wide truncate">
+                {format(currentDate, 'EEEE', { locale: it })}
+              </div>
+              <div className="text-[10px] sm:text-xs md:text-sm opacity-90 mt-0.5 truncate">
+                {format(currentDate, 'd MMMM yyyy', { locale: it })}
+              </div>
             </div>
-            <div className="text-sm opacity-90 mt-0.5">
-              {format(currentDate, 'd MMMM yyyy', { locale: it })}
+            
+            {/* Dropdown aule al centro */}
+            <div className="flex items-center justify-center sm:flex-1 sm:justify-center order-3 sm:order-2">
+              <div className="bg-white bg-opacity-90 backdrop-blur-sm rounded-lg shadow-sm w-full sm:w-auto max-w-full sm:max-w-[200px]">
+                <CustomMultiSelect
+                  values={selectedClassrooms}
+                  options={classrooms.map(c => ({ value: c, label: c }))}
+                  placeholder={selectedClassrooms.length === classrooms.length ? "Tutte le aule" : `${selectedClassrooms.length} aule`}
+                  onChange={setSelectedClassrooms}
+                  className="w-full sm:min-w-[160px] sm:max-w-[200px]"
+                />
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigateDate('prev')}
-              className="btn-modern px-3 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm"
-              title="Giorno precedente"
-            >
-              <span className="relative z-10">←</span>
-            </button>
-            <button
-              onClick={() => setCurrentDate(new Date())}
-              className="btn-modern px-4 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm"
-            >
-              <span className="relative z-10">Oggi</span>
-            </button>
-            <button
-              onClick={() => navigateDate('next')}
-              className="btn-modern px-3 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm"
-              title="Giorno successivo"
-            >
-              <span className="relative z-10">→</span>
-            </button>
+            
+            {/* Pulsanti navigazione */}
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 order-2 sm:order-3 justify-end sm:justify-start">
+              <button
+                onClick={() => navigateDate('prev')}
+                className="btn-modern px-2 sm:px-3 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm whitespace-nowrap"
+                title="Giorno precedente"
+              >
+                <span className="relative z-10">←</span>
+              </button>
+              <button
+                onClick={() => setCurrentDate(new Date())}
+                className="btn-modern px-3 sm:px-4 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-xs sm:text-sm font-medium backdrop-blur-sm whitespace-nowrap"
+              >
+                <span className="relative z-10">Oggi</span>
+              </button>
+              <button
+                onClick={() => navigateDate('next')}
+                className="btn-modern px-2 sm:px-3 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm whitespace-nowrap"
+                title="Giorno successivo"
+              >
+                <span className="relative z-10">→</span>
+              </button>
+            </div>
           </div>
         </div>
         {/* Container calendario con header sticky */}
@@ -293,16 +329,17 @@ export default function CalendarView() {
           <div className="flex-1 overflow-auto relative hide-scrollbar">
             {/* Header aule sticky - dentro il container scrollabile */}
             <div className="sticky top-0 z-20 bg-white border-b border-gray-300 shadow-sm">
-              <div className="flex" style={{ minWidth: `${classrooms.length * minClassroomWidth + 64}px` }}>
+              <div className="flex" style={{ minWidth: `${visibleClassrooms.length * minClassroomWidth + 64}px` }}>
                 {/* Colonna orari nell'header */}
                 <div className="sticky left-0 z-30 w-16 flex-shrink-0 border-r border-gray-300 bg-gray-50"></div>
                 
                 {/* Header aule */}
-                {classrooms.map((classroom) => (
+                {visibleClassrooms.map((classroom) => (
                   <div
                     key={classroom}
-                    className="flex-shrink-0 border-r border-gray-200 last:border-r-0 px-2 py-2 text-center text-xs font-bold text-gray-700 bg-gray-50 whitespace-nowrap"
+                    className="flex-shrink-0 border-r border-gray-200 last:border-r-0 px-1 sm:px-2 py-2 text-center text-[10px] sm:text-xs font-bold text-gray-700 bg-gray-50 truncate"
                     style={{ width: `${minClassroomWidth}px`, minWidth: `${minClassroomWidth}px` }}
+                    title={classroom}
                   >
                     {classroom}
                   </div>
@@ -325,8 +362,8 @@ export default function CalendarView() {
   }
 
   const handleResetFilters = () => {
-    setFilterCourse('')
-    setFilterYear(null)
+    setFilterCourses([])
+    setFilterYears([])
   }
 
   const handleSearchSelect = (lesson: Lesson, dayOfWeek: number) => {
@@ -352,38 +389,42 @@ export default function CalendarView() {
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Controlli sticky (ricerca, filtri) */}
-      <div className="sticky top-0 z-10 bg-gray-50 pb-2 mb-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        {/* Ricerca a sinistra */}
-        <div className="w-full sm:w-auto">
-          <button
-            onClick={() => setShowSearch(true)}
-            className="btn-modern flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-laba-primary text-sm font-medium shadow-md border border-gray-200 relative overflow-hidden"
-          >
-            <svg className="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <span className="relative z-10">Cerca Lezione</span>
-          </button>
-        </div>
+      <div className="sticky top-0 z-10 bg-gray-50 pb-2 mb-2 flex flex-col gap-3">
+        {/* Prima riga: Ricerca e Aggiungi (se admin) */}
+        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
+          {/* Ricerca */}
+          <div className="w-full sm:w-auto">
+            <button
+              onClick={() => setShowSearch(true)}
+              className="btn-modern flex items-center justify-center sm:justify-start gap-2 px-4 sm:px-5 py-2.5 rounded-full bg-white text-laba-primary text-sm font-medium shadow-md border border-gray-200 relative overflow-hidden w-full sm:w-auto"
+            >
+              <svg className="w-4 h-4 relative z-10 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <span className="relative z-10 whitespace-nowrap">Cerca Lezione</span>
+            </button>
+          </div>
 
-        {/* Filtri a destra */}
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-          <LessonFilters
-            course={filterCourse}
-            year={filterYear}
-            onCourseChange={setFilterCourse}
-            onYearChange={setFilterYear}
-            onReset={handleResetFilters}
-          />
-          
+          {/* Aggiungi Lezione (solo admin) */}
           {isAuthenticated && (
             <button
               onClick={handleAddLesson}
-              className="btn-modern px-6 py-2.5 rounded-full bg-green-500 text-white text-sm font-medium shadow-md whitespace-nowrap relative overflow-hidden"
+              className="btn-modern px-4 sm:px-6 py-2.5 rounded-full bg-green-500 text-white text-sm font-medium shadow-md whitespace-nowrap relative overflow-hidden w-full sm:w-auto"
             >
               <span className="relative z-10">+ Aggiungi Lezione</span>
             </button>
           )}
+        </div>
+
+        {/* Seconda riga: Filtri */}
+        <div className="w-full">
+          <LessonFilters
+            courses={filterCourses}
+            years={filterYears}
+            onCoursesChange={setFilterCourses}
+            onYearsChange={setFilterYears}
+            onReset={handleResetFilters}
+          />
         </div>
       </div>
 

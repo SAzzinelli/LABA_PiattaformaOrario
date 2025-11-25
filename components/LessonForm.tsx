@@ -48,6 +48,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [updateScope, setUpdateScope] = useState<'single' | 'future'>('single')
 
   useEffect(() => {
     if (lesson) {
@@ -80,6 +81,7 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
         year: formData.year || undefined,
         group: formData.group || undefined,
         notes: formData.notes || undefined,
+        updateScope: lesson ? updateScope : undefined, // Solo per modifiche
       }
 
       const url = lesson ? `/api/lessons/${lesson.id}` : '/api/lessons'
@@ -301,6 +303,39 @@ export default function LessonForm({ lesson, onClose }: LessonFormProps) {
               placeholder="Note aggiuntive sulla lezione..."
             />
           </div>
+
+          {/* Scelta ambito modifica (solo per modifiche) */}
+          {lesson && (
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+              Modifica:
+            </label>
+            <div className="flex gap-4">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  name="updateScope"
+                  value="single"
+                  checked={updateScope === 'single'}
+                  onChange={(e) => setUpdateScope(e.target.value as 'single' | 'future')}
+                  className="mr-2 w-4 h-4 text-laba-primary focus:ring-laba-primary"
+                />
+                <span className="text-sm text-gray-700">Solo questa lezione</span>
+              </label>
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  name="updateScope"
+                  value="future"
+                  checked={updateScope === 'future'}
+                  onChange={(e) => setUpdateScope(e.target.value as 'single' | 'future')}
+                  className="mr-2 w-4 h-4 text-laba-primary focus:ring-laba-primary"
+                />
+                <span className="text-sm text-gray-700">Tutte le lezioni future con le stesse caratteristiche</span>
+              </label>
+            </div>
+          </div>
+          )}
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">

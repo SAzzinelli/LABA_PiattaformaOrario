@@ -15,8 +15,10 @@ export interface Lesson {
 }
 
 export interface LessonFilters {
-  course?: string
-  year?: number
+  course?: string // Deprecato, usa courses
+  year?: number // Deprecato, usa years
+  courses?: string[]
+  years?: number[]
 }
 
 // Convert database row to Lesson interface
@@ -59,10 +61,18 @@ export async function getLessons(filters?: LessonFilters): Promise<Lesson[]> {
       .select('*')
 
     // Applica filtri se presenti
-    if (filters?.course) {
+    // Supporta sia il vecchio formato (singolo) che il nuovo (multiplo)
+    if (filters?.courses && filters.courses.length > 0) {
+      query = query.in('course', filters.courses)
+    } else if (filters?.course) {
+      // Backward compatibility
       query = query.eq('course', filters.course)
     }
-    if (filters?.year !== undefined) {
+    
+    if (filters?.years && filters.years.length > 0) {
+      query = query.in('year', filters.years)
+    } else if (filters?.year !== undefined) {
+      // Backward compatibility
       query = query.eq('year', filters.year)
     }
 
@@ -135,6 +145,99 @@ export async function updateLesson(
     return dbRowToLesson(data)
   } catch (error) {
     console.error('Error in updateLesson:', error)
+    return null
+  }
+}
+
+export async function updateLessonAndFuture(
+  id: string,
+  lesson: Partial<Omit<Lesson, 'id'>>
+): Promise<{ count: number; lessons: Lesson[] } | null> {
+  try {
+    // Prima, ottieni la lezione corrente per identificare le caratteristiche originali
+    const { data: currentLesson, error: fetchError } = await supabase
+      .from('lessons')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (fetchError || !currentLesson) {
+      console.error('Error fetching current lesson:', fetchError)
+      return null
+    }
+
+    // Identifica le caratteristiche originali per trovare le lezioni future
+    const originalLesson = dbRowToLesson(currentLesson)
+    
+    // Costruisci la query per trovare tutte le lezioni future con le stesse caratteristiche
+    let query = supabase
+      .from('lessons')
+      .select('*')
+      .eq('day_of_week', originalLesson.dayOfWeek)
+      .eq('start_time', originalLesson.startTime)
+      .eq('end_time', originalLesson.endTime)
+      .eq('professor', originalLesson.professor)
+      .eq('title', originalLesson.title)
+      .neq('id', id) // Escludi la lezione corrente
+
+    // Aggiungi filtri per course, year, group se presenti
+    if (originalLesson.course) {
+      query = query.eq('course', originalLesson.course)
+    } else {
+      query = query.is('course', null)
+    }
+
+    if (originalLesson.year) {
+      query = query.eq('year', originalLesson.year)
+    } else {
+      query = query.is('year', null)
+    }
+
+    if (originalLesson.group) {
+      query = query.eq('group_name', originalLesson.group)
+    } else {
+      query = query.is('group_name', null)
+    }
+
+    // Ottieni tutte le lezioni future che corrispondono
+    const { data: futureLessons, error: findError } = await query
+
+    if (findError) {
+      console.error('Error finding future lessons:', findError)
+      return null
+    }
+
+    // Prepara i dati da aggiornare
+    const updateRow = lessonToDbRow(lesson)
+    
+    // Ottieni gli ID delle lezioni future da aggiornare
+    const futureIds = (futureLessons || []).map(l => l.id)
+    
+    if (futureIds.length === 0) {
+      // Nessuna lezione futura trovata, aggiorna solo quella corrente
+      const updated = await updateLesson(id, lesson)
+      return updated ? { count: 1, lessons: [updated] } : null
+    }
+
+    // Aggiorna tutte le lezioni future (inclusa quella corrente)
+    const allIds = [id, ...futureIds]
+    const { data: updatedLessons, error: updateError } = await supabase
+      .from('lessons')
+      .update(updateRow)
+      .in('id', allIds)
+      .select()
+
+    if (updateError) {
+      console.error('Error updating future lessons:', updateError)
+      return null
+    }
+
+    return {
+      count: updatedLessons?.length || 0,
+      lessons: (updatedLessons || []).map(dbRowToLesson)
+    }
+  } catch (error) {
+    console.error('Error in updateLessonAndFuture:', error)
     return null
   }
 }
