@@ -237,18 +237,18 @@ export default function CustomMultiSelect({
                     }}
                     className={`w-full px-4 py-2.5 text-left text-sm smooth-transition flex items-center gap-2 ${
                       isSelected
-                        ? 'bg-laba-primary text-white font-medium'
+                        ? 'text-gray-900 font-medium'
                         : 'text-gray-900 hover:bg-gray-50'
                     }`}
                     title={option.label}
                   >
                     <div className={`w-4 h-4 border-2 rounded flex items-center justify-center flex-shrink-0 ${
                       isSelected 
-                        ? 'border-white bg-white' 
+                        ? 'border-laba-primary bg-laba-primary' 
                         : 'border-gray-400'
                     }`}>
                       {isSelected && (
-                        <svg className="w-3 h-3 text-laba-primary" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       )}
