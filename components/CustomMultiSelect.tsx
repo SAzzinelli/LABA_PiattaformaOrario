@@ -15,6 +15,7 @@ interface CustomMultiSelectProps {
   disabled?: boolean
   onChange: (values: string[]) => void
   className?: string
+  buttonClassName?: string
 }
 
 export default function CustomMultiSelect({
@@ -24,6 +25,7 @@ export default function CustomMultiSelect({
   disabled = false,
   onChange,
   className = '',
+  buttonClassName = '',
 }: CustomMultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 })
@@ -100,9 +102,9 @@ export default function CustomMultiSelect({
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        className={`input-modern w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border-2 bg-white text-left text-xs sm:text-sm font-medium ${
+        className={`input-modern w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border-2 text-left text-xs sm:text-sm font-medium ${
           disabled ? 'bg-gray-100 cursor-not-allowed opacity-60' : 'hover:border-laba-primary cursor-pointer hover-lift'
-        }`}
+        } ${buttonClassName || 'bg-white'}`}
       >
         <div className="flex items-center justify-between gap-2 min-w-0">
           <span className={`${selectedOptions.length > 0 ? 'text-gray-900 font-medium' : 'text-gray-500'} truncate`} title={displayText}>

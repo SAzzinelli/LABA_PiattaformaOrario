@@ -70,6 +70,7 @@ export async function getLessons(filters?: LessonFilters): Promise<Lesson[]> {
     }
     
     if (filters?.years && filters.years.length > 0) {
+      // Filtra per anni specifici - mostra solo lezioni con gli anni selezionati
       query = query.in('year', filters.years)
     } else if (filters?.year !== undefined) {
       // Backward compatibility

@@ -287,15 +287,14 @@ export default function CalendarView() {
             
             {/* Dropdown aule al centro */}
             <div className="flex items-center justify-center sm:flex-1 sm:justify-center order-3 sm:order-2">
-              <div className="bg-white bg-opacity-90 backdrop-blur-sm rounded-lg shadow-sm w-full sm:w-auto max-w-full sm:max-w-[200px]">
-                <CustomMultiSelect
-                  values={selectedClassrooms}
-                  options={classrooms.map(c => ({ value: c, label: c }))}
-                  placeholder={selectedClassrooms.length === classrooms.length ? "Tutte le aule" : `${selectedClassrooms.length} aule`}
-                  onChange={setSelectedClassrooms}
-                  className="w-full sm:min-w-[160px] sm:max-w-[200px]"
-                />
-              </div>
+              <CustomMultiSelect
+                values={selectedClassrooms}
+                options={classrooms.map(c => ({ value: c, label: c }))}
+                placeholder={selectedClassrooms.length === classrooms.length ? "Tutte le aule" : `${selectedClassrooms.length} aule`}
+                onChange={setSelectedClassrooms}
+                className="w-full sm:min-w-[120px] sm:max-w-[140px]"
+                buttonClassName="bg-blue-200 bg-opacity-50 border-blue-300 text-gray-800"
+              />
             </div>
             
             {/* Pulsanti navigazione */}
@@ -389,22 +388,30 @@ export default function CalendarView() {
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Controlli sticky (ricerca, filtri) */}
-      <div className="sticky top-0 z-10 bg-gray-50 pb-2 mb-2 flex flex-col gap-3">
-        {/* Prima riga: Ricerca e Aggiungi (se admin) */}
-        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
-          {/* Ricerca */}
-          <div className="w-full sm:w-auto">
-            <button
-              onClick={() => setShowSearch(true)}
-              className="btn-modern flex items-center justify-center sm:justify-start gap-2 px-4 sm:px-5 py-2.5 rounded-full bg-white text-laba-primary text-sm font-medium shadow-md border border-gray-200 relative overflow-hidden w-full sm:w-auto"
-            >
-              <svg className="w-4 h-4 relative z-10 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <span className="relative z-10 whitespace-nowrap">Cerca Lezione</span>
-            </button>
-          </div>
+      <div className="sticky top-0 z-10 bg-gray-50 pb-2 mb-2 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-3">
+        {/* Ricerca a sinistra */}
+        <div className="w-full sm:w-auto">
+          <button
+            onClick={() => setShowSearch(true)}
+            className="btn-modern flex items-center justify-center sm:justify-start gap-2 px-4 sm:px-5 py-2.5 rounded-full bg-white text-laba-primary text-sm font-medium shadow-md border border-gray-200 relative overflow-hidden w-full sm:w-auto"
+          >
+            <svg className="w-4 h-4 relative z-10 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <span className="relative z-10 whitespace-nowrap">Cerca Lezione</span>
+          </button>
+        </div>
 
+        {/* Filtri e Aggiungi a destra */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <LessonFilters
+            courses={filterCourses}
+            years={filterYears}
+            onCoursesChange={setFilterCourses}
+            onYearsChange={setFilterYears}
+            onReset={handleResetFilters}
+          />
+          
           {/* Aggiungi Lezione (solo admin) */}
           {isAuthenticated && (
             <button
@@ -414,17 +421,6 @@ export default function CalendarView() {
               <span className="relative z-10">+ Aggiungi Lezione</span>
             </button>
           )}
-        </div>
-
-        {/* Seconda riga: Filtri */}
-        <div className="w-full">
-          <LessonFilters
-            courses={filterCourses}
-            years={filterYears}
-            onCoursesChange={setFilterCourses}
-            onYearsChange={setFilterYears}
-            onReset={handleResetFilters}
-          />
         </div>
       </div>
 
