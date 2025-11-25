@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 interface Option {
   value: string
@@ -25,10 +26,23 @@ export default function CustomDropdown({
   className = '',
 }: CustomDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [position, setPosition] = useState({ top: 0, left: 0, width: 0 })
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   const selectedOption = options.find(opt => opt.value === value)
+
+  // Calcola posizione quando si apre
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      setPosition({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      })
+    }
+  }, [isOpen])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -72,34 +86,43 @@ export default function CustomDropdown({
         </div>
       </button>
 
-      {isOpen && !disabled && buttonRef.current && (
-        <div 
-          className="absolute z-[9999] mt-2 w-full bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto animate-scale-in"
-          style={{ 
-            width: buttonRef.current.offsetWidth,
-            top: '100%',
-            left: 0,
-          }}
-        >
-          {options.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => {
-                onChange(option.value)
-                setIsOpen(false)
-              }}
-              className={`w-full px-4 py-2.5 text-left text-sm smooth-transition ${
-                value === option.value
-                  ? 'bg-laba-primary text-white font-medium'
-                  : 'text-gray-900 hover:bg-gray-50'
-              }`}
-              title={option.label}
-            >
-              <span className="block truncate">{option.label}</span>
-            </button>
-          ))}
-        </div>
+      {isOpen && !disabled && typeof window !== 'undefined' && createPortal(
+        <>
+          {/* Backdrop per chiudere */}
+          <div
+            className="fixed inset-0 z-[9998]"
+            onClick={() => setIsOpen(false)}
+          />
+          {/* Dropdown menu */}
+          <div 
+            className="fixed z-[9999] bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto animate-scale-in"
+            style={{ 
+              top: `${position.top}px`,
+              left: `${position.left}px`,
+              width: `${position.width}px`,
+            }}
+          >
+            {options.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  onChange(option.value)
+                  setIsOpen(false)
+                }}
+                className={`w-full px-4 py-2.5 text-left text-sm smooth-transition ${
+                  value === option.value
+                    ? 'bg-laba-primary text-white font-medium'
+                    : 'text-gray-900 hover:bg-gray-50'
+                }`}
+                title={option.label}
+              >
+                <span className="block truncate">{option.label}</span>
+              </button>
+            ))}
+          </div>
+        </>,
+        document.body
       )}
     </div>
   )
