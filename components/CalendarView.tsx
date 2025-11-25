@@ -460,7 +460,7 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit, onView }: LessonE
       title={`${lesson.title} - ${formatTime(lesson.startTime)}-${formatTime(lesson.endTime)} - ${lesson.classroom}`}
     >
       <div className="px-1.5 py-0.5 h-full flex flex-col">
-        <div className={`text-[10px] font-medium ${courseColor.text} leading-tight`}>
+        <div className={`text-[11px] font-medium ${courseColor.text} leading-tight`}>
           {formatTime(lesson.startTime)} - {formatTime(lesson.endTime)}
         </div>
         <div className={`text-xs font-semibold ${courseColor.text} leading-tight truncate`}>
@@ -472,7 +472,7 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit, onView }: LessonE
               {lesson.professor}
             </div>
             {lesson.group && (
-              <div className={`text-[10px] ${courseColor.text} opacity-70 truncate mt-0.5`}>
+              <div className={`text-[10px] font-semibold ${courseColor.text} opacity-80 truncate mt-0.5`}>
                 {lesson.group}
               </div>
             )}
