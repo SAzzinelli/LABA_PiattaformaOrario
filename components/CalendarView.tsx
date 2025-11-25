@@ -9,6 +9,7 @@ import SearchOverlay from './SearchOverlay'
 import LessonDetailsModal from './LessonDetailsModal'
 import { CLASSROOMS, getBaseClassrooms, getFirstExternalIndex } from '@/lib/classrooms'
 import { generateTimeLines, getTimePosition, getCurrentTime, getTotalCalendarHeight } from '@/lib/timeSlots'
+import { getCourseColor } from '@/lib/courseColors'
 
 interface Lesson {
   id: string
@@ -24,15 +25,8 @@ interface Lesson {
   notes?: string
 }
 
-const dayHeaderColors: Record<number, string> = {
-  0: 'bg-laba-sunday',
-  1: 'bg-laba-monday',
-  2: 'bg-laba-tuesday',
-  3: 'bg-laba-wednesday',
-  4: 'bg-laba-thursday',
-  5: 'bg-laba-friday',
-  6: 'bg-laba-saturday',
-}
+// Tutti i giorni hanno lo stesso colore
+const dayHeaderColor = 'bg-laba-primary'
 
 export default function CalendarView() {
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -255,7 +249,7 @@ export default function CalendarView() {
   const renderDayView = () => {
     const dayLessons = getLessonsForDay(currentDate)
     const dayOfWeek = currentDate.getDay()
-    const headerColor = dayHeaderColors[dayOfWeek] || 'bg-laba-primary'
+    const headerColor = dayHeaderColor
     const isToday = isSameDay(currentDate, new Date())
 
     return (
@@ -443,6 +437,9 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit, onView }: LessonE
     return time.substring(0, 5) // Prende solo HH:mm
   }
 
+  // Ottieni il colore del corso
+  const courseColor = getCourseColor(lesson.course)
+
   const handleClick = () => {
     if (onEdit) {
       onEdit(lesson)
@@ -453,7 +450,7 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit, onView }: LessonE
 
   return (
     <div
-      className="absolute left-0 right-0 rounded cursor-pointer overflow-hidden group border-l-2 border-laba-primary bg-blue-50 hover:bg-blue-100 smooth-transition"
+      className={`absolute left-0 right-0 rounded cursor-pointer overflow-hidden group border-l-2 ${courseColor.border} ${courseColor.bg} hover:opacity-90 smooth-transition`}
       style={{
         top: '0px',
         height: `${Math.max(height, 20)}px`,
@@ -462,19 +459,19 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit, onView }: LessonE
       title={`${lesson.title} - ${formatTime(lesson.startTime)}-${formatTime(lesson.endTime)} - ${lesson.classroom}`}
     >
       <div className="px-1.5 py-0.5 h-full flex flex-col">
-        <div className="text-[10px] font-medium text-laba-primary leading-tight">
+        <div className={`text-[10px] font-medium ${courseColor.text} leading-tight`}>
           {formatTime(lesson.startTime)} - {formatTime(lesson.endTime)}
         </div>
-        <div className="text-xs font-semibold text-gray-900 leading-tight truncate">
+        <div className={`text-xs font-semibold ${courseColor.text} leading-tight truncate`}>
           {lesson.title}
         </div>
         {height > 40 && (
           <>
-            <div className="text-[10px] text-gray-600 truncate mt-0.5">
+            <div className={`text-[10px] ${courseColor.text} opacity-80 truncate mt-0.5`}>
               {lesson.professor}
             </div>
             {lesson.group && (
-              <div className="text-[10px] text-purple-600 truncate mt-0.5">
+              <div className={`text-[10px] ${courseColor.text} opacity-70 truncate mt-0.5`}>
                 {lesson.group}
               </div>
             )}

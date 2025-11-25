@@ -8,3 +8,4 @@ ALTER TABLE lessons DROP CONSTRAINT IF EXISTS lessons_year_check;
 ALTER TABLE lessons ADD CONSTRAINT lessons_year_check CHECK (year IS NULL OR (year >= 1 AND year <= 3));
 
 
+

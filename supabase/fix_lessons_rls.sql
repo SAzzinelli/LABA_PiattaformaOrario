@@ -19,3 +19,4 @@ ALTER TABLE lessons DISABLE ROW LEVEL SECURITY;
 --   WITH CHECK (true);
 
 
+
