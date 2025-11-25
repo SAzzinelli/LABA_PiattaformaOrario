@@ -38,6 +38,21 @@ export default function LessonDetailsModal({ isOpen, onClose, lesson, dayDate }:
   // Ottieni il colore del corso per l'header
   const courseColor = getCourseColor(lesson.course)
 
+  // Mappa colori header per stili inline (fallback se Tailwind non include le classi)
+  const headerColorMap: Record<string, string> = {
+    'bg-purple-600': '#9333ea',
+    'bg-red-600': '#dc2626',
+    'bg-pink-600': '#db2777',
+    'bg-blue-600': '#2563eb',
+    'bg-green-600': '#16a34a',
+    'bg-yellow-600': '#ca8a04',
+    'bg-orange-600': '#ea580c',
+    'bg-indigo-600': '#4f46e5',
+    'bg-laba-primary': '#033157',
+  }
+
+  const headerBgColor = headerColorMap[courseColor.header] || '#033157'
+
   return (
     <>
       {/* Backdrop blurrato */}
@@ -54,7 +69,10 @@ export default function LessonDetailsModal({ isOpen, onClose, lesson, dayDate }:
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className={`${courseColor.header} text-white p-6 flex items-center justify-between rounded-t-xl`} style={{ borderRadius: '12px 12px 0 0' }}>
+          <div 
+            className={`${courseColor.header} text-white p-6 flex items-center justify-between rounded-t-xl`} 
+            style={{ borderRadius: '12px 12px 0 0', backgroundColor: headerBgColor }}
+          >
             <div>
               <h2 className="text-2xl font-bold mb-1">{lesson.title}</h2>
               <div className="text-sm opacity-90">
