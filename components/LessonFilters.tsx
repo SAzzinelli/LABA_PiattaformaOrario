@@ -41,7 +41,7 @@ export default function LessonFilters({
   ]
 
   return (
-    <div className="flex items-center gap-3 relative z-50">
+    <div className="flex items-center gap-3 relative" style={{ zIndex: 9999 }}>
       {/* Corso */}
       <div className="flex items-center gap-2">
         <label className="text-sm font-medium text-gray-700 whitespace-nowrap">

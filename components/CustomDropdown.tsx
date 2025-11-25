@@ -26,6 +26,7 @@ export default function CustomDropdown({
 }: CustomDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   const selectedOption = options.find(opt => opt.value === value)
 
@@ -48,6 +49,7 @@ export default function CustomDropdown({
   return (
     <div ref={dropdownRef} className={`relative ${className}`} style={{ minWidth: '200px', maxWidth: '300px' }}>
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
@@ -70,8 +72,15 @@ export default function CustomDropdown({
         </div>
       </button>
 
-      {isOpen && !disabled && (
-        <div className="absolute z-[100] mt-2 w-full bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto animate-scale-in">
+      {isOpen && !disabled && buttonRef.current && (
+        <div 
+          className="absolute z-[9999] mt-2 w-full bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto animate-scale-in"
+          style={{ 
+            width: buttonRef.current.offsetWidth,
+            top: '100%',
+            left: 0,
+          }}
+        >
           {options.map((option) => (
             <button
               key={option.value}
