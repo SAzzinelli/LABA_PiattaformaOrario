@@ -2,6 +2,7 @@
 
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
+import { getCourseColor } from '@/lib/courseColors'
 
 interface Lesson {
   id: string
@@ -34,6 +35,9 @@ export default function LessonDetailsModal({ isOpen, onClose, lesson, dayDate }:
     return time.substring(0, 5) // Prende solo HH:mm
   }
 
+  // Ottieni il colore del corso per l'header
+  const courseColor = getCourseColor(lesson.course)
+
   return (
     <>
       {/* Backdrop blurrato */}
@@ -50,7 +54,7 @@ export default function LessonDetailsModal({ isOpen, onClose, lesson, dayDate }:
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="bg-laba-primary text-white p-6 flex items-center justify-between rounded-t-xl" style={{ borderRadius: '12px 12px 0 0' }}>
+          <div className={`${courseColor.header} text-white p-6 flex items-center justify-between rounded-t-xl`} style={{ borderRadius: '12px 12px 0 0' }}>
             <div>
               <h2 className="text-2xl font-bold mb-1">{lesson.title}</h2>
               <div className="text-sm opacity-90">
@@ -68,28 +72,37 @@ export default function LessonDetailsModal({ isOpen, onClose, lesson, dayDate }:
           {/* Contenuto */}
           <div className="p-6 overflow-y-auto max-h-[calc(85vh-120px)]">
             <div className="space-y-6">
-              {/* Pill con informazioni importanti */}
-              <div className="flex flex-wrap gap-3">
-                <span className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
-                  {formatTime(lesson.startTime)} - {formatTime(lesson.endTime)}
-                </span>
-                <span className="px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
-                  {lesson.classroom}
-                </span>
-                {lesson.course && (
-                  <span className="px-4 py-2 bg-purple-100 text-purple-800 rounded-full text-sm font-semibold">
-                    {lesson.course}
+              {/* Pill con informazioni importanti - organizzate logicamente */}
+              <div className="space-y-3">
+                {/* Prima riga: Informazioni base (Orario e Aula) */}
+                <div className="flex flex-wrap gap-3">
+                  <span className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
+                    {formatTime(lesson.startTime)} - {formatTime(lesson.endTime)}
                   </span>
-                )}
-                {lesson.year && (
-                  <span className="px-4 py-2 bg-orange-100 text-orange-800 rounded-full text-sm font-semibold">
-                    {lesson.year}° Anno
+                  <span className="px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
+                    {lesson.classroom}
                   </span>
-                )}
-                {lesson.group && (
-                  <span className="px-4 py-2 bg-pink-100 text-pink-800 rounded-full text-sm font-semibold">
-                    {lesson.group.startsWith('Gruppo ') ? lesson.group : `Gruppo ${lesson.group}`}
-                  </span>
+                </div>
+                
+                {/* Seconda riga: Informazioni di classificazione (Corso, Anno, Gruppo) */}
+                {(lesson.course || lesson.year || lesson.group) && (
+                  <div className="flex flex-wrap gap-3">
+                    {lesson.course && (
+                      <span className={`px-4 py-2 ${courseColor.bg} ${courseColor.text} rounded-full text-sm font-semibold`}>
+                        {lesson.course}
+                      </span>
+                    )}
+                    {lesson.year && (
+                      <span className="px-4 py-2 bg-orange-100 text-orange-800 rounded-full text-sm font-semibold">
+                        {lesson.year}° Anno
+                      </span>
+                    )}
+                    {lesson.group && (
+                      <span className="px-4 py-2 bg-pink-100 text-pink-800 rounded-full text-sm font-semibold">
+                        {lesson.group.startsWith('Gruppo ') ? lesson.group : `Gruppo ${lesson.group}`}
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
 
