@@ -136,11 +136,11 @@ export default function CustomMultiSelect({
         } ${buttonClassName || 'input-modern px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border-2 bg-white hover:border-laba-primary hover-lift'}`}
       >
         <div className="flex items-center justify-between gap-2 min-w-0">
-          <span className={`${selectedOptions.length > 0 ? 'text-gray-900 font-medium' : 'text-gray-500'} truncate`} title={displayText}>
+          <span className={`${selectedOptions.length > 0 ? (buttonClassName.includes('text-white') ? 'text-white' : 'text-gray-900') : (buttonClassName.includes('text-white') ? 'text-white opacity-90' : 'text-gray-500')} font-medium truncate`} title={displayText}>
             {displayText}
           </span>
           <svg
-            className={`w-3 h-3 sm:w-4 sm:h-4 text-gray-500 smooth-transition flex-shrink-0 ml-1 sm:ml-2 ${isOpen ? 'rotate-180' : ''}`}
+            className={`w-3 h-3 sm:w-4 sm:h-4 ${buttonClassName.includes('text-white') ? 'text-white' : 'text-gray-500'} smooth-transition flex-shrink-0 ml-1 sm:ml-2 ${isOpen ? 'rotate-180' : ''}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -164,11 +164,11 @@ export default function CustomMultiSelect({
           {/* Dropdown menu */}
           <div 
             ref={menuRef}
-            className="fixed z-[9999] bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto animate-scale-in"
+            className="fixed z-[9999] bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-80 overflow-hidden animate-scale-in hide-scrollbar"
             style={{ 
               top: `${position.top}px`,
               left: `${position.left}px`,
-              width: `${position.width}px`,
+              width: `${Math.max(position.width, 280)}px`,
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -224,7 +224,7 @@ export default function CustomMultiSelect({
             )}
             
             {/* Lista opzioni */}
-            <div className="max-h-48 overflow-auto">
+            <div className="max-h-64 overflow-y-auto hide-scrollbar">
               {options.map((option) => {
                 const isSelected = values.includes(option.value)
                 return (

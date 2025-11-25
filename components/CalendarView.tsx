@@ -317,7 +317,7 @@ export default function CalendarView() {
                 placeholder="Aule"
                 onChange={setSelectedClassrooms}
                 className="w-full sm:w-auto"
-                buttonClassName="bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-xs font-medium backdrop-blur-sm rounded-full px-2 sm:px-3 py-1.5 border-0"
+                buttonClassName="bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-xs font-medium backdrop-blur-sm rounded-full px-3 sm:px-4 py-1.5 border-0"
                 showSelectedCount={false}
                 showSelectAll={true}
                 showClear={true}
