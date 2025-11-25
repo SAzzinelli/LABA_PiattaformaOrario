@@ -29,6 +29,7 @@ export default function CustomDropdown({
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 })
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   const selectedOption = options.find(opt => opt.value === value)
 
@@ -57,13 +58,22 @@ export default function CustomDropdown({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node
+      if (
+        dropdownRef.current && 
+        !dropdownRef.current.contains(target) &&
+        menuRef.current &&
+        !menuRef.current.contains(target)
+      ) {
         setIsOpen(false)
       }
     }
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
+      // Usa un piccolo delay per evitare che il click sul bottone chiuda immediatamente
+      setTimeout(() => {
+        document.addEventListener('mousedown', handleClickOutside)
+      }, 0)
     }
 
     return () => {
@@ -102,22 +112,30 @@ export default function CustomDropdown({
           {/* Backdrop per chiudere */}
           <div
             className="fixed inset-0 z-[9998]"
-            onClick={() => setIsOpen(false)}
+            onClick={(e) => {
+              // Chiudi solo se il click non è sul menu
+              if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                setIsOpen(false)
+              }
+            }}
           />
           {/* Dropdown menu */}
           <div 
+            ref={menuRef}
             className="fixed z-[9999] bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto animate-scale-in"
             style={{ 
               top: `${position.top}px`,
               left: `${position.left}px`,
               width: `${position.width}px`,
             }}
+            onClick={(e) => e.stopPropagation()}
           >
             {options.map((option) => (
               <button
                 key={option.value}
                 type="button"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation()
                   onChange(option.value)
                   setIsOpen(false)
                 }}
