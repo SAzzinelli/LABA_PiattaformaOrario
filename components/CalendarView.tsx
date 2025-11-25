@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import { format, isSameDay } from 'date-fns'
 import { it } from 'date-fns/locale'
 import LessonForm from './LessonForm'
-import LessonFilters from './LessonFilters'
 import SearchOverlay from './SearchOverlay'
 import LessonDetailsModal from './LessonDetailsModal'
+import FiltersModal from './FiltersModal'
 import { CLASSROOMS, getBaseClassrooms, getFirstExternalIndex } from '@/lib/classrooms'
 import { generateTimeLines, getTimePosition, getCurrentTime, getTotalCalendarHeight } from '@/lib/timeSlots'
 import { getCourseColor } from '@/lib/courseColors'
@@ -42,6 +42,9 @@ export default function CalendarView() {
   
   // Ricerca
   const [showSearch, setShowSearch] = useState(false)
+  
+  // Filtri
+  const [showFilters, setShowFilters] = useState(false)
   
   // Dettagli lezione (per utenti non loggati)
   const [showLessonDetails, setShowLessonDetails] = useState(false)
@@ -352,9 +355,9 @@ export default function CalendarView() {
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Controlli sticky (ricerca, filtri) */}
-      <div className="sticky top-0 z-10 bg-gray-50 pb-2 mb-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 overflow-visible">
-        {/* Ricerca a sinistra */}
-        <div className="w-full sm:w-auto">
+      <div className="sticky top-0 z-10 bg-gray-50 pb-2 mb-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        {/* Ricerca e Filtri a sinistra */}
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
             onClick={() => setShowSearch(true)}
             className="btn-modern flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-laba-primary text-sm font-medium shadow-md border border-gray-200 relative overflow-hidden"
@@ -364,27 +367,34 @@ export default function CalendarView() {
             </svg>
             <span className="relative z-10">Cerca Lezione</span>
           </button>
+          
+          <button
+            onClick={() => setShowFilters(true)}
+            className="btn-modern flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-laba-primary text-sm font-medium shadow-md border border-gray-200 relative overflow-hidden"
+          >
+            <svg className="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            <span className="relative z-10">Filtri</span>
+            {(filterCourse || filterYear !== null) && (
+              <span className="ml-1 px-2 py-0.5 bg-laba-primary text-white text-xs rounded-full relative z-10">
+                {[filterCourse && '1', filterYear !== null && '1'].filter(Boolean).length}
+              </span>
+            )}
+          </button>
         </div>
 
-        {/* Filtri a destra */}
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-          <LessonFilters
-            course={filterCourse}
-            year={filterYear}
-            onCourseChange={setFilterCourse}
-            onYearChange={setFilterYear}
-            onReset={handleResetFilters}
-          />
-          
-          {isAuthenticated && (
+        {/* Aggiungi Lezione a destra */}
+        {isAuthenticated && (
+          <div className="w-full sm:w-auto">
             <button
               onClick={handleAddLesson}
               className="btn-modern px-6 py-2.5 rounded-full bg-green-500 text-white text-sm font-medium shadow-md whitespace-nowrap relative overflow-hidden"
             >
               <span className="relative z-10">+ Aggiungi Lezione</span>
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Container scrollabile con header sticky */}
@@ -404,6 +414,16 @@ export default function CalendarView() {
         onClose={() => setShowSearch(false)}
         onSelectLesson={handleSearchSelect}
         lessons={lessons}
+      />
+
+      <FiltersModal
+        isOpen={showFilters}
+        onClose={() => setShowFilters(false)}
+        course={filterCourse}
+        year={filterYear}
+        onCourseChange={setFilterCourse}
+        onYearChange={setFilterYear}
+        onReset={handleResetFilters}
       />
 
       <LessonDetailsModal
