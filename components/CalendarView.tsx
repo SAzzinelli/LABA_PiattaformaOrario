@@ -476,12 +476,7 @@ interface LessonEventCardProps {
   onView?: (lesson: Lesson) => void
 }
 
-function LessonEventCard({ lesson, startSlot, endSlot, rowHeight, onEdit, onView }: LessonEventCardProps) {
-  // Importa timeSlots per calcolare il limite
-  const { generateTimeSlots } = require('@/lib/timeSlots')
-  const timeSlots = generateTimeSlots()
-  const maxSlots = timeSlots.length // Numero reale di slot disponibili (da 9:00 a 21:00 = 24 slot)
-  
+function LessonEventCard({ lesson, startSlot, endSlot, rowHeight, maxSlots, onEdit, onView }: LessonEventCardProps) {
   // Limita endSlot al numero massimo di slot disponibili per evitare che vada oltre
   const limitedEndSlot = Math.min(endSlot, maxSlots)
   const height = (limitedEndSlot - startSlot) * rowHeight // Altezza dinamica basata su rowHeight
