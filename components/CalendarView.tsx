@@ -28,15 +28,7 @@ interface Lesson {
   notes?: string
 }
 
-const dayHeaderColors: Record<number, string> = {
-  0: 'bg-laba-sunday',
-  1: 'bg-laba-monday',
-  2: 'bg-laba-tuesday',
-  3: 'bg-laba-wednesday',
-  4: 'bg-laba-thursday',
-  5: 'bg-laba-friday',
-  6: 'bg-laba-saturday',
-}
+// Colore header calendario sempre #033157
 
 interface CalendarViewProps {
   initialLocation?: Location
@@ -323,13 +315,11 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
 
   const renderDayView = () => {
     const dayLessons = getLessonsForDay(currentDate)
-    const dayOfWeek = currentDate.getDay()
-    const headerColor = dayHeaderColors[dayOfWeek] || 'bg-laba-primary'
     const isToday = isSameDay(currentDate, new Date())
 
     return (
       <div className="card-modern overflow-hidden animate-fade-in">
-        <div className={`${headerColor} text-white p-3 flex items-center justify-between rounded-t-lg shadow-md`}>
+        <div className="text-white p-3 flex items-center justify-between rounded-t-lg shadow-md" style={{ backgroundColor: '#033157' }}>
           <div>
             <div className="font-bold text-xl uppercase tracking-wide">
               {format(currentDate, 'EEEE', { locale: it })}
