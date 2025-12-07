@@ -1,77 +1,97 @@
-import { ALL_COURSES, Course } from './courses'
+// Colori per i corsi - versione meno satura per modali e header
+import { ALL_COURSES } from './courses'
 
-// Mappa colori per i corsi
-export const COURSE_COLORS: Record<Course, { bg: string; border: string; text: string; header: string; borderColor: string }> = {
+export interface CourseColor {
+  bg: string // Background class
+  text: string // Text color class
+  border: string // Border color class
+  borderColor: string // Border color hex (per style inline)
+  bgHex: string // Background hex (per style inline)
+  textHex: string // Text color hex (per style inline)
+}
+
+// Colori base meno saturi per i corsi
+const courseColorMap: Record<string, CourseColor> = {
   'Graphic Design & Multimedia': {
-    bg: 'bg-purple-100',
-    border: 'border-purple-700',
-    text: 'text-purple-900',
-    header: 'bg-purple-500',
-    borderColor: '#7e22ce', // purple-700
+    bg: 'bg-blue-50',
+    text: 'text-blue-700',
+    border: 'border-blue-300',
+    borderColor: '#93c5fd',
+    bgHex: '#eff6ff',
+    textHex: '#1e40af',
   },
   'Regia e Videomaking': {
-    bg: 'bg-red-100',
-    border: 'border-red-700',
-    text: 'text-red-900',
-    header: 'bg-red-500',
-    borderColor: '#b91c1c', // red-700
+    bg: 'bg-purple-50',
+    text: 'text-purple-700',
+    border: 'border-purple-300',
+    borderColor: '#c4b5fd',
+    bgHex: '#faf5ff',
+    textHex: '#6b21a8',
   },
   'Fashion Design': {
-    bg: 'bg-pink-100',
-    border: 'border-pink-700',
-    text: 'text-pink-900',
-    header: 'bg-pink-500',
-    borderColor: '#be185d', // pink-700
+    bg: 'bg-pink-50',
+    text: 'text-pink-700',
+    border: 'border-pink-300',
+    borderColor: '#f9a8d4',
+    bgHex: '#fdf2f8',
+    textHex: '#be185d',
   },
   'Fotografia': {
-    bg: 'bg-blue-100',
-    border: 'border-blue-700',
-    text: 'text-blue-900',
-    header: 'bg-blue-500',
-    borderColor: '#1d4ed8', // blue-700
+    bg: 'bg-amber-50',
+    text: 'text-amber-700',
+    border: 'border-amber-300',
+    borderColor: '#fcd34d',
+    bgHex: '#fffbeb',
+    textHex: '#b45309',
   },
   'Design': {
-    bg: 'bg-green-100',
-    border: 'border-green-700',
-    text: 'text-green-900',
-    header: 'bg-green-500',
-    borderColor: '#15803d', // green-700
+    bg: 'bg-emerald-50',
+    text: 'text-emerald-700',
+    border: 'border-emerald-300',
+    borderColor: '#6ee7b7',
+    bgHex: '#ecfdf5',
+    textHex: '#047857',
   },
   'Pittura': {
-    bg: 'bg-yellow-100',
-    border: 'border-yellow-700',
-    text: 'text-yellow-900',
-    header: 'bg-yellow-500',
-    borderColor: '#a16207', // yellow-700
+    bg: 'bg-orange-50',
+    text: 'text-orange-700',
+    border: 'border-orange-300',
+    borderColor: '#fdba74',
+    bgHex: '#fff7ed',
+    textHex: '#c2410c',
   },
   'Interior Design': {
-    bg: 'bg-orange-100',
-    border: 'border-orange-700',
-    text: 'text-orange-900',
-    header: 'bg-orange-500',
-    borderColor: '#c2410c', // orange-700
+    bg: 'bg-teal-50',
+    text: 'text-teal-700',
+    border: 'border-teal-300',
+    borderColor: '#5eead4',
+    bgHex: '#f0fdfa',
+    textHex: '#0f766e',
   },
   'Cinema e Audiovisivi': {
-    bg: 'bg-indigo-100',
-    border: 'border-indigo-700',
-    text: 'text-indigo-900',
-    header: 'bg-indigo-500',
-    borderColor: '#4338ca', // indigo-700
+    bg: 'bg-indigo-50',
+    text: 'text-indigo-700',
+    border: 'border-indigo-300',
+    borderColor: '#a5b4fc',
+    bgHex: '#eef2ff',
+    textHex: '#4338ca',
   },
 }
 
-// Colore di default se il corso non è specificato
-export const DEFAULT_COURSE_COLOR = {
-  bg: 'bg-gray-100',
-  border: 'border-gray-700',
-  text: 'text-gray-900',
-  header: 'bg-laba-primary',
-  borderColor: '#374151', // gray-700
+// Colore di default per lezioni senza corso specifico
+const defaultColor: CourseColor = {
+  bg: 'bg-gray-50',
+  text: 'text-gray-700',
+  border: 'border-gray-300',
+  borderColor: '#d1d5db',
+  bgHex: '#f9fafb',
+  textHex: '#374151',
 }
 
-// Funzione per ottenere il colore di un corso
-export function getCourseColor(course?: string): { bg: string; border: string; text: string; header: string; borderColor: string } {
-  if (!course) return DEFAULT_COURSE_COLOR
-  return COURSE_COLORS[course as Course] || DEFAULT_COURSE_COLOR
+export function getCourseColor(course?: string): CourseColor {
+  if (!course) {
+    return defaultColor
+  }
+  return courseColorMap[course] || defaultColor
 }
 

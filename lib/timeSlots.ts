@@ -1,33 +1,11 @@
-// Genera slot orari da mezz'ora dalle 8:00 alle 21:00
+// Genera slot orari da mezz'ora dalle 9:00 alle 21:00
 export function generateTimeSlots(): string[] {
   const slots: string[] = []
-  for (let hour = 8; hour < 21; hour++) {
+  for (let hour = 9; hour < 21; hour++) {
     slots.push(`${hour.toString().padStart(2, '0')}:00`)
     slots.push(`${hour.toString().padStart(2, '0')}:30`)
   }
   return slots
-}
-
-// Genera tutti gli orari (ore e mezze ore) per le linee
-export function generateTimeLines(): Array<{ time: string; isHour: boolean; position: number }> {
-  const lines: Array<{ time: string; isHour: boolean; position: number }> = []
-  for (let hour = 8; hour <= 21; hour++) {
-    // Linea per l'ora intera
-    lines.push({
-      time: `${hour.toString().padStart(2, '0')}:00`,
-      isHour: true,
-      position: (hour - 8) * 60 * 2, // Ogni ora = 120px
-    })
-    // Linea per la mezz'ora (solo se non è l'ultima ora)
-    if (hour < 21) {
-      lines.push({
-        time: `${hour.toString().padStart(2, '0')}:30`,
-        isHour: false,
-        position: ((hour - 8) * 60 + 30) * 2, // Mezz'ora dopo l'ora
-      })
-    }
-  }
-  return lines
 }
 
 // Converte orario HH:mm in minuti dall'inizio del giorno
@@ -51,17 +29,11 @@ export function getLessonSlots(startTime: string, endTime: string): number {
   return Math.ceil(duration / 30) // Ogni slot è 30 minuti
 }
 
-// Calcola la posizione verticale in pixel di un orario nella griglia
-// Ogni ora = 120px, ogni minuto = 2px
+// Calcola la posizione verticale di un orario nella griglia
 export function getTimePosition(time: string): number {
   const minutes = timeToMinutes(time)
-  const startMinutes = 8 * 60 // 8:00
-  return (minutes - startMinutes) * 2 // Posizione in pixel (2px per minuto)
-}
-
-// Altezza totale del calendario in pixel (8:00 - 21:00 = 13 ore = 1560px)
-export function getTotalCalendarHeight(): number {
-  return 13 * 60 * 2 // 13 ore * 60 minuti * 2px = 1560px
+  const startMinutes = 9 * 60 // 9:00
+  return (minutes - startMinutes) / 30 // Posizione in slot (ogni slot = 30 min)
 }
 
 // Ottiene l'orario corrente in formato HH:mm
@@ -70,9 +42,9 @@ export function getCurrentTime(): string {
   return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
 }
 
-// Verifica se un orario è nel range 8:00-21:00
+// Verifica se un orario è nel range 9:00-21:00
 export function isTimeInRange(time: string): boolean {
   const minutes = timeToMinutes(time)
-  return minutes >= 8 * 60 && minutes < 21 * 60
+  return minutes >= 9 * 60 && minutes < 21 * 60
 }
 

@@ -37,7 +37,7 @@ body {
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateX(-20px);
   }
   to {
     opacity: 1;
@@ -66,15 +66,15 @@ body {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.6s ease-out;
 }
 
 .animate-slide-in {
-  animation: slideIn 0.25s ease-out;
+  animation: slideIn 0.5s ease-out;
 }
 
 .animate-scale-in {
-  animation: scaleIn 0.2s ease-out;
+  animation: scaleIn 0.4s ease-out;
 }
 
 /* Hover effects stile Agency */
@@ -118,6 +118,7 @@ body {
 
 .card-modern:hover {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
 }
 
 /* Button styles stile Agency */
@@ -181,16 +182,6 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
-}
-
-/* Nascondi scrollbar ma mantieni scroll funzionante */
-.hide-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;  /* Chrome, Safari and Opera */
 }
 
 /* Text selection */

@@ -6,18 +6,14 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const filters: LessonFilters = {}
-
-    // Supporta filtri multipli per corsi e anni
-    const courses = searchParams.getAll('course')
-    const years = searchParams.getAll('year').map(y => parseInt(y)).filter(y => !isNaN(y))
-
-    if (courses.length > 0) {
-      filters.courses = courses
+    
+    if (searchParams.get('course')) {
+      filters.course = searchParams.get('course') || undefined
     }
-    if (years.length > 0) {
-      filters.years = years
+    if (searchParams.get('year')) {
+      filters.year = parseInt(searchParams.get('year') || '0')
     }
-
+    
     const lessons = await getLessons(Object.keys(filters).length > 0 ? filters : undefined)
     return NextResponse.json(lessons)
   } catch (error) {
@@ -43,15 +39,12 @@ export async function POST(request: NextRequest) {
 
   try {
     const data = await request.json()
-    // console.log('Received lesson data:', JSON.stringify(data, null, 2))
     const lesson = await addLesson(data)
     return NextResponse.json(lesson, { status: 201 })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error creating lesson:', error)
-    console.error('Error stack:', error?.stack)
-    const errorMessage = error?.message || 'Errore durante la creazione della lezione'
     return NextResponse.json(
-      { error: errorMessage },
+      { error: 'Errore durante la creazione della lezione' },
       { status: 500 }
     )
   }

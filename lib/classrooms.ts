@@ -1,5 +1,5 @@
-// Lista completa delle aule LABA
-export const CLASSROOMS = [
+// Aule per Piazza di Badia a Ripoli
+export const CLASSROOMS_BADIA_RIPOLI = [
   'Aula Magna',
   'Magna 1',
   'Magna 2',
@@ -19,6 +19,22 @@ export const CLASSROOMS = [
   'Studio 1',
   'Studio 2',
   'Studio 3',
+] as const
+
+// Aule per Via de Vecchietti
+export const CLASSROOMS_VIA_VECCHIETTI = [
+  'Atelier',
+  'Bottega',
+  'Manifattura',
+  'Sala Rossa',
+  'Sala Gialla',
+  'Sala Verde',
+] as const
+
+// Lista completa delle aule (per backward compatibility)
+export const CLASSROOMS = [
+  ...CLASSROOMS_BADIA_RIPOLI,
+  ...CLASSROOMS_VIA_VECCHIETTI,
 ] as const
 
 export type Classroom = typeof CLASSROOMS[number]
@@ -66,8 +82,49 @@ export function getOrderedClassrooms(): string[] {
   ]
 }
 
+// Funzione per ottenere le aule per una sede specifica
+export function getClassroomsForLocation(location: 'badia-ripoli' | 'via-vecchietti'): string[] {
+  if (location === 'badia-ripoli') {
+    return Array.from(CLASSROOMS_BADIA_RIPOLI)
+  } else {
+    return Array.from(CLASSROOMS_VIA_VECCHIETTI)
+  }
+}
+
 // Funzione per ottenere tutte le aule base (senza varianti) nell'ordine corretto
-export function getBaseClassrooms(): string[] {
+// Ora accetta un parametro opzionale per la sede
+export function getBaseClassrooms(location?: 'badia-ripoli' | 'via-vecchietti'): string[] {
+  // Se viene specificata una sede, usa le aule di quella sede
+  if (location) {
+    const locationClassrooms = getClassroomsForLocation(location)
+    
+    // Per Badia a Ripoli, gestisci le varianti (Magna 1/2 -> Aula Magna, Conference 1/2 -> Conference)
+    if (location === 'badia-ripoli') {
+      const baseSet = new Set<string>()
+      const result: string[] = []
+      
+      locationClassrooms.forEach(aula => {
+        let baseAula = aula
+        if (aula === 'Magna 1' || aula === 'Magna 2') {
+          baseAula = 'Aula Magna'
+        } else if (aula === 'Conference 1' || aula === 'Conference 2') {
+          baseAula = 'Conference'
+        }
+        
+        if (!baseSet.has(baseAula)) {
+          baseSet.add(baseAula)
+          result.push(baseAula)
+        }
+      })
+      
+      return result
+    } else {
+      // Per Via de Vecchietti, tutte le aule sono già "base" (nessuna variante)
+      return locationClassrooms
+    }
+  }
+  
+  // Altrimenti usa il comportamento originale (tutte le aule)
   const ordered = getOrderedClassrooms()
   const baseSet = new Set<string>()
   
@@ -113,8 +170,14 @@ export function isExternalClassroom(classroom: string): boolean {
 }
 
 // Funzione per ottenere l'indice della prima aula esterna (basato su aule base)
-export function getFirstExternalIndex(): number {
-  // Conta le aule interne base (senza varianti)
+// Accetta un parametro opzionale per la sede
+export function getFirstExternalIndex(location?: 'badia-ripoli' | 'via-vecchietti'): number {
+  // Per Via de Vecchietti non ci sono aule "esterne", tutte sono considerate interne
+  if (location === 'via-vecchietti') {
+    return getBaseClassrooms('via-vecchietti').length // Tutte le aule sono "interne"
+  }
+  
+  // Per Badia a Ripoli, usa la logica originale
   const internalBase = new Set<string>()
   INTERNAL_CLASSROOMS.forEach(aula => {
     // Gestisce le varianti di Conference

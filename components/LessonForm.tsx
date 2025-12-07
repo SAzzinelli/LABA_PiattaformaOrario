@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CLASSROOMS } from '@/lib/classrooms'
+import { getClassroomsForLocation } from '@/lib/classrooms'
 import { ALL_COURSES, getYearsForCourse, isTriennale, isBiennale } from '@/lib/courses'
+import { Location, getCoursesForLocation } from '@/lib/locations'
+import { getCourseColor } from '@/lib/courseColors'
 
 interface Lesson {
   id: string
@@ -20,7 +22,7 @@ interface Lesson {
 
 interface LessonFormProps {
   lesson?: Lesson | null
-  existingLessons?: Lesson[]
+  location: Location
   onClose: () => void
 }
 
@@ -34,7 +36,12 @@ const DAYS_OF_WEEK = [
   { value: 6, label: 'Sabato' },
 ]
 
-export default function LessonForm({ lesson, existingLessons = [], onClose }: LessonFormProps) {
+export default function LessonForm({ lesson, location, onClose }: LessonFormProps) {
+  const availableClassrooms = getClassroomsForLocation(location)
+  const availableCourses = getCoursesForLocation(location)
+  
+  // Filtra i corsi disponibili per la sede
+  const courseOptions = ALL_COURSES.filter(c => availableCourses.includes(c))
   const [formData, setFormData] = useState({
     title: '',
     startTime: '',
@@ -49,7 +56,6 @@ export default function LessonForm({ lesson, existingLessons = [], onClose }: Le
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [updateScope, setUpdateScope] = useState<'single' | 'future'>('single')
 
   useEffect(() => {
     if (lesson) {
@@ -70,44 +76,9 @@ export default function LessonForm({ lesson, existingLessons = [], onClose }: Le
 
   const availableYears = formData.course ? getYearsForCourse(formData.course as any) : []
 
-  const checkConflict = () => {
-    if (!formData.classroom || !formData.startTime || !formData.endTime) return null
-
-    const start = parseInt(formData.startTime.replace(':', ''))
-    const end = parseInt(formData.endTime.replace(':', ''))
-
-    const conflict = existingLessons.find(l => {
-      // Ignora la lezione che stiamo modificando
-      if (lesson && l.id === lesson.id) return false
-
-      // Stesso giorno
-      if (l.dayOfWeek !== formData.dayOfWeek) return false
-
-      // Stessa aula
-      if (l.classroom !== formData.classroom) return false
-
-      const lStart = parseInt(l.startTime.replace(':', ''))
-      const lEnd = parseInt(l.endTime.replace(':', ''))
-
-      // Sovrapposizione temporale
-      return (start < lEnd && end > lStart)
-    })
-
-    return conflict
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-
-    // Controllo conflitti
-    const conflict = checkConflict()
-    if (conflict) {
-      if (!confirm(`Attenzione: c'è già una lezione in ${conflict.classroom} dalle ${conflict.startTime} alle ${conflict.endTime} ("${conflict.title}"). Vuoi procedere comunque?`)) {
-        return
-      }
-    }
-
     setLoading(true)
 
     try {
@@ -117,7 +88,6 @@ export default function LessonForm({ lesson, existingLessons = [], onClose }: Le
         year: formData.year || undefined,
         group: formData.group || undefined,
         notes: formData.notes || undefined,
-        updateScope: lesson ? updateScope : undefined, // Solo per modifiche
       }
 
       const url = lesson ? `/api/lessons/${lesson.id}` : '/api/lessons'
@@ -143,20 +113,37 @@ export default function LessonForm({ lesson, existingLessons = [], onClose }: Le
     }
   }
 
+  const courseColor = getCourseColor(lesson?.course)
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-      <div className="card-modern p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-scale-in shadow-2xl">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-laba-primary">
-            {lesson ? 'Modifica Lezione' : 'Nuova Lezione'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="w-10 h-10 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 smooth-transition flex items-center justify-center text-2xl hover-scale"
-          >
-            ×
-          </button>
+      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-scale-in shadow-2xl flex flex-col">
+        {/* Header con colore del corso (meno saturo) */}
+        <div
+          className="px-8 py-6 text-white"
+          style={{ backgroundColor: courseColor.bgHex }}
+        >
+          <div className="flex justify-between items-center">
+            <h2
+              className="text-2xl font-bold"
+              style={{ color: courseColor.textHex }}
+            >
+              {lesson ? 'Modifica Lezione' : 'Nuova Lezione'}
+            </h2>
+            <button
+              onClick={onClose}
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-black hover:bg-opacity-10 transition-colors"
+              style={{ color: courseColor.textHex }}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
+
+        {/* Contenuto scrollabile */}
+        <div className="flex-1 overflow-y-auto p-8">
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -251,7 +238,7 @@ export default function LessonForm({ lesson, existingLessons = [], onClose }: Le
                 required
               >
                 <option value="">Seleziona un'aula</option>
-                {CLASSROOMS.map((classroom) => (
+                {availableClassrooms.map((classroom) => (
                   <option key={classroom} value={classroom}>
                     {classroom}
                   </option>
@@ -275,14 +262,14 @@ export default function LessonForm({ lesson, existingLessons = [], onClose }: Le
               >
                 <option value="">Nessun corso specifico</option>
                 <optgroup label="Triennali">
-                  {ALL_COURSES.filter(c => isTriennale(c)).map((c) => (
+                  {courseOptions.filter(c => isTriennale(c)).map((c) => (
                     <option key={c} value={c}>
                       {c}
                     </option>
                   ))}
                 </optgroup>
                 <optgroup label="Biennali">
-                  {ALL_COURSES.filter(c => isBiennale(c)).map((c) => (
+                  {courseOptions.filter(c => isBiennale(c)).map((c) => (
                     <option key={c} value={c}>
                       {c}
                     </option>
@@ -321,7 +308,7 @@ export default function LessonForm({ lesson, existingLessons = [], onClose }: Le
               type="text"
               value={formData.group}
               onChange={(e) => setFormData({ ...formData, group: e.target.value })}
-              className="input-modern w-full px-4 py-2.5 rounded-lg"
+                className="input-modern w-full px-4 py-2.5 rounded-lg"
               placeholder="Es: Gruppo A, Gruppo B, oppure lascia vuoto"
             />
           </div>
@@ -335,43 +322,10 @@ export default function LessonForm({ lesson, existingLessons = [], onClose }: Le
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
-              className="input-modern w-full px-4 py-2.5 rounded-lg"
+                className="input-modern w-full px-4 py-2.5 rounded-lg"
               placeholder="Note aggiuntive sulla lezione..."
             />
           </div>
-
-          {/* Scelta ambito modifica (solo per modifiche) */}
-          {lesson && (
-            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Modifica:
-              </label>
-              <div className="flex gap-4">
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="updateScope"
-                    value="single"
-                    checked={updateScope === 'single'}
-                    onChange={(e) => setUpdateScope(e.target.value as 'single' | 'future')}
-                    className="mr-2 w-4 h-4 text-laba-primary focus:ring-laba-primary"
-                  />
-                  <span className="text-sm text-gray-700">Solo questa lezione</span>
-                </label>
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="radio"
-                    name="updateScope"
-                    value="future"
-                    checked={updateScope === 'future'}
-                    onChange={(e) => setUpdateScope(e.target.value as 'single' | 'future')}
-                    className="mr-2 w-4 h-4 text-laba-primary focus:ring-laba-primary"
-                  />
-                  <span className="text-sm text-gray-700">Tutte le lezioni future con le stesse caratteristiche</span>
-                </label>
-              </div>
-            </div>
-          )}
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
@@ -396,6 +350,7 @@ export default function LessonForm({ lesson, existingLessons = [], onClose }: Le
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   )

@@ -1,18 +1,15 @@
 import CalendarView from '@/components/CalendarView'
 import Header from '@/components/Header'
-import { getLessons } from '@/lib/db'
+import Footer from '@/components/Footer'
 
-export const dynamic = 'force-dynamic'
-
-export default async function Home() {
-  const initialLessons = await getLessons()
-
+export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header />
-      <main className="container mx-auto px-2 py-6 flex-1">
-        <CalendarView initialLessons={initialLessons} />
+      <main className="container mx-auto px-2 py-2 flex-1">
+        <CalendarView />
       </main>
+      <Footer />
     </div>
   )
 }

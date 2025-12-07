@@ -70,19 +70,18 @@ export default function SearchOverlay({ isOpen, onClose, onSelectLesson, lessons
     <>
       {/* Backdrop blurrato */}
       <div 
-        className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-lg z-[100] animate-fade-in"
+        className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 animate-fade-in"
         onClick={onClose}
       />
       
       {/* Overlay contenuto */}
-      <div className="fixed inset-0 z-[100] flex items-start justify-center pt-20 px-4 animate-scale-in pointer-events-none">
+      <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 animate-scale-in pointer-events-none">
         <div 
-          className="card-modern w-full max-w-3xl max-h-[70vh] overflow-hidden pointer-events-auto shadow-2xl bg-white rounded-xl"
-          style={{ borderRadius: '12px', overflow: 'hidden' }}
+          className="card-modern w-full max-w-3xl max-h-[70vh] overflow-hidden pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="bg-laba-primary text-white p-4 flex items-center justify-between rounded-t-xl" style={{ borderRadius: '12px 12px 0 0' }}>
+          <div className="bg-laba-primary text-white p-4 flex items-center justify-between">
             <h2 className="text-xl font-bold">Cerca Lezione</h2>
             <button
               onClick={onClose}
