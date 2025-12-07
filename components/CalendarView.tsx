@@ -251,7 +251,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
               style={{ top: `${currentTimePos * rowHeight}px` }}
             >
               <div className="flex">
-                <div className="w-16 flex-shrink-0 flex items-center">
+                <div className="sticky left-0 z-30 w-16 flex-shrink-0 bg-white flex items-center">
                   <div className="w-2 h-2 bg-red-500 rounded-full mr-1"></div>
                   <span className="text-xs font-semibold text-red-600">{currentTime}</span>
                 </div>
@@ -267,8 +267,8 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
 
             return (
               <div key={time} className="flex border-b border-gray-100" style={{ height: `${rowHeight}px` }}>
-                {/* Colonna orari */}
-                <div className="w-16 flex-shrink-0 border-r border-gray-200 p-1 text-xs text-gray-600 flex items-center">
+                {/* Colonna orari - sticky */}
+                <div className="sticky left-0 z-10 w-16 flex-shrink-0 border-r border-gray-200 bg-white p-1 text-xs text-gray-600 flex items-center">
                   {isHour && <span className="font-semibold">{time}</span>}
                   {isHalfHour && <span className="text-gray-400 text-[10px]">{time}</span>}
                 </div>
