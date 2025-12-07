@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Linea orizzontale al centro di ogni riga del calendario */
+.calendar-time-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  border-top: 1px solid #e5e7eb;
+  pointer-events: none;
+  z-index: 0;
+}
+
 :root {
   --laba-primary: #033157;
 }
@@ -66,20 +79,20 @@ body {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.6s ease-out;
+  animation: fadeIn 0.2s ease-out;
 }
 
 .animate-slide-in {
-  animation: slideIn 0.5s ease-out;
+  animation: slideIn 0.2s ease-out;
 }
 
 .animate-scale-in {
-  animation: scaleIn 0.4s ease-out;
+  animation: scaleIn 0.15s ease-out;
 }
 
 /* Hover effects stile Agency */
 .hover-lift {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hover-lift:hover {
@@ -88,7 +101,7 @@ body {
 }
 
 .hover-scale {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hover-scale:hover {
@@ -96,7 +109,7 @@ body {
 }
 
 .hover-glow {
-  transition: all 0.3s ease;
+  transition: all 0.15s ease;
 }
 
 .hover-glow:hover {
@@ -105,7 +118,7 @@ body {
 
 /* Smooth transitions */
 .smooth-transition {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Card styles stile Agency */
@@ -113,7 +126,7 @@ body {
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card-modern:hover {
@@ -125,7 +138,7 @@ body {
 .btn-modern {
   position: relative;
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-modern::before {
@@ -153,7 +166,7 @@ body {
 
 /* Input styles stile Agency */
 .input-modern {
-  transition: all 0.3s ease;
+  transition: all 0.15s ease;
   border: 2px solid #e5e7eb;
 }
 

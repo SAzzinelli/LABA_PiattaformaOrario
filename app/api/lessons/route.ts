@@ -15,13 +15,11 @@ export async function GET(request: NextRequest) {
     }
     
     const lessons = await getLessons(Object.keys(filters).length > 0 ? filters : undefined)
-    return NextResponse.json(lessons)
+    return NextResponse.json(lessons || [])
   } catch (error) {
     console.error('Error fetching lessons:', error)
-    return NextResponse.json(
-      { error: 'Errore durante il recupero delle lezioni' },
-      { status: 500 }
-    )
+    // Restituisci array vuoto invece di errore 500 per permettere al calendario di funzionare
+    return NextResponse.json([])
   }
 }
 

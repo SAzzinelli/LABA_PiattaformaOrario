@@ -95,3 +95,4 @@ export function getCourseColor(course?: string): CourseColor {
   return courseColorMap[course] || defaultColor
 }
 
+

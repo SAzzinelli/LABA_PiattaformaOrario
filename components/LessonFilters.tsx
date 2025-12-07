@@ -32,10 +32,10 @@ export default function LessonFilters({
   const availableYears = course ? getYearsForCourse(course as any) : []
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2 flex-wrap">
       {/* Filtro Corso */}
-      <div className="flex items-center gap-2">
-        <label htmlFor="filterCourse" className="text-sm font-medium text-gray-700 whitespace-nowrap flex-shrink-0">
+      <div className="flex items-center gap-1.5">
+        <label htmlFor="filterCourse" className="text-xs font-medium text-gray-600 whitespace-nowrap">
           Corso:
         </label>
         <select
@@ -45,7 +45,7 @@ export default function LessonFilters({
             onCourseChange(e.target.value)
             onYearChange(null) // Reset anno quando cambia corso
           }}
-          className="input-modern px-4 py-2 rounded-lg text-sm min-w-[180px]"
+          className="px-3 py-1.5 rounded-md text-sm border border-gray-300 bg-white text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[160px]"
         >
           <option value="">Tutti i corsi</option>
           {courseOptions.map((c) => (
@@ -57,8 +57,8 @@ export default function LessonFilters({
       </div>
 
       {/* Filtro Anno */}
-      <div className="flex items-center gap-2">
-        <label htmlFor="filterYear" className="text-sm font-medium text-gray-700 whitespace-nowrap flex-shrink-0">
+      <div className="flex items-center gap-1.5">
+        <label htmlFor="filterYear" className="text-xs font-medium text-gray-600 whitespace-nowrap">
           Anno:
         </label>
         <select
@@ -66,7 +66,7 @@ export default function LessonFilters({
           value={year?.toString() || ''}
           onChange={(e) => onYearChange(e.target.value ? parseInt(e.target.value) : null)}
           disabled={!course}
-          className="input-modern px-4 py-2 rounded-lg text-sm min-w-[120px] disabled:bg-gray-100 disabled:cursor-not-allowed"
+          className="px-3 py-1.5 rounded-md text-sm border border-gray-300 bg-white text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed min-w-[110px]"
         >
           <option value="">Tutti gli anni</option>
           {availableYears.map((y) => (

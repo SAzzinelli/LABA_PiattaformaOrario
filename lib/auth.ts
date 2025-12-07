@@ -47,7 +47,7 @@ export async function verifyCredentials(email: string, password: string): Promis
     // Fallback a credenziali hardcoded se Supabase non è configurato
     if (email === ADMIN_EMAIL) {
       const hashed = await bcrypt.hash(ADMIN_PASSWORD, 10)
-      return await bcrypt.compare(password, hashed)
+  return await bcrypt.compare(password, hashed)
     }
     return false
   }
