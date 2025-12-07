@@ -1,35 +1,11 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import LoginModal from './LoginModal'
-import { Location } from '@/lib/locations'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
-interface HeaderProps {
-  selectedLocation?: Location
-  onLocationChange?: (location: Location) => void
-}
-
-export default function Header({ selectedLocation, onLocationChange }: HeaderProps) {
+export default function Header() {
   const router = useRouter()
-  const pathname = usePathname()
-  
-  // Estrai la sede dall'URL se disponibile
-  const getLocationFromPath = (): Location => {
-    if (pathname?.includes('/via-vecchietti')) return 'via-vecchietti'
-    if (pathname?.includes('/badia-ripoli')) return 'badia-ripoli'
-    return selectedLocation || 'badia-ripoli'
-  }
-  
-  const currentLocation = selectedLocation || getLocationFromPath()
-  
-  const handleLocationChange = (location: Location) => {
-    if (onLocationChange) {
-      onLocationChange(location)
-    } else {
-      router.push(`/${location}`)
-    }
-  }
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
@@ -90,38 +66,17 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
       <header className="text-white shadow-lg sticky top-0 z-[100]" style={{ backgroundColor: '#033157' }}>
         <div className="container mx-auto px-2">
           <div className="flex items-center justify-between h-14">
-            {/* Logo a sinistra */}
-            <div className="flex items-center gap-2 md:gap-3 animate-fade-in">
+            {/* Logo a sinistra - cliccabile per tornare alla home */}
+            <button
+              onClick={() => router.push('/')}
+              className="flex items-center gap-2 md:gap-3 animate-fade-in hover:opacity-80 transition-opacity"
+            >
               <img 
                 src="/logoSito.svg" 
                 alt="LABA" 
                 className="h-6 md:h-8 w-auto brightness-0 invert transition-transform duration-300 hover:scale-110"
               />
-            </div>
-            
-            {/* Selettore Sede al centro - Nascosto su mobile, visibile su tablet+ */}
-            <div className="hidden md:flex items-center gap-2">
-              <button
-                onClick={() => handleLocationChange('badia-ripoli')}
-                className={`px-3.5 py-2 rounded-lg font-medium text-sm transition-all ${
-                  currentLocation === 'badia-ripoli'
-                    ? 'bg-white text-laba-primary shadow-md'
-                    : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
-                }`}
-              >
-                Piazza di Badia a Ripoli
-              </button>
-              <button
-                onClick={() => handleLocationChange('via-vecchietti')}
-                className={`px-3.5 py-2 rounded-lg font-medium text-sm transition-all ${
-                  currentLocation === 'via-vecchietti'
-                    ? 'bg-white text-laba-primary shadow-md'
-                    : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
-                }`}
-              >
-                Via de' Vecchietti
-              </button>
-            </div>
+            </button>
             
             {/* Menu hamburger a destra */}
             <nav className="flex items-center">
@@ -158,44 +113,20 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
           {/* Menu dropdown - posizionato fisso in alto a destra */}
           <div className="fixed top-14 right-2 md:right-4 z-[100] bg-white rounded-lg shadow-xl border border-gray-200 min-w-[200px] max-w-[calc(100vw-1rem)] animate-scale-in">
             <div className="py-2">
-              {/* Selettore Sede su mobile */}
-              <div className="md:hidden border-b border-gray-200 pb-2 mb-2">
-                <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Sede</div>
-                <button
-                  onClick={() => {
-                    handleLocationChange('badia-ripoli')
-                    setShowMenu(false)
-                  }}
-                  className={`w-full px-4 py-2 text-left text-sm transition-colors flex items-center gap-3 ${
-                    currentLocation === 'badia-ripoli'
-                      ? 'bg-blue-50 text-blue-700 font-medium'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span className="text-xs">Piazza di Badia a Ripoli</span>
-                </button>
-                <button
-                  onClick={() => {
-                    handleLocationChange('via-vecchietti')
-                    setShowMenu(false)
-                  }}
-                  className={`w-full px-4 py-2 text-left text-sm transition-colors flex items-center gap-3 ${
-                    currentLocation === 'via-vecchietti'
-                      ? 'bg-blue-50 text-blue-700 font-medium'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span className="text-xs">Via de' Vecchietti</span>
-                </button>
-              </div>
+              <button
+                onClick={() => {
+                  router.push('/')
+                  setShowMenu(false)
+                }}
+                className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-3"
+              >
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span>Home</span>
+              </button>
+              
+              <div className="border-t border-gray-200 my-1"></div>
               
               {isAuthenticated ? (
                 <button
@@ -222,6 +153,24 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                   <span>Login Admin</span>
+                </button>
+              )}
+              
+              <div className="border-t border-gray-200 my-1"></div>
+              
+              {isAuthenticated && (
+                <button
+                  onClick={() => {
+                    router.push('/admin')
+                    setShowMenu(false)
+                  }}
+                  className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-3"
+                >
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>Gestione Avvisi</span>
                 </button>
               )}
               

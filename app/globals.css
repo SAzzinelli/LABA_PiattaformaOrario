@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes accordion-down {
+  from {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    max-height: 500px;
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-accordion-down {
+  animation: accordion-down 0.3s ease-out;
+  overflow: hidden;
+}
+
 /* Linea orizzontale al centro di ogni riga del calendario */
 .calendar-time-row::before {
   content: '';
