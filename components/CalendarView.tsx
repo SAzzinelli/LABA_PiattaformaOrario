@@ -217,9 +217,9 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
     return (
       <div className="relative flex-1 overflow-x-auto overflow-y-auto">
         {/* Header aule */}
-        <div className="sticky z-20 bg-white border-b border-gray-200" style={{ top: '76px' }}>
+        <div className="sticky bg-white border-b border-gray-200" style={{ top: '76px', zIndex: 20 }}>
           <div className="flex" style={{ minWidth: `${classrooms.length * minClassroomWidth}px` }}>
-            <div className="sticky left-0 z-40 w-16 flex-shrink-0 border-r border-gray-200 bg-white"></div>
+            <div className="sticky bg-white border-r border-gray-200" style={{ left: 0, zIndex: 50, width: '64px', flexShrink: 0 }}></div>
             {classrooms.map((classroom, index) => {
               const classroomLessons = getLessonsForClassroom(dayLessons, classroom)
               const isFirstExternal = index === firstExternalIndex
@@ -251,7 +251,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
               style={{ top: `${currentTimePos * rowHeight}px` }}
             >
               <div className="flex">
-                <div className="sticky left-0 z-30 w-16 flex-shrink-0 bg-white flex items-center">
+                <div className="sticky bg-white flex items-center" style={{ left: 0, zIndex: 35, width: '64px', flexShrink: 0 }}>
                   <div className="w-2 h-2 bg-red-500 rounded-full mr-1"></div>
                   <span className="text-xs font-semibold text-red-600">{currentTime}</span>
                 </div>
@@ -268,7 +268,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             return (
               <div key={time} className="flex border-b border-gray-100" style={{ height: `${rowHeight}px` }}>
                 {/* Colonna orari - sticky */}
-                <div className="sticky left-0 z-20 w-16 flex-shrink-0 border-r border-gray-200 bg-white p-1 text-xs text-gray-600 flex items-center">
+                <div className="sticky bg-white border-r border-gray-200 p-1 text-xs text-gray-600 flex items-center" style={{ left: 0, zIndex: 30, width: '64px', flexShrink: 0 }}>
                   {isHour && <span className="font-semibold">{time}</span>}
                   {isHalfHour && <span className="text-gray-400 text-[10px]">{time}</span>}
                 </div>
@@ -319,7 +319,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
 
     return (
       <div className="card-modern overflow-y-auto animate-fade-in flex flex-col" style={{ maxHeight: 'calc(100vh - 200px)' }}>
-        <div className="sticky top-0 z-30 text-white p-3 flex items-center justify-between rounded-t-lg shadow-md" style={{ backgroundColor: '#033157' }}>
+        <div className="sticky text-white p-3 flex items-center justify-between rounded-t-lg shadow-md" style={{ top: 0, zIndex: 40, backgroundColor: '#033157' }}>
           <div>
             <div className="font-bold text-xl uppercase tracking-wide">
               {format(currentDate, 'EEEE', { locale: it })}
