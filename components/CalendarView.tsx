@@ -210,7 +210,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
     return null
   }
 
-  const renderTimeGrid = (dayLessons: Lesson[], dayDate: Date, dayHeaderHeight: number) => {
+  const renderTimeGrid = (dayLessons: Lesson[], dayDate: Date) => {
     const currentTimePos = getCurrentTimePosition(dayDate)
     const firstExternalIndex = getFirstExternalIndex(selectedLocation)
 
@@ -348,7 +348,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             </button>
           </div>
         </div>
-        {renderTimeGrid(dayLessons, currentDate, dayHeaderHeight)}
+        {renderTimeGrid(dayLessons, currentDate)}
       </div>
     )
   }
