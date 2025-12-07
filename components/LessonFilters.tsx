@@ -1,9 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { ALL_COURSES, getYearsForCourse, isTriennale, isBiennale } from '@/lib/courses'
+import { ALL_COURSES, getYearsForCourse } from '@/lib/courses'
 import { Location, getCoursesForLocation } from '@/lib/locations'
-import CustomDropdown from './CustomDropdown'
 
 interface LessonFiltersProps {
   course: string
@@ -34,44 +32,50 @@ export default function LessonFilters({
   const availableYears = course ? getYearsForCourse(course as any) : []
 
   return (
-    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+    <div className="flex items-center gap-3">
       {/* Filtro Corso */}
-      <div className="flex-shrink-0">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-gray-600 font-medium">Corso</label>
-          <CustomDropdown
-            value={course || ''}
-            options={courseOptions.map(c => ({ value: c, label: c === 'Graphic Design & Multimedia' ? 'Graphic Design' : c }))}
-            onChange={(value) => {
-              onCourseChange(value)
-              onYearChange(null) // Reset anno quando cambia corso
-            }}
-            placeholder="Tutti i corsi"
-          />
-        </div>
+      <div className="flex items-center gap-2">
+        <label htmlFor="filterCourse" className="text-sm font-medium text-gray-700 whitespace-nowrap flex-shrink-0">
+          Corso:
+        </label>
+        <select
+          id="filterCourse"
+          value={course || ''}
+          onChange={(e) => {
+            onCourseChange(e.target.value)
+            onYearChange(null) // Reset anno quando cambia corso
+          }}
+          className="input-modern px-4 py-2 rounded-lg text-sm min-w-[180px]"
+        >
+          <option value="">Tutti i corsi</option>
+          {courseOptions.map((c) => (
+            <option key={c} value={c}>
+              {c === 'Graphic Design & Multimedia' ? 'Graphic Design' : c}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Filtro Anno */}
-      <div className="flex-shrink-0">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-gray-600 font-medium">Anno</label>
-          <CustomDropdown
-            value={year?.toString() || ''}
-            options={availableYears.map(y => ({ value: y.toString(), label: `${y}° Anno` }))}
-            onChange={(value) => onYearChange(value ? parseInt(value) : null)}
-            placeholder="Tutti gli anni"
-            disabled={!course}
-          />
-        </div>
+      <div className="flex items-center gap-2">
+        <label htmlFor="filterYear" className="text-sm font-medium text-gray-700 whitespace-nowrap flex-shrink-0">
+          Anno:
+        </label>
+        <select
+          id="filterYear"
+          value={year?.toString() || ''}
+          onChange={(e) => onYearChange(e.target.value ? parseInt(e.target.value) : null)}
+          disabled={!course}
+          className="input-modern px-4 py-2 rounded-lg text-sm min-w-[120px] disabled:bg-gray-100 disabled:cursor-not-allowed"
+        >
+          <option value="">Tutti gli anni</option>
+          {availableYears.map((y) => (
+            <option key={y} value={y}>
+              {y}° Anno
+            </option>
+          ))}
+        </select>
       </div>
-
-      {/* Reset */}
-      <button
-        onClick={onReset}
-        className="btn-modern px-4 py-2.5 rounded-full border-2 border-gray-300 text-gray-700 text-sm font-medium hover:border-gray-400 transition-colors whitespace-nowrap"
-      >
-        Reset
-      </button>
     </div>
   )
 }

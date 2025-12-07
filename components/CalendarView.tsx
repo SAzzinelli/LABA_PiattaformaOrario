@@ -13,6 +13,7 @@ import { generateTimeSlots, getTimePosition, getCurrentTime } from '@/lib/timeSl
 import { Location } from '@/lib/locations'
 import { useRouter, usePathname } from 'next/navigation'
 import { generateICS } from '@/lib/ics'
+import { getCourseColor } from '@/lib/courseColors'
 
 interface Lesson {
   id: string
@@ -58,7 +59,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   const [showSearch, setShowSearch] = useState(false)
   
   // Altezza righe calendario (slider)
-  const [rowHeight, setRowHeight] = useState(60) // Default 60px
+  const [rowHeight, setRowHeight] = useState(45) // Default 45px
   
   // Modale dettaglio lezione
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
@@ -415,8 +416,8 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
       />
 
       <div className="mb-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        {/* Ricerca e Export a sinistra */}
-        <div className="w-full sm:w-auto flex items-center gap-2">
+        {/* Ricerca a sinistra */}
+        <div className="w-full sm:w-auto">
           <button
             onClick={() => setShowSearch(true)}
             className="btn-modern flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-laba-primary text-sm font-medium shadow-md border border-gray-200 relative overflow-hidden"
@@ -425,22 +426,6 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <span className="relative z-10">Cerca Lezione</span>
-          </button>
-          
-          <button
-            onClick={handleExportToCalendar}
-            className="btn-modern flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-laba-primary text-sm font-medium shadow-md border border-gray-200 relative overflow-hidden hover:bg-laba-primary hover:text-white transition-colors"
-            title="Aggiungi al calendario"
-          >
-            {/* Icona calendario */}
-            <svg className="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            {/* Icona evento + (calendario con simbolo più) */}
-            <svg className="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            <span className="relative z-10">Agg. al calendario</span>
           </button>
         </div>
 
@@ -466,7 +451,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
           </div>
         </div>
 
-        {/* Filtri a destra */}
+        {/* Filtri e Export a destra */}
         <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
           <LessonFilters
             course={filterCourse}
@@ -476,6 +461,14 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             onYearChange={setFilterYear}
             onReset={handleResetFilters}
           />
+          
+          <button
+            onClick={handleExportToCalendar}
+            className="btn-modern px-5 py-2.5 rounded-full bg-white text-laba-primary text-sm font-medium shadow-md border border-gray-200 relative overflow-hidden hover:bg-laba-primary hover:text-white transition-colors"
+            title="Esporta calendario"
+          >
+            <span className="relative z-10">Esporta</span>
+          </button>
           
           {isAuthenticated && (
             <button
@@ -531,13 +524,16 @@ interface LessonEventCardProps {
 
 function LessonEventCard({ lesson, startSlot, endSlot, rowHeight, onEdit, onView }: LessonEventCardProps) {
   const height = (endSlot - startSlot) * rowHeight // Altezza dinamica basata su rowHeight
+  const courseColor = getCourseColor(lesson.course)
 
   return (
     <div
-      className="absolute left-1 right-1 rounded-lg shadow-md border-l-4 border-laba-primary bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 smooth-transition cursor-pointer overflow-hidden z-10 hover-lift group"
+      className="absolute left-1 right-1 rounded-lg shadow-md border-l-4 smooth-transition cursor-pointer overflow-hidden z-10 hover-lift group"
       style={{
         top: `${startSlot * rowHeight}px`,
         height: `${Math.max(height, rowHeight)}px`,
+        borderLeftColor: courseColor.borderColor,
+        backgroundColor: courseColor.bgHex,
       }}
       onClick={() => {
         if (onEdit) onEdit(lesson)
@@ -547,19 +543,19 @@ function LessonEventCard({ lesson, startSlot, endSlot, rowHeight, onEdit, onView
     >
       <div className="p-2.5 h-full flex flex-col justify-between">
         <div>
-          <div className="text-xs font-semibold text-laba-primary mb-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
+          <div className={`text-xs font-semibold mb-1.5 opacity-80 group-hover:opacity-100 transition-opacity`} style={{ color: courseColor.textHex }}>
             {lesson.startTime} - {lesson.endTime}
           </div>
-          <div className="text-sm font-bold text-gray-800 line-clamp-2 group-hover:text-laba-primary transition-colors">
+          <div className={`text-sm font-bold line-clamp-2 transition-colors`} style={{ color: courseColor.textHex }}>
             {lesson.title}
           </div>
         </div>
         <div className="mt-auto">
-          <div className="text-xs text-gray-600 truncate group-hover:text-gray-700 transition-colors">
+          <div className={`text-xs truncate group-hover:opacity-100 transition-colors`} style={{ color: courseColor.textHex, opacity: 0.8 }}>
             {lesson.professor}
           </div>
           {lesson.group && (
-            <div className="text-xs text-purple-600 mt-1 group-hover:text-purple-700 transition-colors">
+            <div className={`text-xs mt-1 font-semibold transition-colors`} style={{ color: courseColor.textHex, opacity: 0.8 }}>
               {lesson.group}
             </div>
           )}
