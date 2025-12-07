@@ -46,6 +46,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null)
   const [filterCourse, setFilterCourse] = useState('')
   const [filterYear, setFilterYear] = useState<number | null>(null)
+  const [hiddenClassrooms, setHiddenClassrooms] = useState<string[]>([])
   const [showSearch, setShowSearch] = useState(false)
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
   const [showLessonDetails, setShowLessonDetails] = useState(false)
@@ -69,6 +70,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
         setSelectedLocation(locationFromPath)
         setFilterCourse('')
         setFilterYear(null)
+        setHiddenClassrooms([])
       }
     }
   }, [pathname, selectedLocation])
@@ -84,13 +86,16 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
       setCurrentTime(`${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`)
     }
     updateTime()
-    const interval = setInterval(updateTime, 60000)
+    const interval = setInterval(updateTime, 60000) // Aggiorna ogni minuto
+    // Aggiorna anche ogni 30 secondi per movimento più fluido
+    const interval30s = setInterval(updateTime, 30000)
     
     const handleExportEvent = () => handleExportToCalendar()
     window.addEventListener('export-calendar', handleExportEvent)
     
     return () => {
       clearInterval(interval)
+      clearInterval(interval30s)
       window.removeEventListener('export-calendar', handleExportEvent)
     }
   }, [])
@@ -179,7 +184,72 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   // --- LOGICA DI CALCOLO DELLA GRIGLIA ---
   
   const timeSlots = generateTimeSlots() // ["09:00", "09:30", ...]
-  const classrooms = getBaseClassrooms(selectedLocation)
+  const baseClassrooms = getBaseClassrooms(selectedLocation)
+  
+  // Logica dinamica per aule unite/divise
+  // Analizza le lezioni del giorno per decidere se mostrare varianti separate
+  const dayLessonsForClassroomLogic = lessons.filter(l => l.dayOfWeek === currentDate.getDay())
+  
+  // Verifica se ci sono lezioni con varianti (Magna 1/2, Conference 1/2)
+  const hasMagnaVariants = dayLessonsForClassroomLogic.some(l => 
+    l.classroom === 'Magna 1' || l.classroom === 'Magna 2'
+  )
+  const hasConferenceVariants = dayLessonsForClassroomLogic.some(l => 
+    l.classroom === 'Conference 1' || l.classroom === 'Conference 2'
+  )
+  const hasMagnaUnified = dayLessonsForClassroomLogic.some(l => 
+    l.classroom === 'Aula Magna'
+  )
+  const hasConferenceUnified = dayLessonsForClassroomLogic.some(l => 
+    l.classroom === 'Conference'
+  )
+  
+  // Costruisci lista aule dinamica
+  const dynamicClassrooms: string[] = []
+  baseClassrooms.forEach(aula => {
+    if (aula === 'Aula Magna') {
+      // Se ci sono varianti E non c'è l'unificata, mostra le varianti separate
+      if (hasMagnaVariants && !hasMagnaUnified) {
+        dynamicClassrooms.push('Magna 1', 'Magna 2')
+      } else {
+        // Altrimenti mostra l'aula unificata
+        dynamicClassrooms.push('Aula Magna')
+      }
+    } else if (aula === 'Conference') {
+      // Se ci sono varianti E non c'è l'unificata, mostra le varianti separate
+      if (hasConferenceVariants && !hasConferenceUnified) {
+        dynamicClassrooms.push('Conference 1', 'Conference 2')
+      } else {
+        // Altrimenti mostra l'aula unificata
+        dynamicClassrooms.push('Conference')
+      }
+    } else {
+      dynamicClassrooms.push(aula)
+    }
+  })
+  
+  const allClassrooms = dynamicClassrooms
+  const classrooms = allClassrooms.filter(c => !hiddenClassrooms.includes(c))
+  
+  // Calcola posizione indicatore ora corrente (solo se è il giorno corrente)
+  const isToday = isSameDay(currentDate, new Date())
+  const currentTimePosition = useMemo(() => {
+    if (!isToday || !currentTime) return null
+    
+    const now = new Date()
+    const currentMinutes = now.getHours() * 60 + now.getMinutes()
+    const startMinutes = 9 * 60 // 09:00
+    const rowHeight = 40 // Altezza riga in px
+    
+    // Se l'ora corrente è fuori dal range del calendario (9:00-21:00), non mostrare
+    if (currentMinutes < startMinutes || currentMinutes >= 21 * 60) return null
+    
+    // Calcola la posizione precisa in pixel
+    const slotIndex = (currentMinutes - startMinutes) / 30 // Slot frazionario (es. 9:15 = 0.5)
+    const position = 40 + (slotIndex * rowHeight) // 40px per header + posizione nello slot
+    
+    return position
+  }, [isToday, currentTime, currentDate])
   
   // Matrice della griglia: [TimeIndex][ClassroomIndex] -> GridCell
   const gridMatrix = useMemo(() => {
@@ -198,12 +268,28 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
 
     // Popola la matrice
     dayLessons.forEach(lesson => {
-      // Trova indice aula
+      // Trova indice aula - gestione dinamica varianti
       let classroomIndex = classrooms.indexOf(lesson.classroom)
+      
+      // Se non trovata direttamente, prova mapping varianti
       if (classroomIndex === -1) {
-        // Gestione varianti aule
-        if (lesson.classroom === 'Magna 1' || lesson.classroom === 'Magna 2') classroomIndex = classrooms.indexOf('Aula Magna')
-        if (lesson.classroom === 'Conference 1' || lesson.classroom === 'Conference 2') classroomIndex = classrooms.indexOf('Conference')
+        // Se l'aula è "Aula Magna" ma nel calendario ci sono "Magna 1" e "Magna 2"
+        if (lesson.classroom === 'Aula Magna' && classrooms.includes('Magna 1')) {
+          // Metti nella prima variante disponibile (Magna 1)
+          classroomIndex = classrooms.indexOf('Magna 1')
+        }
+        // Se l'aula è "Magna 1" o "Magna 2" ma nel calendario c'è solo "Aula Magna"
+        else if ((lesson.classroom === 'Magna 1' || lesson.classroom === 'Magna 2') && classrooms.includes('Aula Magna')) {
+          classroomIndex = classrooms.indexOf('Aula Magna')
+        }
+        // Se l'aula è "Conference" ma nel calendario ci sono "Conference 1" e "Conference 2"
+        else if (lesson.classroom === 'Conference' && classrooms.includes('Conference 1')) {
+          classroomIndex = classrooms.indexOf('Conference 1')
+        }
+        // Se l'aula è "Conference 1" o "Conference 2" ma nel calendario c'è solo "Conference"
+        else if ((lesson.classroom === 'Conference 1' || lesson.classroom === 'Conference 2') && classrooms.includes('Conference')) {
+          classroomIndex = classrooms.indexOf('Conference')
+        }
       }
       
       if (classroomIndex === -1) return // Aula non trovata in questa sede
@@ -251,7 +337,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
         <div className="flex flex-col md:flex-row gap-2 md:gap-3 items-stretch md:items-center justify-between">
           <button
             onClick={() => setShowSearch(true)}
-            className="flex items-center justify-center gap-2 px-4 md:px-5 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-medium transition-colors border border-gray-200 whitespace-nowrap w-full md:w-auto md:min-w-[140px]"
+            className="flex items-center justify-start gap-2 px-4 md:px-5 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-medium transition-colors border border-gray-200 whitespace-nowrap w-full md:w-auto md:min-w-[200px]"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -263,9 +349,12 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
               course={filterCourse}
               year={filterYear}
               location={selectedLocation}
+              hiddenClassrooms={hiddenClassrooms}
+              availableClassrooms={allClassrooms}
               onCourseChange={setFilterCourse}
               onYearChange={setFilterYear}
-              onReset={() => { setFilterCourse(''); setFilterYear(null) }}
+              onHiddenClassroomsChange={setHiddenClassrooms}
+              onReset={() => { setFilterCourse(''); setFilterYear(null); setHiddenClassrooms([]) }}
             />
             {isAuthenticated && (
               <button
@@ -321,6 +410,43 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
           }}
         >
+          {/* Indicatore ora corrente - Linea rossa stile macOS */}
+          {currentTimePosition !== null && (
+            <div
+              className="absolute left-0 right-0 pointer-events-none z-[60]"
+              style={{
+                top: `${currentTimePosition}px`,
+                height: '2px',
+                backgroundColor: '#ff3b30',
+                boxShadow: '0 0 4px rgba(255, 59, 48, 0.5)',
+                transform: 'translateY(-1px)' // Centra la linea
+              }}
+            >
+              {/* Punto rosso a sinistra (nella colonna orari) */}
+              <div
+                className="absolute left-0"
+                style={{
+                  width: '70px',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                  paddingRight: '8px'
+                }}
+              >
+                <div
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: '#ff3b30',
+                    boxShadow: '0 0 4px rgba(255, 59, 48, 0.6)'
+                  }}
+                />
+              </div>
+            </div>
+          )}
+          
           <div 
             className="relative"
             style={{
