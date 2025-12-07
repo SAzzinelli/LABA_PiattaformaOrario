@@ -7,7 +7,6 @@ import LessonForm from './LessonForm'
 import LessonFilters from './LessonFilters'
 import SearchOverlay from './SearchOverlay'
 import LessonDetailsModal from './LessonDetailsModal'
-import LocationSelector from './LocationSelector'
 import { getBaseClassrooms, getFirstExternalIndex } from '@/lib/classrooms'
 import { generateTimeSlots, getTimePosition, getCurrentTime } from '@/lib/timeSlots'
 import { Location } from '@/lib/locations'
@@ -58,8 +57,8 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   // Ricerca
   const [showSearch, setShowSearch] = useState(false)
   
-  // Altezza righe calendario (slider)
-  const [rowHeight, setRowHeight] = useState(45) // Default 45px
+  // Altezza righe calendario (fissa a 45px)
+  const rowHeight = 45
   
   // Modale dettaglio lezione
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
@@ -84,6 +83,9 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
       const locationFromPath = getLocationFromPath()
       if (locationFromPath !== selectedLocation) {
         setSelectedLocation(locationFromPath)
+        // Reset filtri quando cambia sede
+        setFilterCourse('')
+        setFilterYear(null)
       }
     }
   }, [pathname, selectedLocation])
@@ -403,18 +405,6 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
 
   return (
     <div>
-      {/* Selettore Sede */}
-      <LocationSelector
-        selectedLocation={selectedLocation}
-        onLocationChange={(location) => {
-          // Naviga all'URL della nuova sede
-          router.push(`/${location}`)
-          // Reset filtri quando cambia sede
-          setFilterCourse('')
-          setFilterYear(null)
-        }}
-      />
-
       <div className="mb-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         {/* Ricerca a sinistra */}
         <div className="w-full sm:w-auto">
@@ -427,28 +417,6 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             </svg>
             <span className="relative z-10">Cerca Lezione</span>
           </button>
-        </div>
-
-        {/* Controlli centrali: Slider altezza righe */}
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-center">
-          <div className="flex items-center gap-2">
-            <label htmlFor="rowHeight" className="text-xs text-gray-600 whitespace-nowrap">
-              Altezza righe:
-            </label>
-            <input
-              id="rowHeight"
-              type="range"
-              min="30"
-              max="100"
-              step="5"
-              value={rowHeight}
-              onChange={(e) => setRowHeight(parseInt(e.target.value))}
-              className="w-24 sm:w-32"
-            />
-            <span className="text-xs text-gray-600 font-medium min-w-[2.5rem] text-right">
-              {rowHeight}px
-            </span>
-          </div>
         </div>
 
         {/* Filtri e Export a destra */}
