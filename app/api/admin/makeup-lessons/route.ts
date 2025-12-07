@@ -5,7 +5,7 @@ import { verifyToken } from '@/lib/auth'
 // GET - Lista recuperi
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get('auth_token')?.value
+    const token = request.cookies.get('auth-token')?.value
     if (!token) {
       return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
     }
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 // POST - Crea recupero
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get('auth_token')?.value
+    const token = request.cookies.get('auth-token')?.value
     if (!token) {
       return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
     }
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
 // DELETE - Elimina recupero
 export async function DELETE(request: NextRequest) {
   try {
-    const token = request.cookies.get('auth_token')?.value
+    const token = request.cookies.get('auth-token')?.value
     if (!token) {
       return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
     }

@@ -5,7 +5,7 @@ import { verifyToken } from '@/lib/auth'
 // GET - Lista cambi aula
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get('auth_token')?.value
+    const token = request.cookies.get('auth-token')?.value
     if (!token) {
       return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
     }
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 // POST - Crea cambio aula
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get('auth_token')?.value
+    const token = request.cookies.get('auth-token')?.value
     if (!token) {
       return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
     }
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
 // DELETE - Elimina cambio aula
 export async function DELETE(request: NextRequest) {
   try {
-    const token = request.cookies.get('auth_token')?.value
+    const token = request.cookies.get('auth-token')?.value
     if (!token) {
       return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
     }

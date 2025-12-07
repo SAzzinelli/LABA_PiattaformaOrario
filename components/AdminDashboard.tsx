@@ -72,31 +72,38 @@ export default function AdminDashboard() {
   const loadData = async () => {
     try {
       // Carica lezioni per i dropdown
-      const lessonsRes = await fetch('/api/lessons')
+      const lessonsRes = await fetch('/api/lessons', { credentials: 'include' })
       if (lessonsRes.ok) {
         const lessonsData = await lessonsRes.json()
         setLessons(lessonsData || [])
       }
 
       // Carica assenze
-      const absencesRes = await fetch('/api/admin/absences')
+      const absencesRes = await fetch('/api/admin/absences', { credentials: 'include' })
       if (absencesRes.ok) {
         const absencesData = await absencesRes.json()
         setAbsences(absencesData || [])
+      } else if (absencesRes.status === 401) {
+        console.error('Non autorizzato - verifica di essere loggato')
+        alert('Sessione scaduta. Effettua nuovamente il login.')
       }
 
       // Carica recuperi
-      const makeupRes = await fetch('/api/admin/makeup-lessons')
+      const makeupRes = await fetch('/api/admin/makeup-lessons', { credentials: 'include' })
       if (makeupRes.ok) {
         const makeupData = await makeupRes.json()
         setMakeupLessons(makeupData || [])
+      } else if (makeupRes.status === 401) {
+        console.error('Non autorizzato - verifica di essere loggato')
       }
 
       // Carica cambi aula
-      const changesRes = await fetch('/api/admin/classroom-changes')
+      const changesRes = await fetch('/api/admin/classroom-changes', { credentials: 'include' })
       if (changesRes.ok) {
         const changesData = await changesRes.json()
         setClassroomChanges(changesData || [])
+      } else if (changesRes.status === 401) {
+        console.error('Non autorizzato - verifica di essere loggato')
       }
     } catch (error) {
       console.error('Error loading data:', error)
@@ -109,9 +116,14 @@ export default function AdminDashboard() {
     if (!confirm('Sei sicuro di voler eliminare questa assenza?')) return
 
     try {
-      const res = await fetch(`/api/admin/absences?id=${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/admin/absences?id=${id}`, { 
+        method: 'DELETE',
+        credentials: 'include'
+      })
       if (res.ok) {
         setAbsences(absences.filter(a => a.id !== id))
+      } else {
+        alert('Errore nell\'eliminazione')
       }
     } catch (error) {
       console.error('Error deleting absence:', error)
@@ -123,9 +135,14 @@ export default function AdminDashboard() {
     if (!confirm('Sei sicuro di voler eliminare questo recupero?')) return
 
     try {
-      const res = await fetch(`/api/admin/makeup-lessons?id=${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/admin/makeup-lessons?id=${id}`, { 
+        method: 'DELETE',
+        credentials: 'include'
+      })
       if (res.ok) {
         setMakeupLessons(makeupLessons.filter(m => m.id !== id))
+      } else {
+        alert('Errore nell\'eliminazione')
       }
     } catch (error) {
       console.error('Error deleting makeup:', error)
@@ -137,9 +154,14 @@ export default function AdminDashboard() {
     if (!confirm('Sei sicuro di voler eliminare questo cambio aula?')) return
 
     try {
-      const res = await fetch(`/api/admin/classroom-changes?id=${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/admin/classroom-changes?id=${id}`, { 
+        method: 'DELETE',
+        credentials: 'include'
+      })
       if (res.ok) {
         setClassroomChanges(classroomChanges.filter(c => c.id !== id))
+      } else {
+        alert('Errore nell\'eliminazione')
       }
     } catch (error) {
       console.error('Error deleting change:', error)
@@ -425,6 +447,7 @@ function AbsenceForm({ lessons, onClose, onSuccess }: any) {
       const res = await fetch('/api/admin/absences', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(formData)
       })
       if (res.ok) {
@@ -540,6 +563,7 @@ function MakeupForm({ lessons, onClose, onSuccess }: any) {
       const res = await fetch('/api/admin/makeup-lessons', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           ...formData,
           year: formData.year ? parseInt(formData.year) : null
@@ -704,6 +728,7 @@ function ChangeForm({ lessons, onClose, onSuccess }: any) {
       const res = await fetch('/api/admin/classroom-changes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(formData)
       })
       if (res.ok) {
