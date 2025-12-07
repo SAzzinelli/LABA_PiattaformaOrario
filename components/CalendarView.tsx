@@ -287,8 +287,8 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
         {/* Header Giorno */}
         <div className="px-6 py-4 text-white flex items-center justify-between" style={{ backgroundColor: '#033157' }}>
           <div className="flex flex-col animate-slide-in">
-            <span className="text-xl font-bold uppercase tracking-wide">{dayName}</span>
-            <span className="text-lg font-normal mt-0.5">{dayNumber} {monthName}</span>
+            <span className="text-lg font-bold uppercase tracking-wide">{dayName}</span>
+            <span className="text-base font-normal mt-0.5">{dayNumber} {monthName}</span>
           </div>
           <div className="flex items-center gap-2">
             <button 
@@ -327,9 +327,9 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             className="relative"
             style={{
               display: 'grid',
-              gridTemplateColumns: `90px repeat(${classrooms.length}, 160px)`,
-              gridTemplateRows: `50px repeat(${timeSlots.length}, 48px)`,
-              minWidth: `${90 + classrooms.length * 160}px`,
+              gridTemplateColumns: `70px repeat(${classrooms.length}, 120px)`,
+              gridTemplateRows: `40px repeat(${timeSlots.length}, 36px)`,
+              minWidth: `${70 + classrooms.length * 120}px`,
               backgroundColor: 'white'
             }}
           >
@@ -346,9 +346,9 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             {classrooms.map((classroom, idx) => (
               <div
                 key={classroom}
-                className="sticky top-0 z-20 bg-gradient-to-br from-gray-50 to-white border-b-2 border-r border-gray-200 px-3 py-2 text-xs font-bold text-gray-800 flex items-center justify-center shadow-sm hover:bg-gray-100 transition-colors duration-200"
+                className="sticky top-0 z-20 bg-gradient-to-br from-gray-50 to-white border-b-2 border-r border-gray-200 px-2 py-1.5 text-[10px] font-bold text-gray-800 flex items-center justify-center shadow-sm hover:bg-gray-100 transition-colors duration-200"
                 style={{ 
-                  height: '50px',
+                  height: '40px',
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
                   letterSpacing: '0.025em',
@@ -372,7 +372,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                     style={{
                       gridRow: rowIndex,
                       gridColumn: 1,
-                      height: '48px',
+                      height: '36px',
                       backgroundColor: 'rgba(255, 255, 255, 0.95)',
                       backdropFilter: 'blur(10px)',
                       WebkitBackdropFilter: 'blur(10px)',
@@ -385,7 +385,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                       style={{
                         top: '50%',
                         left: '0',
-                        width: `${90 + classrooms.length * 160}px`,
+                        width: `${70 + classrooms.length * 120}px`,
                         height: '1px',
                         marginTop: '-0.5px',
                         zIndex: 0,
@@ -393,7 +393,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                       }}
                     />
                     <span 
-                      className={`relative z-10 bg-white px-1 ${isHour ? 'font-bold text-gray-900 text-sm' : 'text-gray-500 text-xs'}`}
+                      className={`relative z-10 bg-white px-1 ${isHour ? 'font-bold text-gray-900 text-xs' : 'text-gray-500 text-[10px]'}`}
                       style={{
                         fontVariantNumeric: 'tabular-nums',
                         letterSpacing: isHour ? '0.05em' : '0.025em'
@@ -487,72 +487,70 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   )
 }
 
-// Componente Evento
+// Componente Evento - Design Moderno e Pulito
 function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => void, onView?: () => void }) {
   const courseColor = getCourseColor(lesson.course)
   
   const formatTime = (time: string) => time.split(':').slice(0, 2).join(':')
+  const formatGroup = (group: string | undefined) => {
+    if (!group) return null
+    return `Gruppo ${group}`
+  }
 
   return (
     <div
       onClick={onEdit || onView}
-      className="h-full w-full rounded-xl border-l-4 p-3 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden flex flex-col group relative"
+      className="h-full w-full rounded-lg p-2.5 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer overflow-visible flex flex-col group relative border"
       style={{
         backgroundColor: courseColor.bgHex,
-        borderLeftColor: courseColor.borderColor,
-        borderLeftWidth: '4px',
-        transform: 'translateY(0)',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08)'
+        borderColor: courseColor.borderColor,
+        borderWidth: '1px',
+        minHeight: '100%'
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)'
-        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15), 0 4px 8px rgba(0,0,0,0.1)'
+        e.currentTarget.style.transform = 'translateY(-1px)'
+        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.12)'
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'translateY(0) scale(1)'
-        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08)'
+        e.currentTarget.style.transform = 'translateY(0)'
+        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)'
       }}
       title={`${lesson.title} - ${lesson.startTime}-${lesson.endTime}`}
     >
-      {/* Overlay gradient per profondità */}
-      <div 
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        style={{
-          background: `linear-gradient(135deg, ${courseColor.bgHex} 0%, ${courseColor.bgHex}dd 100%)`
-        }}
-      />
+      {/* Orario - Badge in alto */}
+      <div className="mb-2">
+        <span 
+          className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
+          style={{ 
+            color: courseColor.textHex,
+            backgroundColor: 'rgba(255, 255, 255, 0.3)',
+            fontVariantNumeric: 'tabular-nums',
+            letterSpacing: '0.03em'
+          }}
+        >
+          {formatTime(lesson.startTime)} - {formatTime(lesson.endTime)}
+        </span>
+      </div>
       
-      <div className="relative z-10 flex flex-col h-full">
-        <div className="flex justify-between items-start mb-2">
-          <span 
-            className="text-xs font-bold px-2 py-0.5 rounded-md backdrop-blur-sm"
-            style={{ 
-              color: courseColor.textHex,
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              fontVariantNumeric: 'tabular-nums',
-              letterSpacing: '0.05em'
-            }}
-          >
-            {formatTime(lesson.startTime)} - {formatTime(lesson.endTime)}
-          </span>
-        </div>
-      
+      {/* Titolo - Non tagliato, con wrap */}
       <div 
-        className="font-bold text-sm leading-tight mb-2 line-clamp-2 group-hover:line-clamp-none transition-all" 
+        className="font-bold text-xs leading-snug mb-1.5 flex-1" 
         style={{ 
           color: courseColor.textHex,
-          textShadow: '0 1px 2px rgba(0,0,0,0.05)'
+          wordBreak: 'break-word',
+          overflowWrap: 'break-word'
         }}
       >
         {lesson.title}
       </div>
       
+      {/* Professore e Gruppo - In fondo */}
       <div className="mt-auto space-y-1">
         <div 
-          className="text-xs font-medium truncate group-hover:whitespace-normal" 
+          className="text-[10px] font-medium leading-tight" 
           style={{ 
             color: courseColor.textHex,
-            opacity: 0.9
+            opacity: 0.85
           }}
         >
           {lesson.professor}
@@ -560,17 +558,16 @@ function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => 
         
         {lesson.group && (
           <div 
-            className="text-[10px] font-bold px-2 py-0.5 rounded inline-block"
+            className="text-[9px] font-semibold px-1.5 py-0.5 rounded inline-block"
             style={{ 
               color: courseColor.textHex,
               backgroundColor: 'rgba(255, 255, 255, 0.25)',
               opacity: 0.9
             }}
           >
-            Gr: {lesson.group}
+            {formatGroup(lesson.group)}
           </div>
         )}
-      </div>
       </div>
     </div>
   )
