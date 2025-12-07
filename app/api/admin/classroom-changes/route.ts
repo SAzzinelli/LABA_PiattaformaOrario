@@ -31,6 +31,11 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching classroom changes:', error)
+      // Se la tabella non esiste ancora, ritorna array vuoto invece di errore
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        console.log('Tabella classroom_changes non ancora creata, ritorno array vuoto')
+        return NextResponse.json([])
+      }
       return NextResponse.json({ error: 'Errore nel recupero dei cambi aula' }, { status: 500 })
     }
 
@@ -77,6 +82,12 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error creating classroom change:', error)
+      // Se la tabella non esiste ancora, ritorna errore informativo
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        return NextResponse.json({ 
+          error: 'La tabella classroom_changes non esiste ancora. Esegui lo script SQL schema_dashboard.sql in Supabase.' 
+        }, { status: 500 })
+      }
       return NextResponse.json({ error: 'Errore nella creazione del cambio aula' }, { status: 500 })
     }
 
@@ -113,6 +124,10 @@ export async function DELETE(request: NextRequest) {
 
     if (error) {
       console.error('Error deleting classroom change:', error)
+      // Se la tabella non esiste ancora, ritorna successo comunque
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        return NextResponse.json({ success: true })
+      }
       return NextResponse.json({ error: 'Errore nell\'eliminazione del cambio aula' }, { status: 500 })
     }
 

@@ -83,6 +83,12 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error creating makeup lesson:', error)
+      // Se la tabella non esiste ancora, ritorna errore informativo
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        return NextResponse.json({ 
+          error: 'La tabella makeup_lessons non esiste ancora. Esegui lo script SQL schema_dashboard.sql in Supabase.' 
+        }, { status: 500 })
+      }
       return NextResponse.json({ error: 'Errore nella creazione del recupero' }, { status: 500 })
     }
 

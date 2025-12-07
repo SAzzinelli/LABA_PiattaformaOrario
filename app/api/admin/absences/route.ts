@@ -31,6 +31,11 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching absences:', error)
+      // Se la tabella non esiste ancora, ritorna array vuoto invece di errore
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        console.log('Tabella professor_absences non ancora creata, ritorno array vuoto')
+        return NextResponse.json([])
+      }
       return NextResponse.json({ error: 'Errore nel recupero delle assenze' }, { status: 500 })
     }
 
@@ -74,6 +79,12 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error creating absence:', error)
+      // Se la tabella non esiste ancora, ritorna errore informativo
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        return NextResponse.json({ 
+          error: 'La tabella professor_absences non esiste ancora. Esegui lo script SQL schema_dashboard.sql in Supabase.' 
+        }, { status: 500 })
+      }
       return NextResponse.json({ error: 'Errore nella creazione dell\'assenza' }, { status: 500 })
     }
 
