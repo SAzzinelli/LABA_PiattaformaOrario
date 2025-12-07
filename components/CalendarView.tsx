@@ -217,9 +217,9 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
     return (
       <div className="relative flex-1 overflow-x-auto overflow-y-auto">
         {/* Header aule */}
-        <div className="sticky bg-white border-b border-gray-200" style={{ top: `${dayHeaderHeight}px`, zIndex: 20 }}>
+        <div className="sticky bg-white border-b border-gray-200" style={{ top: 0, zIndex: 20 }}>
           <div className="flex" style={{ minWidth: `${classrooms.length * minClassroomWidth}px` }}>
-            <div className="bg-white border-r border-gray-200" style={{ position: 'sticky', left: 0, top: `${dayHeaderHeight}px`, zIndex: 50, width: '64px', flexShrink: 0 }}></div>
+            <div className="bg-white border-r border-gray-200" style={{ position: 'sticky', left: 0, top: 0, zIndex: 50, width: '64px', flexShrink: 0 }}></div>
             {classrooms.map((classroom, index) => {
               const classroomLessons = getLessonsForClassroom(dayLessons, classroom)
               
@@ -315,7 +315,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
     const dayHeaderHeight = 76
 
     return (
-      <div className="card-modern overflow-y-auto animate-fade-in flex flex-col" style={{ maxHeight: 'calc(100vh - 150px)' }}>
+      <div className="card-modern overflow-hidden animate-fade-in flex flex-col" style={{ maxHeight: 'calc(100vh - 150px)' }}>
         <div className="sticky text-white p-3 flex items-center justify-between rounded-t-lg shadow-md" style={{ top: 0, zIndex: 40, backgroundColor: '#033157' }}>
           <div>
             <div className="font-bold text-xl uppercase tracking-wide">
