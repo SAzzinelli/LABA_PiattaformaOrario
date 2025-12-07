@@ -247,18 +247,18 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   return (
     <div className="h-full flex flex-col">
       {/* Barra superiore strumenti */}
-      <div className="mb-4 bg-white rounded-lg shadow-sm border border-gray-200 p-3 flex-shrink-0">
-        <div className="flex gap-3 items-center justify-between">
+      <div className="mb-4 bg-white rounded-lg shadow-sm border border-gray-200 p-2 md:p-3 flex-shrink-0">
+        <div className="flex flex-col md:flex-row gap-2 md:gap-3 items-stretch md:items-center justify-between">
           <button
             onClick={() => setShowSearch(true)}
-            className="flex items-center gap-2 px-5 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-medium transition-colors border border-gray-200 whitespace-nowrap min-w-[140px]"
+            className="flex items-center justify-center gap-2 px-4 md:px-5 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-medium transition-colors border border-gray-200 whitespace-nowrap w-full md:w-auto md:min-w-[140px]"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <span>Cerca</span>
           </button>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-3">
             <LessonFilters
               course={filterCourse}
               year={filterYear}
@@ -270,7 +270,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             {isAuthenticated && (
               <button
                 onClick={() => { setEditingLesson(null); setShowForm(true) }}
-                className="px-4 py-2 rounded-lg bg-green-500 text-white text-sm font-medium shadow-sm hover:bg-green-600 transition-colors flex items-center gap-2"
+                className="px-4 py-2 rounded-lg bg-green-500 text-white text-sm font-medium shadow-sm hover:bg-green-600 transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -285,29 +285,29 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
       {/* Contenitore Calendario */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden animate-fade-in flex-1 flex flex-col min-h-0">
         {/* Header Giorno */}
-        <div className="px-3 py-2 text-white flex items-center justify-between" style={{ backgroundColor: '#033157' }}>
+        <div className="px-2 md:px-3 py-1.5 md:py-2 text-white flex items-center justify-between" style={{ backgroundColor: '#033157' }}>
           <div className="flex flex-col animate-slide-in">
-            <span className="text-base font-bold uppercase tracking-wide">{dayName}</span>
-            <span className="text-sm font-normal mt-0.5">{dayNumber} {monthName}</span>
+            <span className="text-sm md:text-base font-bold uppercase tracking-wide">{dayName}</span>
+            <span className="text-xs md:text-sm font-normal mt-0.5">{dayNumber} {monthName}</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1 md:gap-1.5">
             <button 
               onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate() - 1); setCurrentDate(d) }} 
-              className="px-3 py-1.5 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center backdrop-blur-sm"
+              className="px-2 md:px-3 py-1 md:py-1.5 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center backdrop-blur-sm"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+              <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
             <button 
               onClick={() => setCurrentDate(new Date())} 
-              className="px-4 py-1.5 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 text-xs font-medium backdrop-blur-sm"
+              className="px-3 md:px-4 py-1 md:py-1.5 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 text-[10px] md:text-xs font-medium backdrop-blur-sm"
             >
               Oggi
             </button>
             <button 
               onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate() + 1); setCurrentDate(d) }} 
-              className="px-3 py-1.5 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center backdrop-blur-sm"
+              className="px-2 md:px-3 py-1 md:py-1.5 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center backdrop-blur-sm"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
         </div>
@@ -325,9 +325,9 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             className="relative"
             style={{
               display: 'grid',
-              gridTemplateColumns: `70px repeat(${classrooms.length}, 120px)`,
-              gridTemplateRows: `40px repeat(${timeSlots.length}, 36px)`,
-              minWidth: `${70 + classrooms.length * 120}px`,
+              gridTemplateColumns: `60px repeat(${classrooms.length}, minmax(100px, 120px))`,
+              gridTemplateRows: `35px repeat(${timeSlots.length}, 32px)`,
+              minWidth: `${60 + classrooms.length * 100}px`,
               backgroundColor: 'white'
             }}
           >
@@ -335,6 +335,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             <div 
               className="sticky top-0 left-0 z-30 bg-gradient-to-br from-gray-50 to-white border-b-2 border-r-2 border-gray-200 shadow-sm transition-all duration-200"
               style={{ 
+                height: '35px',
                 backdropFilter: 'blur(10px)',
                 WebkitBackdropFilter: 'blur(10px)'
               }}
@@ -344,16 +345,16 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             {classrooms.map((classroom, idx) => (
               <div
                 key={classroom}
-                className="sticky top-0 z-20 bg-gradient-to-br from-gray-50 to-white border-b-2 border-r border-gray-200 px-2 py-1.5 text-[10px] font-bold text-gray-800 flex items-center justify-center shadow-sm hover:bg-gray-100 transition-colors duration-200"
+                className="sticky top-0 z-20 bg-gradient-to-br from-gray-50 to-white border-b-2 border-r border-gray-200 px-1.5 md:px-2 py-1 md:py-1.5 text-[9px] md:text-[10px] font-bold text-gray-800 flex items-center justify-center shadow-sm hover:bg-gray-100 transition-colors duration-200"
                 style={{ 
-                  height: '40px',
+                  height: '35px',
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
                   letterSpacing: '0.025em',
                   animationDelay: `${idx * 20}ms`
                 }}
               >
-                <span className="truncate animate-fade-in">{classroom}</span>
+                <span className="truncate animate-fade-in text-center leading-tight">{classroom}</span>
               </div>
             ))}
 
@@ -370,7 +371,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                     style={{
                       gridRow: rowIndex,
                       gridColumn: 1,
-                      height: '36px',
+                      height: '32px',
                       backgroundColor: 'rgba(255, 255, 255, 0.95)',
                       backdropFilter: 'blur(10px)',
                       WebkitBackdropFilter: 'blur(10px)',
@@ -383,7 +384,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                       style={{
                         top: '50%',
                         left: '0',
-                        width: `${70 + classrooms.length * 120}px`,
+                        width: `calc(60px + ${classrooms.length} * 100px)`,
                         height: '1px',
                         marginTop: '-0.5px',
                         zIndex: 0,
@@ -391,7 +392,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                       }}
                     />
                     <span 
-                      className={`relative z-10 bg-white px-1 ${isHour ? 'font-bold text-gray-900 text-xs' : 'text-gray-500 text-[10px]'}`}
+                      className={`relative z-10 bg-white px-0.5 md:px-1 ${isHour ? 'font-bold text-gray-900 text-[10px] md:text-xs' : 'text-gray-500 text-[9px] md:text-[10px]'}`}
                       style={{
                         fontVariantNumeric: 'tabular-nums',
                         letterSpacing: isHour ? '0.05em' : '0.025em'

@@ -91,16 +91,16 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
         <div className="container mx-auto px-2">
           <div className="flex items-center justify-between h-14">
             {/* Logo a sinistra */}
-            <div className="flex items-center gap-3 animate-fade-in">
+            <div className="flex items-center gap-2 md:gap-3 animate-fade-in">
               <img 
                 src="/logoSito.svg" 
                 alt="LABA" 
-                className="h-8 w-auto brightness-0 invert transition-transform duration-300 hover:scale-110"
+                className="h-6 md:h-8 w-auto brightness-0 invert transition-transform duration-300 hover:scale-110"
               />
             </div>
             
-            {/* Selettore Sede al centro */}
-            <div className="flex items-center gap-2">
+            {/* Selettore Sede al centro - Nascosto su mobile, visibile su tablet+ */}
+            <div className="hidden md:flex items-center gap-2">
               <button
                 onClick={() => handleLocationChange('badia-ripoli')}
                 className={`px-3.5 py-2 rounded-lg font-medium text-sm transition-all ${
@@ -156,8 +156,47 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
           />
           
           {/* Menu dropdown - posizionato fisso in alto a destra */}
-          <div className="fixed top-14 right-4 z-[100] bg-white rounded-lg shadow-xl border border-gray-200 min-w-[200px] animate-scale-in">
+          <div className="fixed top-14 right-2 md:right-4 z-[100] bg-white rounded-lg shadow-xl border border-gray-200 min-w-[200px] max-w-[calc(100vw-1rem)] animate-scale-in">
             <div className="py-2">
+              {/* Selettore Sede su mobile */}
+              <div className="md:hidden border-b border-gray-200 pb-2 mb-2">
+                <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Sede</div>
+                <button
+                  onClick={() => {
+                    handleLocationChange('badia-ripoli')
+                    setShowMenu(false)
+                  }}
+                  className={`w-full px-4 py-2 text-left text-sm transition-colors flex items-center gap-3 ${
+                    currentLocation === 'badia-ripoli'
+                      ? 'bg-blue-50 text-blue-700 font-medium'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="text-xs">Piazza di Badia a Ripoli</span>
+                </button>
+                <button
+                  onClick={() => {
+                    handleLocationChange('via-vecchietti')
+                    setShowMenu(false)
+                  }}
+                  className={`w-full px-4 py-2 text-left text-sm transition-colors flex items-center gap-3 ${
+                    currentLocation === 'via-vecchietti'
+                      ? 'bg-blue-50 text-blue-700 font-medium'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="text-xs">Via de' Vecchietti</span>
+                </button>
+              </div>
+              
               {isAuthenticated ? (
                 <button
                   onClick={() => {
