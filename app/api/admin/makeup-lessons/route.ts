@@ -22,6 +22,11 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching makeup lessons:', error)
+      // Se la tabella non esiste ancora, ritorna array vuoto invece di errore
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        console.log('Tabella makeup_lessons non ancora creata, ritorno array vuoto')
+        return NextResponse.json([])
+      }
       return NextResponse.json({ error: 'Errore nel recupero dei recuperi' }, { status: 500 })
     }
 
