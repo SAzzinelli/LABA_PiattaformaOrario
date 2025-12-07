@@ -294,11 +294,35 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
       
       if (classroomIndex === -1) return // Aula non trovata in questa sede
 
-      // Trova indice orario inizio
-      // Usa timeToMinutes per trovare lo slot corretto
+      // Trova indice orario inizio - deve corrispondere ESATTAMENTE a uno slot
       const startMinutes = timeToMinutes(lesson.startTime)
-      const gridStartMinutes = 8 * 60 // 08:00
-      const startIndex = Math.floor((startMinutes - gridStartMinutes) / 30)
+      const gridStartMinutes = 8 * 60 // 08:00 - deve corrispondere a generateTimeSlots()
+      
+      // Calcola l'indice dello slot - deve corrispondere ESATTAMENTE a uno slot
+      // Ogni slot è di 30 minuti, quindi dividiamo per 30 e usiamo floor per trovare lo slot corretto
+      const calculatedIndex = (startMinutes - gridStartMinutes) / 30
+      let startIndex = Math.floor(calculatedIndex) // Usa floor per trovare lo slot di inizio
+      
+      // Verifica che l'indice corrisponda esattamente a uno slot esistente
+      if (startIndex < 0 || startIndex >= timeSlots.length) return
+      
+      // Verifica che l'orario di inizio corrisponda esattamente allo slot
+      // Se l'orario non corrisponde esattamente (es. 9:15 invece di 9:00 o 9:30), 
+      // cerca lo slot più vicino entro 15 minuti di tolleranza
+      const expectedSlotTime = timeSlots[startIndex]
+      const expectedSlotMinutes = timeToMinutes(expectedSlotTime)
+      const timeDiff = Math.abs(startMinutes - expectedSlotMinutes)
+      
+      // Se la differenza è > 15 minuti (mezzo slot), cerca lo slot più vicino
+      if (timeDiff > 15) {
+        // Prova slot successivo (più probabile se l'orario è tra due slot)
+        if (startIndex < timeSlots.length - 1) {
+          const nextSlotMinutes = timeToMinutes(timeSlots[startIndex + 1])
+          if (Math.abs(startMinutes - nextSlotMinutes) < timeDiff) {
+            startIndex = startIndex + 1
+          }
+        }
+      }
 
       // Calcola durata in slot (arrotondata per eccesso)
       const endMinutes = timeToMinutes(lesson.endTime)
@@ -622,7 +646,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   )
 }
 
-// Componente Evento - Stile macOS Calendar
+// Componente Evento - Design Moderno e Pulito
 function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => void, onView?: () => void }) {
   const courseColor = getCourseColor(lesson.course)
   
@@ -632,64 +656,69 @@ function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => 
     return `Gruppo ${group}`
   }
 
-  // Colori più saturi per stile macOS
-  const macosBgColor = courseColor.bgHex.replace('ff', 'e6') // Aggiungi più opacità
-  const macosTextColor = courseColor.textHex
+  // Colori più saturi e vibranti
+  const bgColor = courseColor.bgHex
+  const textColor = courseColor.textHex
+  const borderColor = courseColor.borderColor
 
   return (
     <div
       onClick={onEdit || onView}
-      className="h-full w-full rounded-md p-2.5 cursor-pointer overflow-hidden flex flex-col group relative"
+      className="h-full w-full rounded-lg p-2 cursor-pointer overflow-hidden flex flex-col group relative border"
       style={{
-        backgroundColor: macosBgColor,
-        borderLeft: `3px solid ${courseColor.borderColor}`,
+        backgroundColor: bgColor,
+        borderColor: borderColor,
+        borderWidth: '1.5px',
         minHeight: '100%',
         zIndex: 20,
-        position: 'relative'
+        position: 'relative',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.opacity = '0.9'
-        e.currentTarget.style.transform = 'scale(1.01)'
+        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'
+        e.currentTarget.style.transform = 'translateY(-1px)'
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.opacity = '1'
-        e.currentTarget.style.transform = 'scale(1)'
+        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)'
+        e.currentTarget.style.transform = 'translateY(0)'
       }}
       title={`${lesson.title} - ${lesson.startTime}-${lesson.endTime}`}
     >
-      {/* Orario - Stile macOS (sopra) */}
-      <div className="mb-1">
+      {/* Orario - Badge compatto in alto */}
+      <div className="mb-1.5">
         <span 
-          className="text-[10px] font-semibold"
+          className="text-[9px] font-bold px-1.5 py-0.5 rounded"
           style={{ 
-            color: macosTextColor,
+            color: textColor,
+            backgroundColor: 'rgba(255, 255, 255, 0.4)',
             fontVariantNumeric: 'tabular-nums',
-            letterSpacing: '0.02em'
+            letterSpacing: '0.03em'
           }}
         >
           {formatTime(lesson.startTime)}
         </span>
       </div>
       
-      {/* Titolo - Stile macOS (grassetto, principale) */}
+      {/* Titolo - Principale, ben visibile */}
       <div 
-        className="font-semibold text-xs leading-tight mb-1 flex-1" 
+        className="font-bold text-sm leading-snug mb-1.5 flex-1" 
         style={{ 
-          color: macosTextColor,
+          color: textColor,
           wordBreak: 'break-word',
-          overflowWrap: 'break-word'
+          overflowWrap: 'break-word',
+          lineHeight: '1.3'
         }}
       >
         {lesson.title}
       </div>
       
-      {/* Professore e Gruppo - Stile macOS (secondario) */}
-      <div className="mt-auto">
+      {/* Informazioni secondarie */}
+      <div className="mt-auto space-y-0.5">
         <div 
-          className="text-[10px] leading-tight truncate" 
+          className="text-[10px] font-medium leading-tight" 
           style={{ 
-            color: macosTextColor,
-            opacity: 0.8
+            color: textColor,
+            opacity: 0.85
           }}
         >
           {lesson.professor}
@@ -697,10 +726,11 @@ function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => 
         
         {lesson.group && (
           <div 
-            className="text-[9px] font-medium mt-0.5"
+            className="text-[9px] font-semibold inline-block px-1.5 py-0.5 rounded"
             style={{ 
-              color: macosTextColor,
-              opacity: 0.7
+              color: textColor,
+              backgroundColor: 'rgba(255, 255, 255, 0.3)',
+              opacity: 0.9
             }}
           >
             {formatGroup(lesson.group)}
