@@ -222,14 +222,11 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             <div className="bg-white border-r border-gray-200" style={{ position: 'sticky', left: 0, top: '76px', zIndex: 50, width: '64px', flexShrink: 0 }}></div>
             {classrooms.map((classroom, index) => {
               const classroomLessons = getLessonsForClassroom(dayLessons, classroom)
-              const isFirstExternal = index === firstExternalIndex
               
               return (
                 <div
                   key={classroom}
-                  className={`flex-shrink-0 border-r border-gray-200 last:border-r-0 p-1.5 text-center font-semibold text-xs bg-gray-50 whitespace-nowrap ${
-                    isFirstExternal ? 'border-l-4 border-l-gray-400' : ''
-                  }`}
+                  className="flex-shrink-0 border-r border-gray-200 last:border-r-0 p-1.5 text-center font-semibold text-xs bg-gray-50 whitespace-nowrap"
                   style={{ width: `${minClassroomWidth}px`, minWidth: `${minClassroomWidth}px` }}
                 >
                   {classroom}
@@ -276,7 +273,6 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                 {/* Colonne aule */}
                 {classrooms.map((classroom, index) => {
                   const classroomLessons = getLessonsForClassroom(dayLessons, classroom)
-                  const isFirstExternal = index === firstExternalIndex
                   
                   // Trova la lezione che inizia in questo slot
                   const lessonStarting = classroomLessons.find(lesson => {
@@ -287,9 +283,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                   return (
                     <div
                       key={classroom}
-                      className={`flex-shrink-0 border-r border-gray-100 last:border-r-0 relative ${
-                        isFirstExternal ? 'border-l-4 border-l-gray-400' : ''
-                      }`}
+                      className="flex-shrink-0 border-r border-gray-100 last:border-r-0 relative"
                       style={{ width: `${minClassroomWidth}px`, minWidth: `${minClassroomWidth}px` }}
                     >
                       {lessonStarting && (
@@ -318,7 +312,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
     const isToday = isSameDay(currentDate, new Date())
 
     return (
-      <div className="card-modern overflow-y-auto animate-fade-in flex flex-col" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+      <div className="card-modern overflow-y-auto animate-fade-in flex flex-col" style={{ maxHeight: 'calc(100vh - 150px)' }}>
         <div className="sticky text-white p-3 flex items-center justify-between rounded-t-lg shadow-md" style={{ top: 0, zIndex: 40, backgroundColor: '#033157' }}>
           <div>
             <div className="font-bold text-xl uppercase tracking-wide">
@@ -481,7 +475,14 @@ interface LessonEventCardProps {
 }
 
 function LessonEventCard({ lesson, startSlot, endSlot, rowHeight, onEdit, onView }: LessonEventCardProps) {
-  const height = (endSlot - startSlot) * rowHeight // Altezza dinamica basata su rowHeight
+  // Importa timeSlots per calcolare il limite
+  const { generateTimeSlots } = require('@/lib/timeSlots')
+  const timeSlots = generateTimeSlots()
+  const maxSlots = timeSlots.length // Numero reale di slot disponibili (da 9:00 a 21:00 = 24 slot)
+  
+  // Limita endSlot al numero massimo di slot disponibili per evitare che vada oltre
+  const limitedEndSlot = Math.min(endSlot, maxSlots)
+  const height = (limitedEndSlot - startSlot) * rowHeight // Altezza dinamica basata su rowHeight
   const courseColor = getCourseColor(lesson.course)
 
   return (
@@ -490,6 +491,7 @@ function LessonEventCard({ lesson, startSlot, endSlot, rowHeight, onEdit, onView
       style={{
         top: `${startSlot * rowHeight}px`,
         height: `${Math.max(height, rowHeight)}px`,
+        maxHeight: `${(maxSlots - startSlot) * rowHeight}px`, // Limita l'altezza massima
         borderLeftColor: courseColor.borderColor,
         backgroundColor: courseColor.bgHex,
       }}
