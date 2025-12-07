@@ -61,8 +61,9 @@ export default function CalendarGrid({
 
     const dayLessons = getLessonsForDay(currentDate)
     const currentTimePos = getCurrentTimePosition(currentDate)
-    const timeLines = generateTimeLines()
-    const totalHeight = getTotalCalendarHeight()
+    const rowHeight = 60 // Altezza di default per riga (30 minuti)
+    const timeLines = generateTimeLines(rowHeight)
+    const totalHeight = getTotalCalendarHeight(rowHeight)
 
     return (
         <div className="flex-1 flex flex-col bg-white border border-gray-200 rounded-b-lg overflow-hidden">
@@ -119,7 +120,7 @@ export default function CalendarGrid({
                     {currentTimePos !== null && (
                         <div
                             className="absolute left-16 right-0 z-20 pointer-events-none"
-                            style={{ top: `${currentTimePos}px` }}
+                            style={{ top: `${currentTimePos * rowHeight}px` }}
                         >
                             <div className="flex">
                                 <div className="w-16 flex-shrink-0"></div>

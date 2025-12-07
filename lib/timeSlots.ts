@@ -48,3 +48,33 @@ export function isTimeInRange(time: string): boolean {
   return minutes >= 9 * 60 && minutes < 21 * 60
 }
 
+// Interfaccia per le linee temporali
+export interface TimeLine {
+  time: string
+  position: number // Posizione in pixel (basata su 60px per slot)
+  isHour: boolean // true se è un'ora intera (es. 9:00), false se è mezz'ora (es. 9:30)
+}
+
+// Genera le linee temporali per il calendario
+export function generateTimeLines(rowHeight: number = 60): TimeLine[] {
+  const lines: TimeLine[] = []
+  const slots = generateTimeSlots()
+  
+  slots.forEach((time, index) => {
+    const isHour = time.endsWith(':00')
+    lines.push({
+      time,
+      position: index * rowHeight,
+      isHour,
+    })
+  })
+  
+  return lines
+}
+
+// Calcola l'altezza totale del calendario in pixel
+export function getTotalCalendarHeight(rowHeight: number = 60): number {
+  const slots = generateTimeSlots()
+  return slots.length * rowHeight
+}
+
