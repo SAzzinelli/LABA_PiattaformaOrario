@@ -285,36 +285,36 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
       {/* Contenitore Calendario */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden animate-fade-in flex-1 flex flex-col min-h-0">
         {/* Header Giorno */}
-        <div className="px-2 md:px-3 py-1.5 md:py-2 text-white flex items-center justify-between" style={{ backgroundColor: '#033157' }}>
+        <div className="px-3 md:px-4 py-2 md:py-2.5 text-white flex items-center justify-between" style={{ backgroundColor: '#033157' }}>
           <div className="flex flex-col animate-slide-in">
-            <span className="text-sm md:text-base font-bold uppercase tracking-wide">{dayName}</span>
-            <span className="text-xs md:text-sm font-normal mt-0.5">{dayNumber} {monthName}</span>
+            <span className="text-base md:text-lg font-bold uppercase tracking-wide">{dayName}</span>
+            <span className="text-sm md:text-base font-normal mt-0.5">{dayNumber} {monthName}</span>
           </div>
-          <div className="flex items-center gap-1 md:gap-1.5">
+          <div className="flex items-center gap-1.5 md:gap-2">
             <button 
               onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate() - 1); setCurrentDate(d) }} 
-              className="px-2 md:px-3 py-1 md:py-1.5 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center backdrop-blur-sm"
+              className="px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center backdrop-blur-sm"
             >
-              <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
             <button 
               onClick={() => setCurrentDate(new Date())} 
-              className="px-3 md:px-4 py-1 md:py-1.5 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 text-[10px] md:text-xs font-medium backdrop-blur-sm"
+              className="px-4 md:px-5 py-1.5 md:py-2 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 text-xs md:text-sm font-medium backdrop-blur-sm"
             >
               Oggi
             </button>
             <button 
               onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate() + 1); setCurrentDate(d) }} 
-              className="px-2 md:px-3 py-1 md:py-1.5 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center backdrop-blur-sm"
+              className="px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center backdrop-blur-sm"
             >
-              <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
         </div>
 
         {/* Calendario Grid Moderno - Scrollabile */}
         <div 
-          className="overflow-auto relative bg-gradient-to-br from-gray-50 to-white flex-1 min-h-0"
+          className="overflow-auto hide-scrollbar relative bg-gradient-to-br from-gray-50 to-white flex-1 min-h-0"
           style={{ 
             overflowY: 'auto', 
             overflowX: 'auto',
@@ -325,9 +325,9 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             className="relative"
             style={{
               display: 'grid',
-              gridTemplateColumns: `60px repeat(${classrooms.length}, minmax(100px, 120px))`,
-              gridTemplateRows: `35px repeat(${timeSlots.length}, 32px)`,
-              minWidth: `${60 + classrooms.length * 100}px`,
+              gridTemplateColumns: `70px repeat(${classrooms.length}, minmax(120px, 140px))`,
+              gridTemplateRows: `40px repeat(${timeSlots.length}, 40px)`,
+              minWidth: `${70 + classrooms.length * 120}px`,
               backgroundColor: 'white'
             }}
           >
@@ -335,7 +335,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             <div 
               className="sticky top-0 left-0 z-30 bg-gradient-to-br from-gray-50 to-white border-b-2 border-r-2 border-gray-200 shadow-sm transition-all duration-200"
               style={{ 
-                height: '35px',
+                height: '40px',
                 backdropFilter: 'blur(10px)',
                 WebkitBackdropFilter: 'blur(10px)'
               }}
@@ -345,9 +345,9 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             {classrooms.map((classroom, idx) => (
               <div
                 key={classroom}
-                className="sticky top-0 z-20 bg-gradient-to-br from-gray-50 to-white border-b-2 border-r border-gray-200 px-1.5 md:px-2 py-1 md:py-1.5 text-[9px] md:text-[10px] font-bold text-gray-800 flex items-center justify-center shadow-sm hover:bg-gray-100 transition-colors duration-200"
+                className="sticky top-0 z-20 bg-gradient-to-br from-gray-50 to-white border-b-2 border-r border-gray-200 px-2 md:px-3 py-1.5 md:py-2 text-[10px] md:text-xs font-bold text-gray-800 flex items-center justify-center shadow-sm hover:bg-gray-100 transition-colors duration-200"
                 style={{ 
-                  height: '35px',
+                  height: '40px',
                   backdropFilter: 'blur(10px)',
                   WebkitBackdropFilter: 'blur(10px)',
                   letterSpacing: '0.025em',
@@ -367,15 +367,19 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                 <React.Fragment key={`row-${time}`}>
                   {/* Colonna Orari - Sticky Left - Moderno */}
                   <div
-                    className="sticky left-0 z-10 bg-white border-r-2 border-gray-200 flex items-center justify-end pr-4 relative transition-all duration-200 hover:bg-gray-50"
+                    className="sticky left-0 z-10 bg-white border-r-2 border-gray-200 relative transition-all duration-200 hover:bg-gray-50"
                     style={{
                       gridRow: rowIndex,
                       gridColumn: 1,
-                      height: '32px',
+                      height: '40px',
                       backgroundColor: 'rgba(255, 255, 255, 0.95)',
                       backdropFilter: 'blur(10px)',
                       WebkitBackdropFilter: 'blur(10px)',
-                      animationDelay: `${timeIndex * 10}ms`
+                      animationDelay: `${timeIndex * 10}ms`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      paddingRight: '12px'
                     }}
                   >
                     {/* Linea orizzontale elegante che passa attraverso il centro dell'orario */}
@@ -384,18 +388,22 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                       style={{
                         top: '50%',
                         left: '0',
-                        width: `calc(60px + ${classrooms.length} * 100px)`,
+                        width: `calc(70px + ${classrooms.length} * 120px)`,
                         height: '1px',
-                        marginTop: '-0.5px',
+                        transform: 'translateY(-50%)',
                         zIndex: 0,
                         background: 'linear-gradient(to right, transparent, #e5e7eb 20%, #e5e7eb 80%, transparent)'
                       }}
                     />
                     <span 
-                      className={`relative z-10 bg-white px-0.5 md:px-1 ${isHour ? 'font-bold text-gray-900 text-[10px] md:text-xs' : 'text-gray-500 text-[9px] md:text-[10px]'}`}
+                      className={`relative z-10 bg-white ${isHour ? 'font-bold text-gray-900 text-xs md:text-sm' : 'text-gray-500 text-[10px] md:text-xs'}`}
                       style={{
                         fontVariantNumeric: 'tabular-nums',
-                        letterSpacing: isHour ? '0.05em' : '0.025em'
+                        letterSpacing: isHour ? '0.05em' : '0.025em',
+                        lineHeight: '1',
+                        margin: 0,
+                        padding: 0,
+                        display: 'block'
                       }}
                     >
                       {time}
@@ -415,11 +423,13 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                       return (
                         <div
                           key={`${time}-${classroom}-${cell.lesson.id}`}
-                          className="border-r border-gray-100 p-1.5 relative group"
+                          className="border-r border-gray-100 p-1 relative group"
                           style={{
                             gridRow: `${rowIndex} / span ${cell.span}`,
                             gridColumn: colIndex,
-                            backgroundColor: 'rgba(249, 250, 251, 0.5)'
+                            backgroundColor: 'transparent',
+                            zIndex: 5,
+                            position: 'relative'
                           }}
                         >
                           <EventCard 
@@ -486,7 +496,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   )
 }
 
-// Componente Evento - Design Moderno e Pulito
+// Componente Evento - Stile macOS Calendar
 function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => void, onView?: () => void }) {
   const courseColor = getCourseColor(lesson.course)
   
@@ -496,46 +506,50 @@ function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => 
     return `Gruppo ${group}`
   }
 
+  // Colori più saturi per stile macOS
+  const macosBgColor = courseColor.bgHex.replace('ff', 'e6') // Aggiungi più opacità
+  const macosTextColor = courseColor.textHex
+
   return (
     <div
       onClick={onEdit || onView}
-      className="h-full w-full rounded-lg p-2.5 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer overflow-visible flex flex-col group relative border"
+      className="h-full w-full rounded-md p-2.5 cursor-pointer overflow-hidden flex flex-col group relative"
       style={{
-        backgroundColor: courseColor.bgHex,
-        borderColor: courseColor.borderColor,
-        borderWidth: '1px',
-        minHeight: '100%'
+        backgroundColor: macosBgColor,
+        borderLeft: `3px solid ${courseColor.borderColor}`,
+        minHeight: '100%',
+        zIndex: 5,
+        position: 'relative'
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-1px)'
-        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.12)'
+        e.currentTarget.style.opacity = '0.9'
+        e.currentTarget.style.transform = 'scale(1.01)'
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'translateY(0)'
-        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)'
+        e.currentTarget.style.opacity = '1'
+        e.currentTarget.style.transform = 'scale(1)'
       }}
       title={`${lesson.title} - ${lesson.startTime}-${lesson.endTime}`}
     >
-      {/* Orario - Badge in alto */}
-      <div className="mb-2">
+      {/* Orario - Stile macOS (sopra) */}
+      <div className="mb-1">
         <span 
-          className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
+          className="text-[10px] font-semibold"
           style={{ 
-            color: courseColor.textHex,
-            backgroundColor: 'rgba(255, 255, 255, 0.3)',
+            color: macosTextColor,
             fontVariantNumeric: 'tabular-nums',
-            letterSpacing: '0.03em'
+            letterSpacing: '0.02em'
           }}
         >
-          {formatTime(lesson.startTime)} - {formatTime(lesson.endTime)}
+          {formatTime(lesson.startTime)}
         </span>
       </div>
       
-      {/* Titolo - Non tagliato, con wrap */}
+      {/* Titolo - Stile macOS (grassetto, principale) */}
       <div 
-        className="font-bold text-xs leading-snug mb-1.5 flex-1" 
+        className="font-semibold text-xs leading-tight mb-1 flex-1" 
         style={{ 
-          color: courseColor.textHex,
+          color: macosTextColor,
           wordBreak: 'break-word',
           overflowWrap: 'break-word'
         }}
@@ -543,13 +557,13 @@ function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => 
         {lesson.title}
       </div>
       
-      {/* Professore e Gruppo - In fondo */}
-      <div className="mt-auto space-y-1">
+      {/* Professore e Gruppo - Stile macOS (secondario) */}
+      <div className="mt-auto">
         <div 
-          className="text-[10px] font-medium leading-tight" 
+          className="text-[10px] leading-tight truncate" 
           style={{ 
-            color: courseColor.textHex,
-            opacity: 0.85
+            color: macosTextColor,
+            opacity: 0.8
           }}
         >
           {lesson.professor}
@@ -557,11 +571,10 @@ function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => 
         
         {lesson.group && (
           <div 
-            className="text-[9px] font-semibold px-1.5 py-0.5 rounded inline-block"
+            className="text-[9px] font-medium mt-0.5"
             style={{ 
-              color: courseColor.textHex,
-              backgroundColor: 'rgba(255, 255, 255, 0.25)',
-              opacity: 0.9
+              color: macosTextColor,
+              opacity: 0.7
             }}
           >
             {formatGroup(lesson.group)}
