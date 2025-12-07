@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { format, isSameDay } from 'date-fns'
 import { it } from 'date-fns/locale'
 import LessonForm from './LessonForm'
@@ -55,6 +55,10 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   // Modale dettaglio lezione
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
   const [showLessonDetails, setShowLessonDetails] = useState(false)
+  
+  // Ref per calcolare l'altezza dell'header del giorno
+  const dayHeaderRef = useRef<HTMLDivElement>(null)
+  const [dayHeaderHeight, setDayHeaderHeight] = useState(76) // Valore di default
 
   const router = useRouter()
   const pathname = usePathname()
@@ -104,6 +108,21 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
     
     return () => clearInterval(interval)
   }, [])
+  
+  // Calcola l'altezza dell'header del giorno
+  useEffect(() => {
+    const updateDayHeaderHeight = () => {
+      if (dayHeaderRef.current) {
+        const height = dayHeaderRef.current.getBoundingClientRect().height
+        setDayHeaderHeight(height)
+      }
+    }
+    
+    updateDayHeaderHeight()
+    window.addEventListener('resize', updateDayHeaderHeight)
+    
+    return () => window.removeEventListener('resize', updateDayHeaderHeight)
+  }, [currentDate])
 
   useEffect(() => {
     loadLessons()
@@ -213,13 +232,15 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   const renderTimeGrid = (dayLessons: Lesson[], dayDate: Date) => {
     const currentTimePos = getCurrentTimePosition(dayDate)
     const firstExternalIndex = getFirstExternalIndex(selectedLocation)
+    // Altezza approssimativa dell'header delle aule
+    const classroomHeaderHeight = 40
 
     return (
-      <div className="relative flex-1 overflow-x-auto overflow-y-auto">
+      <div className="relative flex-1 overflow-x-auto">
         {/* Header aule */}
-        <div className="sticky bg-white border-b border-gray-200" style={{ top: 0, zIndex: 20 }}>
+        <div className="sticky bg-white border-b border-gray-200" style={{ top: `${dayHeaderHeight}px`, zIndex: 20 }}>
           <div className="flex" style={{ minWidth: `${classrooms.length * minClassroomWidth}px` }}>
-            <div className="bg-white border-r border-gray-200" style={{ position: 'sticky', left: 0, top: 0, zIndex: 50, width: '64px', flexShrink: 0 }}></div>
+            <div className="bg-white border-r border-gray-200" style={{ position: 'sticky', left: 0, top: `${dayHeaderHeight}px`, zIndex: 50, width: '64px', flexShrink: 0 }}></div>
             {classrooms.map((classroom, index) => {
               const classroomLessons = getLessonsForClassroom(dayLessons, classroom)
               
@@ -248,7 +269,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
               style={{ top: `${currentTimePos * rowHeight}px` }}
             >
               <div className="flex">
-                <div className="sticky bg-white flex items-center" style={{ left: 0, zIndex: 35, width: '64px', flexShrink: 0 }}>
+                <div className="sticky bg-white flex items-center" style={{ left: 0, top: `${dayHeaderHeight + classroomHeaderHeight}px`, zIndex: 35, width: '64px', flexShrink: 0 }}>
                   <div className="w-2 h-2 bg-red-500 rounded-full mr-1"></div>
                   <span className="text-xs font-semibold text-red-600">{currentTime}</span>
                 </div>
@@ -265,7 +286,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             return (
               <div key={time} className="flex border-b border-gray-100" style={{ height: `${rowHeight}px` }}>
                 {/* Colonna orari - sticky */}
-                <div className="bg-white border-r border-gray-200 p-1 text-xs text-gray-600 flex items-center" style={{ position: 'sticky', left: 0, zIndex: 30, width: '64px', flexShrink: 0, backgroundColor: 'white' }}>
+                <div className="bg-white border-r border-gray-200 p-1 text-xs text-gray-600 flex items-center" style={{ position: 'sticky', left: 0, top: `${dayHeaderHeight + classroomHeaderHeight}px`, zIndex: 30, width: '64px', flexShrink: 0, backgroundColor: 'white' }}>
                   {isHour && <span className="font-semibold">{time}</span>}
                   {isHalfHour && <span className="text-gray-400 text-[10px]">{time}</span>}
                 </div>
@@ -311,12 +332,10 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   const renderDayView = () => {
     const dayLessons = getLessonsForDay(currentDate)
     const isToday = isSameDay(currentDate, new Date())
-    // Altezza approssimativa dell'header del giorno (p-3 = 12px padding top + bottom = 24px, più contenuto ~52px = 76px totale)
-    const dayHeaderHeight = 76
 
     return (
-      <div className="card-modern overflow-hidden animate-fade-in flex flex-col" style={{ maxHeight: 'calc(100vh - 150px)' }}>
-        <div className="sticky text-white p-3 flex items-center justify-between rounded-t-lg shadow-md" style={{ top: 0, zIndex: 40, backgroundColor: '#033157' }}>
+      <div className="card-modern overflow-y-auto animate-fade-in flex flex-col" style={{ maxHeight: 'calc(100vh - 150px)' }}>
+        <div ref={dayHeaderRef} className="sticky text-white p-3 flex items-center justify-between rounded-t-lg shadow-md" style={{ top: 0, zIndex: 40, backgroundColor: '#033157' }}>
           <div>
             <div className="font-bold text-xl uppercase tracking-wide">
               {format(currentDate, 'EEEE', { locale: it })}
