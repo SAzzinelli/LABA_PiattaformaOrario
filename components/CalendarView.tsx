@@ -245,9 +245,9 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   const monthName = format(currentDate, 'MMMM yyyy', { locale: it })
 
   return (
-    <div>
+    <div className="h-full flex flex-col">
       {/* Barra superiore strumenti */}
-      <div className="mb-4 bg-white rounded-lg shadow-sm border border-gray-200 p-3">
+      <div className="mb-4 bg-white rounded-lg shadow-sm border border-gray-200 p-3 flex-shrink-0">
         <div className="flex gap-3 items-center justify-between">
           <button
             onClick={() => setShowSearch(true)}
@@ -283,41 +283,39 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
       </div>
 
       {/* Contenitore Calendario */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden animate-fade-in flex-1 flex flex-col min-h-0">
         {/* Header Giorno */}
-        <div className="px-6 py-4 text-white flex items-center justify-between" style={{ backgroundColor: '#033157' }}>
+        <div className="px-3 py-2 text-white flex items-center justify-between" style={{ backgroundColor: '#033157' }}>
           <div className="flex flex-col animate-slide-in">
-            <span className="text-lg font-bold uppercase tracking-wide">{dayName}</span>
-            <span className="text-base font-normal mt-0.5">{dayNumber} {monthName}</span>
+            <span className="text-base font-bold uppercase tracking-wide">{dayName}</span>
+            <span className="text-sm font-normal mt-0.5">{dayNumber} {monthName}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button 
               onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate() - 1); setCurrentDate(d) }} 
-              className="px-4 py-2 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center backdrop-blur-sm"
+              className="px-3 py-1.5 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center backdrop-blur-sm"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
             <button 
               onClick={() => setCurrentDate(new Date())} 
-              className="px-6 py-2 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 text-sm font-medium backdrop-blur-sm"
+              className="px-4 py-1.5 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 text-xs font-medium backdrop-blur-sm"
             >
               Oggi
             </button>
             <button 
               onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate() + 1); setCurrentDate(d) }} 
-              className="px-4 py-2 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center backdrop-blur-sm"
+              className="px-3 py-1.5 rounded-full bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center backdrop-blur-sm"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
         </div>
 
         {/* Calendario Grid Moderno - Scrollabile */}
         <div 
-          className="overflow-auto relative bg-gradient-to-br from-gray-50 to-white"
+          className="overflow-auto relative bg-gradient-to-br from-gray-50 to-white flex-1 min-h-0"
           style={{ 
-            height: '600px', 
-            maxHeight: '600px', 
             overflowY: 'auto', 
             overflowX: 'auto',
             boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'

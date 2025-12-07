@@ -89,13 +89,13 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
     <>
       <header className="text-white shadow-lg sticky top-0 z-[100]" style={{ backgroundColor: '#033157' }}>
         <div className="container mx-auto px-2">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-14">
             {/* Logo a sinistra */}
-            <div className="flex items-center gap-4 animate-fade-in">
+            <div className="flex items-center gap-3 animate-fade-in">
               <img 
                 src="/logoSito.svg" 
                 alt="LABA" 
-                className="h-10 w-auto brightness-0 invert transition-transform duration-300 hover:scale-110"
+                className="h-8 w-auto brightness-0 invert transition-transform duration-300 hover:scale-110"
               />
             </div>
             
@@ -103,7 +103,7 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleLocationChange('badia-ripoli')}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                className={`px-3.5 py-2 rounded-lg font-medium text-sm transition-all ${
                   currentLocation === 'badia-ripoli'
                     ? 'bg-white text-laba-primary shadow-md'
                     : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
@@ -113,7 +113,7 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
               </button>
               <button
                 onClick={() => handleLocationChange('via-vecchietti')}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                className={`px-3.5 py-2 rounded-lg font-medium text-sm transition-all ${
                   currentLocation === 'via-vecchietti'
                     ? 'bg-white text-laba-primary shadow-md'
                     : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
@@ -130,7 +130,7 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
                 className="p-2 rounded-lg text-white hover:bg-white hover:bg-opacity-20 transition-colors relative z-[100]"
                 aria-label="Menu"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
@@ -156,7 +156,7 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
           />
           
           {/* Menu dropdown - posizionato fisso in alto a destra */}
-          <div className="fixed top-16 right-4 z-[100] bg-white rounded-lg shadow-xl border border-gray-200 min-w-[200px] animate-scale-in">
+          <div className="fixed top-14 right-4 z-[100] bg-white rounded-lg shadow-xl border border-gray-200 min-w-[200px] animate-scale-in">
             <div className="py-2">
               {isAuthenticated ? (
                 <button
