@@ -1,7 +1,7 @@
-// Genera slot orari da mezz'ora dalle 9:00 alle 21:00
+// Genera slot orari da mezz'ora dalle 8:00 alle 22:00
 export function generateTimeSlots(): string[] {
   const slots: string[] = []
-  for (let hour = 9; hour < 21; hour++) {
+  for (let hour = 8; hour < 22; hour++) {
     slots.push(`${hour.toString().padStart(2, '0')}:00`)
     slots.push(`${hour.toString().padStart(2, '0')}:30`)
   }
@@ -34,7 +34,7 @@ export function getLessonSlots(startTime: string, endTime: string): number {
 // Calcola la posizione verticale di un orario nella griglia
 export function getTimePosition(time: string): number {
   const minutes = timeToMinutes(time)
-  const startMinutes = 9 * 60 // 9:00
+  const startMinutes = 8 * 60 // 8:00
   // Arrotonda per eccesso per allineare correttamente con gli slot
   return Math.floor((minutes - startMinutes) / 30) // Posizione in slot (ogni slot = 30 min)
 }
@@ -45,10 +45,10 @@ export function getCurrentTime(): string {
   return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
 }
 
-// Verifica se un orario è nel range 9:00-21:00
+// Verifica se un orario è nel range 8:00-22:00
 export function isTimeInRange(time: string): boolean {
   const minutes = timeToMinutes(time)
-  return minutes >= 9 * 60 && minutes < 21 * 60
+  return minutes >= 8 * 60 && minutes < 22 * 60
 }
 
 // Interfaccia per le linee temporali

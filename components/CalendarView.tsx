@@ -238,11 +238,11 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
     
     const now = new Date()
     const currentMinutes = now.getHours() * 60 + now.getMinutes()
-    const startMinutes = 9 * 60 // 09:00
+    const startMinutes = 8 * 60 // 08:00
     const rowHeight = 40 // Altezza riga in px
     
-    // Se l'ora corrente è fuori dal range del calendario (9:00-21:00), non mostrare
-    if (currentMinutes < startMinutes || currentMinutes >= 21 * 60) return null
+    // Se l'ora corrente è fuori dal range del calendario (8:00-22:00), non mostrare
+    if (currentMinutes < startMinutes || currentMinutes >= 22 * 60) return null
     
     // Calcola la posizione precisa in pixel
     const slotIndex = (currentMinutes - startMinutes) / 30 // Slot frazionario (es. 9:15 = 0.5)
@@ -297,7 +297,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
       // Trova indice orario inizio
       // Usa timeToMinutes per trovare lo slot corretto
       const startMinutes = timeToMinutes(lesson.startTime)
-      const gridStartMinutes = 9 * 60 // 09:00
+      const gridStartMinutes = 8 * 60 // 08:00
       const startIndex = Math.floor((startMinutes - gridStartMinutes) / 30)
 
       // Calcola durata in slot (arrotondata per eccesso)
@@ -451,9 +451,9 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             className="relative"
             style={{
               display: 'grid',
-              gridTemplateColumns: `70px repeat(${classrooms.length}, minmax(120px, 140px))`,
+              gridTemplateColumns: `70px repeat(${classrooms.length}, minmax(140px, 160px))`,
               gridTemplateRows: `40px repeat(${timeSlots.length}, 40px)`,
-              minWidth: `${70 + classrooms.length * 120}px`,
+              minWidth: `${70 + classrooms.length * 140}px`,
               backgroundColor: 'white'
             }}
           >
@@ -514,7 +514,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                       style={{
                         top: '50%',
                         left: '0',
-                        width: `calc(70px + ${classrooms.length} * 120px)`,
+                        width: `calc(70px + ${classrooms.length} * 140px)`,
                         height: '1px',
                         transform: 'translateY(-50%)',
                         zIndex: 0,
@@ -554,7 +554,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                             gridRow: `${rowIndex} / span ${cell.span}`,
                             gridColumn: colIndex,
                             backgroundColor: 'transparent',
-                            zIndex: 5,
+                            zIndex: 15,
                             position: 'relative'
                           }}
                         >
@@ -644,7 +644,7 @@ function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => 
         backgroundColor: macosBgColor,
         borderLeft: `3px solid ${courseColor.borderColor}`,
         minHeight: '100%',
-        zIndex: 5,
+        zIndex: 20,
         position: 'relative'
       }}
       onMouseEnter={(e) => {
