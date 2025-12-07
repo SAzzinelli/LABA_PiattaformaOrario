@@ -37,28 +37,32 @@ export default function LessonFilters({
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
       {/* Filtro Corso */}
       <div className="flex-shrink-0">
-        <CustomDropdown
-          label="Corso"
-          value={course || ''}
-          options={courseOptions.map(c => ({ value: c, label: c === 'Graphic Design & Multimedia' ? 'Graphic Design' : c }))}
-          onChange={(value) => {
-            onCourseChange(value)
-            onYearChange(null) // Reset anno quando cambia corso
-          }}
-          placeholder="Tutti i corsi"
-        />
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-gray-600 font-medium">Corso</label>
+          <CustomDropdown
+            value={course || ''}
+            options={courseOptions.map(c => ({ value: c, label: c === 'Graphic Design & Multimedia' ? 'Graphic Design' : c }))}
+            onChange={(value) => {
+              onCourseChange(value)
+              onYearChange(null) // Reset anno quando cambia corso
+            }}
+            placeholder="Tutti i corsi"
+          />
+        </div>
       </div>
 
       {/* Filtro Anno */}
       <div className="flex-shrink-0">
-        <CustomDropdown
-          label="Anno"
-          value={year?.toString() || ''}
-          options={availableYears.map(y => ({ value: y.toString(), label: `${y}° Anno` }))}
-          onChange={(value) => onYearChange(value ? parseInt(value) : null)}
-          placeholder="Tutti gli anni"
-          disabled={!course}
-        />
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-gray-600 font-medium">Anno</label>
+          <CustomDropdown
+            value={year?.toString() || ''}
+            options={availableYears.map(y => ({ value: y.toString(), label: `${y}° Anno` }))}
+            onChange={(value) => onYearChange(value ? parseInt(value) : null)}
+            placeholder="Tutti gli anni"
+            disabled={!course}
+          />
+        </div>
       </div>
 
       {/* Reset */}
