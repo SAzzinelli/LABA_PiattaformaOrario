@@ -219,7 +219,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
         {/* Header aule */}
         <div className="sticky bg-white border-b border-gray-200" style={{ top: '76px', zIndex: 20 }}>
           <div className="flex" style={{ minWidth: `${classrooms.length * minClassroomWidth}px` }}>
-            <div className="sticky bg-white border-r border-gray-200" style={{ left: 0, zIndex: 50, width: '64px', flexShrink: 0 }}></div>
+            <div className="bg-white border-r border-gray-200" style={{ position: 'sticky', left: 0, top: '76px', zIndex: 50, width: '64px', flexShrink: 0 }}></div>
             {classrooms.map((classroom, index) => {
               const classroomLessons = getLessonsForClassroom(dayLessons, classroom)
               const isFirstExternal = index === firstExternalIndex
