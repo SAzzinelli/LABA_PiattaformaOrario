@@ -146,14 +146,14 @@ export default function CalendarGrid({
                                 {classroomLessons.map((lesson) => {
                                     const startPos = getTimePosition(lesson.startTime)
                                     const endPos = getTimePosition(lesson.endTime)
-                                    const height = endPos - startPos
+                                    const height = (endPos - startPos) * rowHeight
 
                                     return (
                                         <div
                                             key={lesson.id}
                                             className="absolute left-1 right-1 z-10"
                                             style={{
-                                                top: `${startPos}px`,
+                                                top: `${startPos * rowHeight}px`,
                                                 height: `${Math.max(height, 20)}px`,
                                             }}
                                         >
