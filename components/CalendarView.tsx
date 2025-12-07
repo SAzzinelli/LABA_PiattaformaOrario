@@ -292,6 +292,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                           startSlot={getTimePosition(lessonStarting.startTime)}
                           endSlot={getTimePosition(lessonStarting.endTime)}
                           rowHeight={rowHeight}
+                          maxSlots={timeSlots.length}
                           onEdit={isAuthenticated ? handleEditLesson : undefined}
                           onView={!isAuthenticated ? handleViewLesson : undefined}
                         />
@@ -470,6 +471,7 @@ interface LessonEventCardProps {
   startSlot: number
   endSlot: number
   rowHeight: number
+  maxSlots: number
   onEdit?: (lesson: Lesson) => void
   onView?: (lesson: Lesson) => void
 }
