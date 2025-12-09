@@ -1,18 +1,18 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { format, isSameDay } from 'date-fns'
 import { it } from 'date-fns/locale'
 import LessonForm from './LessonForm'
 import LessonFilters from './LessonFilters'
 import SearchOverlay from './SearchOverlay'
 import LessonDetailsModal from './LessonDetailsModal'
-import { getBaseClassrooms, getFirstExternalIndex } from '@/lib/classrooms'
-import { generateTimeSlots, getTimePosition, getCurrentTime } from '@/lib/timeSlots'
+import { getBaseClassrooms } from '@/lib/classrooms'
+import { generateTimeSlots, timeToMinutes } from '@/lib/timeSlots'
 import { Location } from '@/lib/locations'
-import { useRouter, usePathname } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { generateICS } from '@/lib/ics'
-import { getCourseColor } from '@/lib/courseColors'
+import { getCourseColor, getCourseCode } from '@/lib/courseColors'
 
 interface Lesson {
   id: string
@@ -28,11 +28,15 @@ interface Lesson {
   notes?: string
 }
 
-// Colore header calendario sempre #033157
-
 interface CalendarViewProps {
   initialLocation?: Location
 }
+
+// Struttura della cella della griglia
+type GridCell = 
+  | { type: 'empty' }
+  | { type: 'event', lesson: Lesson, span: number }
+  | { type: 'occupied' }
 
 export default function CalendarView({ initialLocation }: CalendarViewProps = {}) {
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -40,98 +44,59 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null)
-  const [currentTime, setCurrentTime] = useState(getCurrentTime())
-  
-  // Filtri
   const [filterCourse, setFilterCourse] = useState('')
   const [filterYear, setFilterYear] = useState<number | null>(null)
-  
-  // Ricerca
   const [showSearch, setShowSearch] = useState(false)
-  
-  // Altezza righe calendario (fissa a 45px)
-  const rowHeight = 45
-  
-  // Modale dettaglio lezione
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
   const [showLessonDetails, setShowLessonDetails] = useState(false)
-  
-  // Ref per calcolare l'altezza dell'header del giorno
-  const dayHeaderRef = useRef<HTMLDivElement>(null)
-  const [dayHeaderHeight, setDayHeaderHeight] = useState(76) // Valore di default
 
-  const router = useRouter()
   const pathname = usePathname()
   
-  // Estrai la sede dall'URL se disponibile
   const getLocationFromPath = (): Location => {
     if (pathname?.includes('/via-vecchietti')) return 'via-vecchietti'
     if (pathname?.includes('/badia-ripoli')) return 'badia-ripoli'
     return initialLocation || 'badia-ripoli'
   }
   
-  // Sede selezionata - usa quella dall'URL se disponibile
   const [selectedLocation, setSelectedLocation] = useState<Location>(initialLocation || 'badia-ripoli')
   
-  // Sincronizza con l'URL quando cambia
+  // Gestione URL e Location
   useEffect(() => {
     if (pathname) {
       const locationFromPath = getLocationFromPath()
       if (locationFromPath !== selectedLocation) {
         setSelectedLocation(locationFromPath)
-        // Reset filtri quando cambia sede
         setFilterCourse('')
         setFilterYear(null)
       }
     }
   }, [pathname, selectedLocation])
 
-  const timeSlots = generateTimeSlots()
-  const classrooms = getBaseClassrooms(selectedLocation)
-  
-  // Calcola la larghezza minima basata sul nome più lungo
-  const getMinClassroomWidth = () => {
-    const maxLength = Math.max(...classrooms.map(c => c.length))
-    // Approssimativamente 6px per carattere + padding ridotto
-    return Math.max(110, maxLength * 6 + 24)
-  }
-  const minClassroomWidth = getMinClassroomWidth()
-
+  // Caricamento dati e Auth
   useEffect(() => {
     checkAuth()
     loadLessons()
     
-    // Aggiorna l'orario corrente ogni minuto
-    const interval = setInterval(() => {
-      setCurrentTime(getCurrentTime())
-    }, 60000)
+    const handleExportEvent = () => handleExportToCalendar()
+    window.addEventListener('export-calendar', handleExportEvent)
     
-    return () => clearInterval(interval)
-  }, [])
-  
-  // Calcola l'altezza dell'header del giorno
-  useEffect(() => {
-    const updateDayHeaderHeight = () => {
-      if (dayHeaderRef.current) {
-        const height = dayHeaderRef.current.getBoundingClientRect().height
-        setDayHeaderHeight(height)
-      }
+    return () => {
+      window.removeEventListener('export-calendar', handleExportEvent)
     }
-    
-    updateDayHeaderHeight()
-    window.addEventListener('resize', updateDayHeaderHeight)
-    
-    return () => window.removeEventListener('resize', updateDayHeaderHeight)
-  }, [currentDate])
+  }, [])
 
   useEffect(() => {
     loadLessons()
   }, [filterCourse, filterYear, selectedLocation])
 
   const checkAuth = async () => {
-    const res = await fetch('/api/auth/check')
-    const data = await res.json()
-    setIsAuthenticated(data.authenticated)
+    try {
+      const res = await fetch('/api/auth/check')
+      const data = await res.json()
+      setIsAuthenticated(data.authenticated)
+    } catch (e) {
+      console.error("Auth check failed", e)
+    }
   }
 
   const loadLessons = async () => {
@@ -139,261 +104,25 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
     if (filterCourse) params.append('course', filterCourse)
     if (filterYear !== null) params.append('year', filterYear.toString())
     
-    const res = await fetch(`/api/lessons?${params.toString()}`)
-    const data = await res.json()
-    
-    // Filtra le lezioni per sede basandosi sulle aule
-    const locationClassrooms = getBaseClassrooms(selectedLocation)
-    const filteredLessons = data.filter((lesson: Lesson) => {
-      // Controlla se l'aula della lezione appartiene alla sede selezionata
-      // Gestisce anche le varianti (Magna 1/2 -> Aula Magna, Conference 1/2 -> Conference)
-      const lessonClassroom = lesson.classroom
-      if (selectedLocation === 'badia-ripoli') {
-        // Per Badia a Ripoli, controlla se l'aula è nelle aule di Badia
-        if (lessonClassroom === 'Magna 1' || lessonClassroom === 'Magna 2') {
-          return locationClassrooms.includes('Aula Magna')
-        }
-        if (lessonClassroom === 'Conference 1' || lessonClassroom === 'Conference 2') {
-          return locationClassrooms.includes('Conference')
-        }
-        return locationClassrooms.includes(lessonClassroom)
-      } else {
-        // Per Via de Vecchietti, solo le aule specifiche
-        return locationClassrooms.includes(lessonClassroom)
-      }
-    })
-    
-    setLessons(filteredLessons)
-  }
-
-  const handleAddLesson = () => {
-    setEditingLesson(null)
-    setShowForm(true)
-  }
-
-  const handleEditLesson = (lesson: Lesson) => {
-    setEditingLesson(lesson)
-    setShowForm(true)
-  }
-
-  const handleViewLesson = (lesson: Lesson) => {
-    setSelectedLesson(lesson)
-    setShowLessonDetails(true)
-  }
-
-  const handleDeleteLesson = async (id: string) => {
-    if (!confirm('Sei sicuro di voler eliminare questa lezione?')) return
-    
     try {
-      const res = await fetch(`/api/lessons/${id}`, { method: 'DELETE' })
-      if (res.ok) {
-        loadLessons()
-      }
-    } catch (error) {
-      console.error('Errore durante l\'eliminazione:', error)
+      const res = await fetch(`/api/lessons?${params.toString()}`)
+      const data = await res.json()
+      
+      const locationClassrooms = getBaseClassrooms(selectedLocation)
+      const filteredLessons = data.filter((lesson: Lesson) => {
+        // Normalizza il nome dell'aula per il confronto
+        const c = lesson.classroom
+        if (selectedLocation === 'badia-ripoli') {
+          if (c === 'Magna 1' || c === 'Magna 2') return locationClassrooms.includes('Aula Magna')
+          if (c === 'Conference 1' || c === 'Conference 2') return locationClassrooms.includes('Conference')
+        }
+        return locationClassrooms.includes(c)
+      })
+      
+      setLessons(filteredLessons)
+    } catch (e) {
+      console.error("Failed to load lessons", e)
     }
-  }
-
-  const handleFormClose = () => {
-    setShowForm(false)
-    setEditingLesson(null)
-    loadLessons()
-  }
-
-  const getLessonsForDay = (date: Date): Lesson[] => {
-    const dayOfWeek = date.getDay()
-    return lessons.filter(lesson => lesson.dayOfWeek === dayOfWeek)
-  }
-
-  const getLessonsForClassroom = (dayLessons: Lesson[], classroom: string): Lesson[] => {
-    return dayLessons.filter(lesson => {
-      // Gestisce le varianti (Magna 1, Magna 2 -> Aula Magna, etc.)
-      if (classroom === 'Aula Magna') {
-        return lesson.classroom === 'Aula Magna' || lesson.classroom === 'Magna 1' || lesson.classroom === 'Magna 2'
-      }
-      if (classroom === 'Conference') {
-        return lesson.classroom === 'Conference' || lesson.classroom === 'Conference 1' || lesson.classroom === 'Conference 2'
-      }
-      return lesson.classroom === classroom
-    })
-  }
-
-  const getCurrentTimePosition = (dayDate: Date): number | null => {
-    const now = new Date()
-    const currentMinutes = now.getHours() * 60 + now.getMinutes()
-    
-    // Mostra il pin solo se siamo nel giorno corrente e l'orario è nel range 9-21
-    if (isSameDay(dayDate, now) && currentMinutes >= 9 * 60 && currentMinutes < 21 * 60) {
-      return getTimePosition(currentTime)
-    }
-    return null
-  }
-
-  const renderTimeGrid = (dayLessons: Lesson[], dayDate: Date) => {
-    const currentTimePos = getCurrentTimePosition(dayDate)
-    const firstExternalIndex = getFirstExternalIndex(selectedLocation)
-    // Altezza approssimativa dell'header delle aule
-    const classroomHeaderHeight = 40
-
-    return (
-      <div className="relative flex-1 overflow-x-auto">
-        {/* Header aule */}
-        <div className="sticky bg-white border-b border-gray-200" style={{ top: `${dayHeaderHeight}px`, zIndex: 20 }}>
-          <div className="flex" style={{ minWidth: `${classrooms.length * minClassroomWidth}px` }}>
-            <div className="bg-white border-r border-gray-200" style={{ position: 'sticky', left: 0, top: `${dayHeaderHeight}px`, zIndex: 50, width: '64px', flexShrink: 0 }}></div>
-            {classrooms.map((classroom, index) => {
-              const classroomLessons = getLessonsForClassroom(dayLessons, classroom)
-              
-              return (
-                <div
-                  key={classroom}
-                  className="flex-shrink-0 border-r border-gray-200 last:border-r-0 p-1.5 text-center font-semibold text-xs bg-gray-50 whitespace-nowrap"
-                  style={{ width: `${minClassroomWidth}px`, minWidth: `${minClassroomWidth}px` }}
-                >
-                  {classroom}
-                  {classroomLessons.length > 0 && (
-                    <span className="ml-1 text-xs text-gray-500">({classroomLessons.length})</span>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Griglia orari */}
-        <div className="relative" style={{ minWidth: `${classrooms.length * minClassroomWidth}px` }}>
-          {/* Pin orario corrente */}
-          {currentTimePos !== null && (
-            <div
-              className="absolute left-0 right-0 z-20 pointer-events-none"
-              style={{ top: `${currentTimePos * rowHeight}px` }}
-            >
-              <div className="flex">
-                <div className="sticky bg-white flex items-center" style={{ left: 0, top: `${dayHeaderHeight + classroomHeaderHeight}px`, zIndex: 35, width: '64px', flexShrink: 0 }}>
-                  <div className="w-2 h-2 bg-red-500 rounded-full mr-1"></div>
-                  <span className="text-xs font-semibold text-red-600">{currentTime}</span>
-                </div>
-                <div className="flex-1 border-t-2 border-red-500"></div>
-              </div>
-            </div>
-          )}
-
-          {/* Righe orari */}
-          {timeSlots.map((time, timeIndex) => {
-            const isHour = time.endsWith(':00')
-            const isHalfHour = time.endsWith(':30')
-
-            return (
-              <div key={time} className="flex border-b border-gray-100" style={{ height: `${rowHeight}px` }}>
-                {/* Colonna orari - sticky */}
-                <div className="bg-white border-r border-gray-200 p-1 text-xs text-gray-600 flex items-center" style={{ position: 'sticky', left: 0, top: `${dayHeaderHeight + classroomHeaderHeight}px`, zIndex: 30, width: '64px', flexShrink: 0, backgroundColor: 'white' }}>
-                  {isHour && <span className="font-semibold">{time}</span>}
-                  {isHalfHour && <span className="text-gray-400 text-[10px]">{time}</span>}
-                </div>
-
-                {/* Colonne aule */}
-                {classrooms.map((classroom, index) => {
-                  const classroomLessons = getLessonsForClassroom(dayLessons, classroom)
-                  
-                  // Trova la lezione che inizia in questo slot
-                  const lessonStarting = classroomLessons.find(lesson => {
-                    const lessonStart = getTimePosition(lesson.startTime)
-                    return timeIndex === lessonStart
-                  })
-
-                  return (
-                    <div
-                      key={classroom}
-                      className="flex-shrink-0 border-r border-gray-100 last:border-r-0 relative"
-                      style={{ width: `${minClassroomWidth}px`, minWidth: `${minClassroomWidth}px` }}
-                    >
-                      {lessonStarting && (
-                        <LessonEventCard
-                          lesson={lessonStarting}
-                          startSlot={getTimePosition(lessonStarting.startTime)}
-                          endSlot={getTimePosition(lessonStarting.endTime)}
-                          rowHeight={rowHeight}
-                          maxSlots={timeSlots.length}
-                          onEdit={isAuthenticated ? handleEditLesson : undefined}
-                          onView={!isAuthenticated ? handleViewLesson : undefined}
-                        />
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    )
-  }
-
-  const renderDayView = () => {
-    const dayLessons = getLessonsForDay(currentDate)
-    const isToday = isSameDay(currentDate, new Date())
-
-    return (
-      <div className="card-modern overflow-y-auto animate-fade-in flex flex-col" style={{ maxHeight: 'calc(100vh - 150px)' }}>
-        <div ref={dayHeaderRef} className="sticky text-white p-3 flex items-center justify-between rounded-t-lg shadow-md" style={{ top: 0, zIndex: 40, backgroundColor: '#033157' }}>
-          <div>
-            <div className="font-bold text-xl uppercase tracking-wide">
-              {format(currentDate, 'EEEE', { locale: it })}
-            </div>
-            <div className="text-sm opacity-90 mt-0.5">
-              {format(currentDate, 'd MMMM yyyy', { locale: it })}
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigateDate('prev')}
-              className="btn-modern px-3 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm"
-              title="Giorno precedente"
-            >
-              <span className="relative z-10">←</span>
-            </button>
-            <button
-              onClick={() => setCurrentDate(new Date())}
-              className="btn-modern px-4 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm"
-            >
-              <span className="relative z-10">Oggi</span>
-            </button>
-            <button
-              onClick={() => navigateDate('next')}
-              className="btn-modern px-3 py-1.5 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium backdrop-blur-sm"
-              title="Giorno successivo"
-            >
-              <span className="relative z-10">→</span>
-            </button>
-          </div>
-        </div>
-        {renderTimeGrid(dayLessons, currentDate)}
-      </div>
-    )
-  }
-
-  const navigateDate = (direction: 'prev' | 'next') => {
-    let newDate = new Date(currentDate)
-    newDate.setDate(newDate.getDate() + (direction === 'next' ? 1 : -1))
-    setCurrentDate(newDate)
-  }
-
-  const handleResetFilters = () => {
-    setFilterCourse('')
-    setFilterYear(null)
-  }
-
-  const handleSearchSelect = (lesson: Lesson, dayOfWeek: number) => {
-    // Calcola la data del giorno della settimana
-    const today = new Date()
-    const currentDay = today.getDay()
-    const diff = dayOfWeek - currentDay
-    const targetDate = new Date(today)
-    targetDate.setDate(today.getDate() + diff)
-    
-    setCurrentDate(targetDate)
-    setEditingLesson(lesson)
-    setShowForm(true)
   }
 
   const handleExportToCalendar = () => {
@@ -409,66 +138,215 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
     window.URL.revokeObjectURL(url)
   }
 
+  // --- LOGICA DI CALCOLO DELLA GRIGLIA ---
+  
+  const timeSlots = generateTimeSlots() // ["09:00", "09:30", ...]
+  const classrooms = getBaseClassrooms(selectedLocation)
+  
+  // Matrice della griglia: [TimeIndex][ClassroomIndex] -> GridCell
+  const gridMatrix = useMemo(() => {
+    // Inizializza la matrice vuota
+    const matrix: GridCell[][] = Array(timeSlots.length).fill(null).map(() => 
+      Array(classrooms.length).fill({ type: 'empty' })
+    )
+
+    // Filtra lezioni del giorno corrente
+    const dayLessons = lessons.filter(l => l.dayOfWeek === currentDate.getDay())
+
+    // Popola la matrice
+    dayLessons.forEach(lesson => {
+      // Trova indice aula
+      let classroomIndex = classrooms.indexOf(lesson.classroom)
+      if (classroomIndex === -1) {
+        // Gestione varianti aule
+        if (lesson.classroom === 'Magna 1' || lesson.classroom === 'Magna 2') classroomIndex = classrooms.indexOf('Aula Magna')
+        if (lesson.classroom === 'Conference 1' || lesson.classroom === 'Conference 2') classroomIndex = classrooms.indexOf('Conference')
+      }
+      
+      if (classroomIndex === -1) return // Aula non trovata in questa sede
+
+      // Trova indice orario inizio
+      // Usa timeToMinutes per trovare lo slot corretto
+      const startMinutes = timeToMinutes(lesson.startTime)
+      const gridStartMinutes = 9 * 60 // 09:00
+      const startIndex = Math.floor((startMinutes - gridStartMinutes) / 30)
+
+      // Calcola durata in slot (arrotondata per eccesso)
+      const endMinutes = timeToMinutes(lesson.endTime)
+      const durationMinutes = endMinutes - startMinutes
+      const span = Math.ceil(durationMinutes / 30)
+
+      if (startIndex >= 0 && startIndex < timeSlots.length) {
+        // Inserisci evento nella cella di partenza
+        matrix[startIndex][classroomIndex] = { 
+          type: 'event', 
+          lesson, 
+          span: Math.min(span, timeSlots.length - startIndex) // Non uscire dalla griglia
+        }
+
+        // Marca le celle successive come occupate
+        for (let i = 1; i < span; i++) {
+          if (startIndex + i < timeSlots.length) {
+            matrix[startIndex + i][classroomIndex] = { type: 'occupied' }
+          }
+        }
+      }
+    })
+
+    return matrix
+  }, [lessons, currentDate, classrooms, timeSlots, selectedLocation])
+
+  // Formattazione data
+  const dayName = format(currentDate, 'EEEE', { locale: it })
+  const dayNumber = format(currentDate, 'd', { locale: it })
+  const monthName = format(currentDate, 'MMMM yyyy', { locale: it })
+
   return (
-    <div>
-      <div className="mb-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        {/* Ricerca a sinistra */}
-        <div className="w-full sm:w-auto">
+    <div className="flex flex-col h-full">
+      {/* Barra superiore strumenti */}
+      <div className="mb-4 bg-white rounded-lg shadow-sm border border-gray-200 p-3 flex-shrink-0">
+        <div className="flex gap-3 items-center justify-between">
           <button
             onClick={() => setShowSearch(true)}
-            className="btn-modern flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-laba-primary text-sm font-medium shadow-md border border-gray-200 relative overflow-hidden"
+            className="flex items-center gap-2 px-5 py-2 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-medium transition-colors border border-gray-200 whitespace-nowrap min-w-[140px]"
           >
-            <svg className="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <span className="relative z-10">Cerca Lezione</span>
+            <span>Cerca</span>
           </button>
-        </div>
-
-        {/* Filtri e Export a destra */}
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-          <LessonFilters
-            course={filterCourse}
-            year={filterYear}
-            location={selectedLocation}
-            onCourseChange={setFilterCourse}
-            onYearChange={setFilterYear}
-            onReset={handleResetFilters}
-          />
-          
-          <button
-            onClick={handleExportToCalendar}
-            className="btn-modern px-5 py-2.5 rounded-full bg-white text-laba-primary text-sm font-medium shadow-md border border-gray-200 relative overflow-hidden hover:bg-laba-primary hover:text-white transition-colors"
-            title="Esporta calendario"
-          >
-            <span className="relative z-10">Esporta</span>
-          </button>
-          
-          {isAuthenticated && (
-            <button
-              onClick={handleAddLesson}
-              className="btn-modern px-6 py-2.5 rounded-full bg-green-500 text-white text-sm font-medium shadow-md whitespace-nowrap relative overflow-hidden"
-            >
-              <span className="relative z-10">+ Aggiungi Lezione</span>
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            <LessonFilters
+              course={filterCourse}
+              year={filterYear}
+              location={selectedLocation}
+              onCourseChange={setFilterCourse}
+              onYearChange={setFilterYear}
+              onReset={() => { setFilterCourse(''); setFilterYear(null) }}
+            />
+            {isAuthenticated && (
+              <button
+                onClick={() => { setEditingLesson(null); setShowForm(true) }}
+                className="px-4 py-2 rounded-lg bg-green-500 text-white text-sm font-medium shadow-sm hover:bg-green-600 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Aggiungi</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      {renderDayView()}
+      {/* Contenitore Calendario */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col flex-1 overflow-hidden">
+        {/* Header Giorno */}
+        <div className="px-4 py-3 text-white font-semibold flex items-center justify-between flex-shrink-0" style={{ backgroundColor: '#033157' }}>
+          <div className="flex items-center gap-3">
+            <span className="text-lg uppercase">{dayName}</span>
+            <span className="text-lg">{dayNumber} {monthName}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate() - 1); setCurrentDate(d) }} className="p-1 rounded hover:bg-white hover:bg-opacity-20 transition-colors">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1 rounded text-sm hover:bg-white hover:bg-opacity-20 transition-colors">Oggi</button>
+            <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate() + 1); setCurrentDate(d) }} className="p-1 rounded hover:bg-white hover:bg-opacity-20 transition-colors">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            </button>
+          </div>
+        </div>
 
+        {/* Tabella Calendario - Scrollabile */}
+        <div className="flex-1 overflow-auto bg-white" style={{ height: 'calc(100vh - 240px)' }}>
+          <table className="w-full border-collapse table-fixed" style={{ minWidth: `${80 + classrooms.length * 150}px` }}>
+            {/* Intestazione Aule - Sticky Top */}
+            <thead className="sticky top-0 z-20 bg-white shadow-sm">
+              <tr>
+                <th className="w-20 bg-white border-b border-r border-gray-200 p-2 sticky left-0 z-30"></th>
+                {classrooms.map((classroom) => (
+                  <th key={classroom} className="border-b border-r border-gray-200 p-2 text-xs font-semibold text-gray-700 bg-gray-50 h-[45px]">
+                    {classroom}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            
+            {/* Corpo Tabella - Orari e Celle */}
+            <tbody>
+              {timeSlots.map((time, timeIndex) => {
+                const isHour = time.endsWith(':00')
+                return (
+                  <tr key={time} className="h-[45px]">
+                    {/* Colonna Orari - Sticky Left */}
+                    <td className="sticky left-0 z-10 bg-white border-r border-gray-200 align-middle p-0">
+                      <div className="flex items-center justify-end pr-3 h-full w-full relative">
+                        {/* Linea che passa attraverso l'orario per simularlo (opzionale, stile macOS) */}
+                        <span className={`text-xs ${isHour ? 'font-bold text-gray-800' : 'text-gray-400 text-[10px]'}`}>
+                          {time}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Celle Aule */}
+                    {classrooms.map((classroom, classroomIndex) => {
+                      const cell = gridMatrix[timeIndex][classroomIndex]
+                      
+                      // Se la cella è occupata da un evento sopra, non renderizzarla
+                      if (cell.type === 'occupied') return null
+
+                      // Se c'è un evento, renderizza cella con rowspan
+                      if (cell.type === 'event') {
+                        return (
+                          <td 
+                            key={`${time}-${classroom}`} 
+                            rowSpan={cell.span} 
+                            className="border-r border-b border-gray-100 p-1 align-top relative"
+                          >
+                            <EventCard 
+                              lesson={cell.lesson} 
+                              onEdit={isAuthenticated ? () => { setEditingLesson(cell.lesson); setShowForm(true) } : undefined}
+                              onView={!isAuthenticated ? () => { setSelectedLesson(cell.lesson); setShowLessonDetails(true) } : undefined}
+                            />
+                          </td>
+                        )
+                      }
+
+                      // Cella vuota
+                      return (
+                        <td key={`${time}-${classroom}`} className="border-r border-b border-gray-100"></td>
+                      )
+                    })}
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Modali e Overlay */}
       {showForm && (
         <LessonForm
           lesson={editingLesson}
           location={selectedLocation}
-          onClose={handleFormClose}
+          onClose={() => { setShowForm(false); setEditingLesson(null); loadLessons() }}
         />
       )}
 
       <SearchOverlay
         isOpen={showSearch}
         onClose={() => setShowSearch(false)}
-        onSelectLesson={handleSearchSelect}
+        onSelectLesson={(lesson, dayOfWeek) => {
+          const today = new Date()
+          const diff = dayOfWeek - today.getDay()
+          const targetDate = new Date(today)
+          targetDate.setDate(today.getDate() + diff)
+          setCurrentDate(targetDate)
+          setEditingLesson(lesson)
+          setShowForm(true)
+        }}
         lessons={lessons}
       />
 
@@ -476,69 +354,55 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
         lesson={selectedLesson}
         currentDate={currentDate}
         isOpen={showLessonDetails}
-        onClose={() => {
-          setShowLessonDetails(false)
-          setSelectedLesson(null)
-        }}
-        onEdit={isAuthenticated ? handleEditLesson : undefined}
+        onClose={() => { setShowLessonDetails(false); setSelectedLesson(null) }}
+        onEdit={isAuthenticated ? (lesson) => { setEditingLesson(lesson); setShowForm(true) } : undefined}
       />
     </div>
   )
 }
 
-// Componente per la card della lezione stile iOS/macOS
-interface LessonEventCardProps {
-  lesson: Lesson
-  startSlot: number
-  endSlot: number
-  rowHeight: number
-  maxSlots: number
-  onEdit?: (lesson: Lesson) => void
-  onView?: (lesson: Lesson) => void
-}
-
-function LessonEventCard({ lesson, startSlot, endSlot, rowHeight, maxSlots, onEdit, onView }: LessonEventCardProps) {
-  // Limita endSlot al numero massimo di slot disponibili per evitare che vada oltre
-  const limitedEndSlot = Math.min(endSlot, maxSlots)
-  const height = (limitedEndSlot - startSlot) * rowHeight // Altezza dinamica basata su rowHeight
+// Componente Evento
+function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => void, onView?: () => void }) {
   const courseColor = getCourseColor(lesson.course)
+  
+  const formatTime = (time: string) => time.split(':').slice(0, 2).join(':')
 
   return (
     <div
-      className="absolute left-1 right-1 rounded-lg shadow-md border-l-4 smooth-transition cursor-pointer overflow-hidden z-10 hover-lift group"
+      onClick={onEdit || onView}
+      className="h-full w-full rounded-lg border-l-4 px-2 pt-0 pb-2 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden flex flex-col group"
       style={{
-        top: `${startSlot * rowHeight}px`,
-        height: `${Math.max(height, rowHeight)}px`,
-        maxHeight: `${(maxSlots - startSlot) * rowHeight}px`, // Limita l'altezza massima
-        borderLeftColor: courseColor.borderColor,
         backgroundColor: courseColor.bgHex,
+        borderLeftColor: courseColor.borderColor
       }}
-      onClick={() => {
-        if (onEdit) onEdit(lesson)
-        else if (onView) onView(lesson)
-      }}
-      title={`${lesson.title} - ${lesson.startTime}-${lesson.endTime} - ${lesson.classroom}`}
+      title={`${lesson.title} - ${lesson.startTime}-${lesson.endTime}`}
     >
-      <div className="p-2.5 h-full flex flex-col justify-between">
-        <div>
-          <div className={`text-xs font-semibold mb-1.5 opacity-80 group-hover:opacity-100 transition-opacity`} style={{ color: courseColor.textHex }}>
-            {lesson.startTime} - {lesson.endTime}
-          </div>
-          <div className={`text-sm font-bold line-clamp-2 transition-colors`} style={{ color: courseColor.textHex }}>
-            {lesson.title}
-          </div>
-        </div>
-        <div className="mt-auto">
-          <div className={`text-xs truncate group-hover:opacity-100 transition-colors`} style={{ color: courseColor.textHex, opacity: 0.8 }}>
-            {lesson.professor}
-          </div>
-          {lesson.group && (
-            <div className={`text-xs mt-1 font-semibold transition-colors`} style={{ color: courseColor.textHex, opacity: 0.8 }}>
-              {lesson.group}
-            </div>
-          )}
-        </div>
+      <div className="flex justify-between items-start mb-1">
+        <span className="text-xs font-bold opacity-90 group-hover:opacity-100" style={{ color: courseColor.textHex }}>
+          {formatTime(lesson.startTime)} - {formatTime(lesson.endTime)}
+        </span>
       </div>
+      
+      <div className="font-bold text-sm leading-tight mb-1 line-clamp-2" style={{ color: courseColor.textHex }}>
+        {lesson.title}
+      </div>
+      
+      {lesson.course && lesson.year && (
+        <div className="text-xs font-semibold opacity-80" style={{ color: courseColor.textHex }}>
+          {getCourseCode(lesson.course)} {lesson.year}
+        </div>
+      )}
+      
+      <div className="mt-auto text-xs opacity-80 truncate" style={{ color: courseColor.textHex }}>
+        {lesson.professor}
+      </div>
+      
+      {lesson.group && (
+        <div className="text-[10px] font-semibold opacity-80" style={{ color: courseColor.textHex }}>
+          Gr: {lesson.group}
+        </div>
+      )}
     </div>
   )
 }
+

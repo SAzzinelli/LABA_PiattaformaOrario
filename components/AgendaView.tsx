@@ -1,5 +1,5 @@
 import { Lesson } from '@/hooks/useLessons'
-import { getCourseColor } from '@/lib/courseColors'
+import { getCourseColor, getCourseCode } from '@/lib/courseColors'
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
 
@@ -57,6 +57,11 @@ export default function AgendaView({
                                 <h3 className="font-bold text-gray-900 text-lg leading-tight">
                                     {lesson.title}
                                 </h3>
+                                {lesson.course && lesson.year && (
+                                    <span className="text-xs font-semibold text-gray-600 mt-1">
+                                        {getCourseCode(lesson.course)} {lesson.year}
+                                    </span>
+                                )}
                             </div>
                             <div className="flex flex-col items-end">
                                 <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded-md">

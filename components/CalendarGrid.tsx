@@ -1,8 +1,6 @@
-import { isSameDay } from 'date-fns'
-import { generateTimeLines, getTimePosition, getCurrentTime, getTotalCalendarHeight } from '@/lib/timeSlots'
-import { getCourseColor } from '@/lib/courseColors'
+import { generateTimeLines, getTimePosition, getTotalCalendarHeight } from '@/lib/timeSlots'
+import { getCourseColor, getCourseCode } from '@/lib/courseColors'
 import { Lesson } from '@/hooks/useLessons'
-import { useState, useEffect } from 'react'
 
 interface CalendarGridProps {
     lessons: Lesson[]
@@ -23,15 +21,6 @@ export default function CalendarGrid({
     onEditLesson,
     onViewLesson
 }: CalendarGridProps) {
-    const [currentTime, setCurrentTime] = useState(getCurrentTime())
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentTime(getCurrentTime())
-        }, 60000)
-        return () => clearInterval(interval)
-    }, [])
-
     const getLessonsForDay = (date: Date): Lesson[] => {
         const dayOfWeek = date.getDay()
         return lessons.filter(lesson => lesson.dayOfWeek === dayOfWeek)
@@ -49,18 +38,7 @@ export default function CalendarGrid({
         })
     }
 
-    const getCurrentTimePosition = (dayDate: Date): number | null => {
-        const now = new Date()
-        const currentMinutes = now.getHours() * 60 + now.getMinutes()
-
-        if (isSameDay(dayDate, now) && currentMinutes >= 8 * 60 && currentMinutes < 21 * 60) {
-            return getTimePosition(currentTime)
-        }
-        return null
-    }
-
     const dayLessons = getLessonsForDay(currentDate)
-    const currentTimePos = getCurrentTimePosition(currentDate)
     const rowHeight = 60 // Altezza di default per riga (30 minuti)
     const timeLines = generateTimeLines(rowHeight)
     const totalHeight = getTotalCalendarHeight(rowHeight)
@@ -116,18 +94,6 @@ export default function CalendarGrid({
                         />
                     ))}
 
-                    {/* Pin orario corrente */}
-                    {currentTimePos !== null && (
-                        <div
-                            className="absolute left-16 right-0 z-20 pointer-events-none"
-                            style={{ top: `${currentTimePos * rowHeight}px` }}
-                        >
-                            <div className="flex">
-                                <div className="w-16 flex-shrink-0"></div>
-                                <div className="flex-1 border-t-2 border-red-500"></div>
-                            </div>
-                        </div>
-                    )}
 
                     {/* Colonne aule con eventi */}
                     {visibleClassrooms.map((classroom, classroomIndex) => {
@@ -205,7 +171,7 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit, onView }: LessonE
             onClick={handleClick}
             title={`${lesson.title} - ${formatTime(lesson.startTime)}-${formatTime(lesson.endTime)} - ${lesson.classroom}`}
         >
-            <div className="px-1.5 pt-1.5 pb-0.5 h-full flex flex-col">
+            <div className="px-1.5 pt-0 pb-0.5 h-full flex flex-col">
                 <div className={`text-[11px] font-medium ${courseColor.text} leading-tight`}>
                     {formatTime(lesson.startTime)} - {formatTime(lesson.endTime)}
                 </div>
@@ -214,6 +180,11 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit, onView }: LessonE
                 </div>
                 {height > 40 && (
                     <>
+                        {lesson.course && lesson.year && (
+                            <div className={`text-[10px] font-semibold ${courseColor.text} opacity-80 truncate mt-0.5`}>
+                                {getCourseCode(lesson.course)} {lesson.year}
+                            </div>
+                        )}
                         <div className={`text-[10px] ${courseColor.text} opacity-80 truncate mt-0.5`}>
                             {lesson.professor}
                         </div>

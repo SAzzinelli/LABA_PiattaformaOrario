@@ -50,3 +50,6 @@ export function getLocationName(location: Location): string {
   return LOCATIONS[location].name
 }
 
+
+
+

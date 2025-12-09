@@ -8,9 +8,11 @@ export function generateTimeSlots(): string[] {
   return slots
 }
 
-// Converte orario HH:mm in minuti dall'inizio del giorno
+// Converte orario HH:mm o HH:mm:ss in minuti dall'inizio del giorno
 export function timeToMinutes(time: string): number {
-  const [hours, minutes] = time.split(':').map(Number)
+  // Rimuovi i secondi se presenti (formato HH:mm:ss -> HH:mm)
+  const timeWithoutSeconds = time.split(':').slice(0, 2).join(':')
+  const [hours, minutes] = timeWithoutSeconds.split(':').map(Number)
   return hours * 60 + minutes
 }
 
@@ -33,7 +35,9 @@ export function getLessonSlots(startTime: string, endTime: string): number {
 export function getTimePosition(time: string): number {
   const minutes = timeToMinutes(time)
   const startMinutes = 9 * 60 // 9:00
-  return (minutes - startMinutes) / 30 // Posizione in slot (ogni slot = 30 min)
+  // Calcola la posizione precisa in slot (ogni slot = 30 min)
+  // Usa Math.floor per allineare correttamente con gli slot
+  return Math.floor((minutes - startMinutes) / 30) // Posizione in slot (ogni slot = 30 min)
 }
 
 // Ottiene l'orario corrente in formato HH:mm

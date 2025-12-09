@@ -95,3 +95,24 @@ export function getCourseColor(course?: string): CourseColor {
   return courseColorMap[course] || defaultColor
 }
 
+// Funzione per ottenere il codice abbreviato del corso
+export function getCourseCode(course?: string): string {
+  if (!course) return ''
+  
+  const codeMap: Record<string, string> = {
+    'Design': 'DES',
+    'Graphic Design & Multimedia': 'GD',
+    'Fashion Design': 'FD',
+    'Interior Design': 'INT',
+    'Regia e Videomaking': 'RV',
+    'Fotografia': 'FOT',
+    'Pittura': 'PIT',
+    'Cinema e Audiovisivi': 'CIN',
+  }
+  
+  return codeMap[course] || ''
+}
+
+
+
+
