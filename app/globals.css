@@ -225,6 +225,12 @@ body {
   display: none;  /* Chrome, Safari, Opera */
 }
 
+/* Mobile scroll improvements */
+.touch-pan-x {
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
 /* Text selection */
 ::selection {
   background: rgba(3, 49, 87, 0.2);

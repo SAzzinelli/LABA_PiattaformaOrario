@@ -38,7 +38,7 @@ export default function AgendaView({
     return (
         <div className="flex flex-col gap-3 p-4 pb-20 overflow-y-auto">
             {dayLessons.map((lesson) => {
-                const courseColor = getCourseColor(lesson.course)
+                const courseColor = getCourseColor(lesson.course, lesson.year)
 
                 return (
                     <div

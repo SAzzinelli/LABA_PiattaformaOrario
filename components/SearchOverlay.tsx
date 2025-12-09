@@ -74,46 +74,46 @@ export default function SearchOverlay({ isOpen, onClose, onSelectLesson, lessons
         onClick={onClose}
       />
       
-      {/* Overlay contenuto */}
-      <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 animate-scale-in pointer-events-none">
+      {/* Overlay contenuto - Mobile first design */}
+      <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-20 px-0 sm:px-4 animate-scale-in pointer-events-none">
         <div 
-          className="card-modern w-full max-w-3xl max-h-[70vh] overflow-hidden pointer-events-auto"
+          className="card-modern w-full h-full sm:h-auto sm:max-w-3xl sm:max-h-[70vh] overflow-hidden pointer-events-auto flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="bg-laba-primary text-white p-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold">Cerca Lezione</h2>
+          <div className="bg-laba-primary text-white p-3 sm:p-4 flex items-center justify-between flex-shrink-0">
+            <h2 className="text-lg sm:text-xl font-bold">Cerca Lezione</h2>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full text-white hover:bg-white hover:bg-opacity-20 smooth-transition flex items-center justify-center text-2xl"
+              className="w-8 h-8 rounded-full text-white hover:bg-white hover:bg-opacity-20 smooth-transition flex items-center justify-center text-2xl flex-shrink-0"
             >
               ×
             </button>
           </div>
 
           {/* Input ricerca */}
-          <div className="p-4 border-b border-gray-200">
+          <div className="p-3 sm:p-4 border-b border-gray-200 flex-shrink-0">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cerca per materia, professore, aula, corso..."
-              className="input-modern w-full px-4 py-3 rounded-lg text-base"
+              placeholder="Cerca per materia, professore, aula..."
+              className="input-modern w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base"
               autoFocus
             />
           </div>
 
           {/* Risultati */}
-          <div className="overflow-y-auto max-h-[calc(70vh-140px)]">
+          <div className="overflow-y-auto flex-1 min-h-0">
             {searchQuery.trim() === '' ? (
-              <div className="p-8 text-center text-gray-500">
-                <p className="text-lg mb-2">Inizia a digitare per cercare</p>
-                <p className="text-sm">Cerca per materia, professore, aula o corso</p>
+              <div className="p-6 sm:p-8 text-center text-gray-500">
+                <p className="text-base sm:text-lg mb-2">Inizia a digitare per cercare</p>
+                <p className="text-xs sm:text-sm">Cerca per materia, professore, aula o corso</p>
               </div>
             ) : filteredLessons.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
-                <p className="text-lg">Nessun risultato trovato</p>
-                <p className="text-sm mt-2">Prova con altri termini di ricerca</p>
+              <div className="p-6 sm:p-8 text-center text-gray-500">
+                <p className="text-base sm:text-lg">Nessun risultato trovato</p>
+                <p className="text-xs sm:text-sm mt-2">Prova con altri termini di ricerca</p>
               </div>
             ) : (
               <div className="divide-y divide-gray-100">
@@ -121,40 +121,40 @@ export default function SearchOverlay({ isOpen, onClose, onSelectLesson, lessons
                   <button
                     key={lesson.id}
                     onClick={() => handleSelectLesson(lesson)}
-                    className="w-full p-4 text-left hover:bg-gray-50 smooth-transition"
+                    className="w-full p-3 sm:p-4 text-left hover:bg-gray-50 active:bg-gray-100 smooth-transition"
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="font-bold text-lg text-laba-primary mb-1">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-base sm:text-lg text-laba-primary mb-1.5 break-words">
                           {lesson.title}
                         </div>
-                        <div className="text-sm text-gray-600 space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">Giorno:</span>
+                        <div className="text-xs sm:text-sm text-gray-600 space-y-1">
+                          <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                            <span className="font-medium whitespace-nowrap">Giorno:</span>
                             <span>{DAYS[lesson.dayOfWeek]}</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">Orario:</span>
-                            <span>{lesson.startTime} - {lesson.endTime}</span>
+                          <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                            <span className="font-medium whitespace-nowrap">Orario:</span>
+                            <span className="whitespace-nowrap">{lesson.startTime.split(':').slice(0, 2).join(':')} - {lesson.endTime.split(':').slice(0, 2).join(':')}</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">Aula:</span>
+                          <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                            <span className="font-medium whitespace-nowrap">Aula:</span>
                             <span>{lesson.classroom}</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">Professore:</span>
+                          <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                            <span className="font-medium whitespace-nowrap">Professore:</span>
                             <span>{lesson.professor}</span>
                           </div>
                           {lesson.course && (
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">Corso:</span>
+                            <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                              <span className="font-medium whitespace-nowrap">Corso:</span>
                               <span>{lesson.course} {lesson.year && `- ${lesson.year}° Anno`}</span>
                             </div>
                           )}
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="px-3 py-1 bg-laba-primary text-white text-xs font-medium rounded-full">
+                      <div className="flex-shrink-0 sm:text-right pt-1 sm:pt-0">
+                        <div className="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-laba-primary text-white text-xs sm:text-sm font-medium rounded-lg sm:rounded-full">
                           Vai
                         </div>
                       </div>

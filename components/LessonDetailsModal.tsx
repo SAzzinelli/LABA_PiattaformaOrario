@@ -45,7 +45,7 @@ export default function LessonDetailsModal({
 }: LessonDetailsModalProps) {
   if (!isOpen || !lesson) return null
 
-  const courseColor = getCourseColor(lesson.course)
+  const courseColor = getCourseColor(lesson.course, lesson.year)
   const dayName = DAYS_OF_WEEK[lesson.dayOfWeek]
   const formattedDate = format(currentDate, 'd MMMM yyyy', { locale: it })
 

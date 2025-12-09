@@ -74,22 +74,22 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
   return (
     <>
       <header className="text-white shadow-lg sticky top-0 z-[100]" style={{ backgroundColor: '#033157' }}>
-        <div className="container mx-auto px-2">
-          <div className="flex items-center justify-between h-16">
+        <div className="container mx-auto px-2 sm:px-4">
+          <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
             {/* Logo a sinistra */}
-            <div className="flex items-center gap-4 animate-fade-in">
+            <div className="flex items-center flex-shrink-0 animate-fade-in">
               <img 
                 src="/logoSito.svg" 
                 alt="LABA" 
-                className="h-10 w-auto brightness-0 invert transition-transform duration-300 hover:scale-110"
+                className="h-8 sm:h-10 w-auto brightness-0 invert transition-transform duration-300 hover:scale-110"
               />
             </div>
             
-            {/* Selettore Sede al centro */}
-            <div className="flex items-center gap-2">
+            {/* Selettore Sede al centro - Mobile: dropdown, Desktop: bottoni */}
+            <div className="hidden sm:flex items-center gap-2 flex-1 justify-center">
               <button
                 onClick={() => handleLocationChange('badia-ripoli')}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                className={`px-3 py-1.5 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
                   currentLocation === 'badia-ripoli'
                     ? 'bg-white text-laba-primary shadow-md'
                     : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
@@ -99,7 +99,7 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
               </button>
               <button
                 onClick={() => handleLocationChange('via-vecchietti')}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                className={`px-3 py-1.5 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
                   currentLocation === 'via-vecchietti'
                     ? 'bg-white text-laba-primary shadow-md'
                     : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
@@ -109,14 +109,40 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
               </button>
             </div>
             
+            {/* Mobile: Selettore Sede compatto */}
+            <div className="sm:hidden flex items-center gap-1.5 flex-1 min-w-0 justify-center">
+              <button
+                onClick={() => handleLocationChange('badia-ripoli')}
+                className={`px-2 py-1 rounded-md font-medium text-[10px] transition-all truncate max-w-[45%] ${
+                  currentLocation === 'badia-ripoli'
+                    ? 'bg-white text-laba-primary shadow-md'
+                    : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
+                }`}
+                title="Piazza di Badia a Ripoli"
+              >
+                Badia
+              </button>
+              <button
+                onClick={() => handleLocationChange('via-vecchietti')}
+                className={`px-2 py-1 rounded-md font-medium text-[10px] transition-all truncate max-w-[45%] ${
+                  currentLocation === 'via-vecchietti'
+                    ? 'bg-white text-laba-primary shadow-md'
+                    : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
+                }`}
+                title="Via de' Vecchietti"
+              >
+                Vecchietti
+              </button>
+            </div>
+            
             {/* Menu hamburger a destra */}
-            <nav className="flex items-center">
+            <nav className="flex items-center flex-shrink-0">
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-2 rounded-lg text-white hover:bg-white hover:bg-opacity-20 transition-colors relative z-[100]"
+                className="p-1.5 sm:p-2 rounded-lg text-white hover:bg-white hover:bg-opacity-20 transition-colors relative z-[100]"
                 aria-label="Menu"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>

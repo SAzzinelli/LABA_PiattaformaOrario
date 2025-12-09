@@ -113,7 +113,7 @@ export default function LessonForm({ lesson, location, onClose }: LessonFormProp
     }
   }
 
-  const courseColor = getCourseColor(lesson?.course)
+  const courseColor = getCourseColor(lesson?.course, lesson?.year)
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">

@@ -157,7 +157,7 @@ interface LessonEventCardProps {
 
 function LessonEventCard({ lesson, startSlot, slotCount, onEdit, onView }: LessonEventCardProps) {
     const formatTime = (time: string) => time.substring(0, 5)
-    const courseColor = getCourseColor(lesson.course)
+    const courseColor = getCourseColor(lesson.course, lesson.year)
 
     const handleClick = () => {
         if (onEdit) onEdit(lesson)
