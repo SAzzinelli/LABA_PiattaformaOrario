@@ -2,18 +2,23 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
-  const token = request.cookies.get('auth-token')?.value
+  try {
+    const token = request.cookies.get('auth-token')?.value
 
-  if (!token) {
-    return NextResponse.json({ authenticated: false })
+    if (!token) {
+      return NextResponse.json({ authenticated: false })
+    }
+
+    const payload = await verifyToken(token)
+
+    if (!payload) {
+      return NextResponse.json({ authenticated: false })
+    }
+
+    return NextResponse.json({ authenticated: true, email: payload.email })
+  } catch (error) {
+    console.error('Error in auth check:', error)
+    return NextResponse.json({ authenticated: false }, { status: 200 })
   }
-
-  const payload = await verifyToken(token)
-
-  if (!payload) {
-    return NextResponse.json({ authenticated: false })
-  }
-
-  return NextResponse.json({ authenticated: true, email: payload.email })
 }
 

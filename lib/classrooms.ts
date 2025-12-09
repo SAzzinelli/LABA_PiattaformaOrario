@@ -15,7 +15,7 @@ export const CLASSROOMS_BADIA_RIPOLI = [
   'Digital HUB',
   'Design LAB',
   'Pittura',
-  'Lab. Tecn. Grafiche',
+  'Tecn. Grafiche',
   'Studio 1',
   'Studio 2',
   'Studio 3',
@@ -67,7 +67,7 @@ export const INTERNAL_CLASSROOMS = [
 export const EXTERNAL_CLASSROOMS = [
   'Design LAB',
   'Pittura',
-  'Lab. Tecn. Grafiche',
+  'Tecn. Grafiche',
   'Studio 1',
   'Studio 2',
   'Studio 3',
