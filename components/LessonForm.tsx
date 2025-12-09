@@ -24,6 +24,7 @@ interface LessonFormProps {
   lesson?: Lesson | null
   location: Location
   onClose: () => void
+  onDelete?: (id: string) => void
 }
 
 const DAYS_OF_WEEK = [
@@ -36,7 +37,7 @@ const DAYS_OF_WEEK = [
   { value: 6, label: 'Sabato' },
 ]
 
-export default function LessonForm({ lesson, location, onClose }: LessonFormProps) {
+export default function LessonForm({ lesson, location, onClose, onDelete }: LessonFormProps) {
   const availableClassrooms = getClassroomsForLocation(location)
   const availableCourses = getCoursesForLocation(location)
   
@@ -56,6 +57,7 @@ export default function LessonForm({ lesson, location, onClose }: LessonFormProp
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [updateScope, setUpdateScope] = useState<'single' | 'all_future'>('single')
 
   useEffect(() => {
     if (lesson) {
@@ -93,10 +95,15 @@ export default function LessonForm({ lesson, location, onClose }: LessonFormProp
       const url = lesson ? `/api/lessons/${lesson.id}` : '/api/lessons'
       const method = lesson ? 'PUT' : 'POST'
 
+      // Se è una modifica, aggiungi lo scope dell'aggiornamento
+      const requestBody = lesson 
+        ? { ...payload, updateScope }
+        : payload
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(requestBody),
       })
 
       if (!res.ok) {
@@ -327,6 +334,45 @@ export default function LessonForm({ lesson, location, onClose }: LessonFormProp
             />
           </div>
 
+          {/* Opzione per modificare solo questa o tutte le future (solo in modifica) */}
+          {lesson && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Applica modifiche a:
+              </label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="updateScope"
+                    value="single"
+                    checked={updateScope === 'single'}
+                    onChange={(e) => setUpdateScope(e.target.value as 'single' | 'all_future')}
+                    className="w-4 h-4 text-laba-primary focus:ring-laba-primary"
+                  />
+                  <div>
+                    <span className="text-sm font-medium text-gray-900">Solo questa lezione</span>
+                    <p className="text-xs text-gray-600">Modifica solo questa occorrenza specifica</p>
+                  </div>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="updateScope"
+                    value="all_future"
+                    checked={updateScope === 'all_future'}
+                    onChange={(e) => setUpdateScope(e.target.value as 'single' | 'all_future')}
+                    className="w-4 h-4 text-laba-primary focus:ring-laba-primary"
+                  />
+                  <div>
+                    <span className="text-sm font-medium text-gray-900">Tutte le lezioni future</span>
+                    <p className="text-xs text-gray-600">Modifica questa e tutte le occorrenze future con le stesse caratteristiche</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+          )}
+
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
               {error}
@@ -334,6 +380,31 @@ export default function LessonForm({ lesson, location, onClose }: LessonFormProp
           )}
 
           <div className="flex gap-2">
+            {lesson && onDelete && (
+              <button
+                type="button"
+                onClick={async () => {
+                  if (confirm('Sei sicuro di voler eliminare questa lezione?')) {
+                    try {
+                      const res = await fetch(`/api/lessons/${lesson.id}`, {
+                        method: 'DELETE',
+                      })
+                      if (res.ok) {
+                        onDelete(lesson.id)
+                        onClose()
+                      } else {
+                        setError('Errore durante l\'eliminazione')
+                      }
+                    } catch (err) {
+                      setError('Errore di connessione')
+                    }
+                  }
+                }}
+                className="btn-modern px-5 py-2.5 rounded-full bg-red-600 text-white text-sm font-medium shadow-md relative overflow-hidden hover:bg-red-700"
+              >
+                <span className="relative z-10">Elimina</span>
+              </button>
+            )}
             <button
               type="submit"
               disabled={loading}

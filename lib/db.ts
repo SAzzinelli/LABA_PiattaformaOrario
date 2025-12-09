@@ -105,25 +105,82 @@ export async function addLesson(lesson: Omit<Lesson, 'id'>): Promise<Lesson> {
 
 export async function updateLesson(
   id: string,
-  lesson: Partial<Omit<Lesson, 'id'>>
+  lesson: Partial<Omit<Lesson, 'id'>>,
+  updateScope?: 'single' | 'all_future'
 ): Promise<Lesson | null> {
   try {
-    const row = lessonToDbRow(lesson)
-    const { data, error } = await supabase
+    // Prima ottieni la lezione originale per trovare le caratteristiche da matchare
+    const { data: originalLesson } = await supabase
       .from('lessons')
-      .update(row)
+      .select('*')
       .eq('id', id)
-      .select()
       .single()
 
-    if (error) {
-      console.error('Error updating lesson:', error)
+    if (!originalLesson) {
       return null
     }
 
-    if (!data) return null
+    const row = lessonToDbRow(lesson)
+    
+    if (updateScope === 'all_future') {
+      // Trova tutte le lezioni con le stesse caratteristiche della lezione originale
+      // e aggiornale tutte
+      let query = supabase
+        .from('lessons')
+        .update(row)
+        .eq('day_of_week', originalLesson.day_of_week)
+        .eq('start_time', originalLesson.start_time)
+        .eq('end_time', originalLesson.end_time)
+        .eq('professor', originalLesson.professor)
+        .eq('classroom', originalLesson.classroom)
+      
+      // Aggiungi filtri opzionali se presenti nella lezione originale
+      if (originalLesson.course) {
+        query = query.eq('course', originalLesson.course)
+      } else {
+        query = query.is('course', null)
+      }
+      
+      if (originalLesson.year) {
+        query = query.eq('year', originalLesson.year)
+      } else {
+        query = query.is('year', null)
+      }
+      
+      if (originalLesson.group_name) {
+        query = query.eq('group_name', originalLesson.group_name)
+      } else {
+        query = query.is('group_name', null)
+      }
 
-    return dbRowToLesson(data)
+      const { data, error } = await query.select()
+
+      if (error) {
+        console.error('Error updating lessons:', error)
+        return null
+      }
+
+      // Restituisci la lezione originale aggiornata
+      const updated = data?.find(l => l.id === id)
+      return updated ? dbRowToLesson(updated) : null
+    } else {
+      // Aggiorna solo questa lezione
+      const { data, error } = await supabase
+        .from('lessons')
+        .update(row)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error updating lesson:', error)
+        return null
+      }
+
+      if (!data) return null
+
+      return dbRowToLesson(data)
+    }
   } catch (error) {
     console.error('Error in updateLesson:', error)
     return null

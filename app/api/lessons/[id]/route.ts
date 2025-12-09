@@ -20,7 +20,8 @@ export async function PUT(
   try {
     const { id } = await params
     const data = await request.json()
-    const lesson = await updateLesson(id, data)
+    const { updateScope, ...lessonData } = data
+    const lesson = await updateLesson(id, lessonData, updateScope)
     if (!lesson) {
       return NextResponse.json({ error: 'Lezione non trovata' }, { status: 404 })
     }

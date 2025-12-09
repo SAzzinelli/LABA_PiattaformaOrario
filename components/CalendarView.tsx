@@ -457,6 +457,20 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
           lesson={editingLesson}
           location={selectedLocation}
           onClose={() => { setShowForm(false); setEditingLesson(null); loadLessons() }}
+          onDelete={async (id) => {
+            try {
+              const res = await fetch(`/api/lessons/${id}`, {
+                method: 'DELETE',
+              })
+              if (res.ok) {
+                loadLessons()
+                setShowForm(false)
+                setEditingLesson(null)
+              }
+            } catch (err) {
+              console.error('Error deleting lesson:', err)
+            }
+          }}
         />
       )}
 
