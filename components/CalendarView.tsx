@@ -159,11 +159,18 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
       let classroomIndex = classrooms.indexOf(lesson.classroom)
       if (classroomIndex === -1) {
         // Gestione varianti aule
-        if (lesson.classroom === 'Magna 1' || lesson.classroom === 'Magna 2') classroomIndex = classrooms.indexOf('Aula Magna')
-        if (lesson.classroom === 'Conference 1' || lesson.classroom === 'Conference 2') classroomIndex = classrooms.indexOf('Conference')
+        if (lesson.classroom === 'Magna 1' || lesson.classroom === 'Magna 2') {
+          classroomIndex = classrooms.indexOf('Aula Magna')
+        } else if (lesson.classroom === 'Conference 1' || lesson.classroom === 'Conference 2') {
+          classroomIndex = classrooms.indexOf('Conference')
+        }
       }
       
-      if (classroomIndex === -1) return // Aula non trovata in questa sede
+      if (classroomIndex === -1) {
+        // Debug: log per vedere lezioni con aula non trovata
+        console.warn(`Aula non trovata per lezione: ${lesson.title} - Aula: ${lesson.classroom} - Aule disponibili:`, classrooms)
+        return // Aula non trovata in questa sede
+      }
 
       // Trova indice orario inizio
       // Usa timeToMinutes per trovare lo slot corretto
@@ -302,7 +309,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                           <td 
                             key={`${time}-${classroom}`} 
                             rowSpan={cell.span} 
-                            className="border-r border-b border-gray-100 p-0 align-top relative"
+                            className="border-r border-b border-t border-gray-100 p-0 align-top relative"
                           >
                             <EventCard 
                               lesson={cell.lesson} 
@@ -315,7 +322,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
 
                       // Cella vuota
                       return (
-                        <td key={`${time}-${classroom}`} className="border-r border-b border-gray-100"></td>
+                        <td key={`${time}-${classroom}`} className="border-r border-b border-t border-gray-100"></td>
                       )
                     })}
                   </tr>

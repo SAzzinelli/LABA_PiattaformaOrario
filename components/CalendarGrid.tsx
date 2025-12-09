@@ -152,9 +152,10 @@ interface LessonEventCardProps {
 }
 
 function LessonEventCard({ lesson, startSlot, endSlot, onEdit, onView }: LessonEventCardProps) {
-    const height = endSlot - startSlot
     const formatTime = (time: string) => time.substring(0, 5)
     const courseColor = getCourseColor(lesson.course)
+    // Calcola l'altezza in slot (includendo lo slot finale)
+    const slotHeight = endSlot - startSlot + 1
 
     const handleClick = () => {
         if (onEdit) onEdit(lesson)
@@ -163,10 +164,9 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit, onView }: LessonE
 
     return (
         <div
-            className={`absolute left-0 right-0 rounded cursor-pointer overflow-hidden group border-l-4 ${courseColor.border} ${courseColor.bg} hover:opacity-90 smooth-transition hover:-translate-y-0.5 hover:shadow-md`}
+            className={`absolute left-0 right-0 h-full rounded cursor-pointer overflow-hidden group border-l-4 ${courseColor.border} ${courseColor.bg} hover:opacity-90 smooth-transition hover:-translate-y-0.5 hover:shadow-md`}
             style={{
                 top: '0px',
-                height: `${Math.max(height, 20)}px`,
                 borderLeftColor: courseColor.borderColor,
             }}
             onClick={handleClick}
@@ -179,7 +179,7 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit, onView }: LessonE
                 <div className={`text-xs font-semibold ${courseColor.text} leading-tight truncate`}>
                     {lesson.title}
                 </div>
-                {height > 40 && (
+                {slotHeight * 60 > 40 && (
                     <>
                         {lesson.course && lesson.year && (
                             <div className={`text-[10px] font-semibold ${courseColor.text} opacity-80 truncate mt-0.5`}>
