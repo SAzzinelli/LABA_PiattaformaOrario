@@ -118,7 +118,7 @@ export default function CalendarGrid({
                                     return (
                                         <div
                                             key={lesson.id}
-                                            className="absolute left-1 right-1 z-10"
+                                            className="absolute left-0 right-0 z-10 px-1"
                                             style={{
                                                 top: `${startPos * rowHeight}px`,
                                                 height: `${Math.max(height, 20)}px`,
@@ -172,7 +172,7 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit, onView }: LessonE
             onClick={handleClick}
             title={`${lesson.title} - ${formatTime(lesson.startTime)}-${formatTime(lesson.endTime)} - ${lesson.classroom}`}
         >
-            <div className="px-1.5 pt-0 pb-0.5 h-full flex flex-col">
+            <div className="px-1.5 pt-0 pb-1 h-full flex flex-col">
                 <div className={`text-[11px] font-medium ${courseColor.text} leading-tight`}>
                     {formatTime(lesson.startTime)} - {formatTime(lesson.endTime)}
                 </div>

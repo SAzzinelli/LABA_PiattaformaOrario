@@ -302,7 +302,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                           <td 
                             key={`${time}-${classroom}`} 
                             rowSpan={cell.span} 
-                            className="border-r border-b border-gray-100 p-1 align-top relative"
+                            className="border-r border-b border-gray-100 p-0 align-top relative"
                           >
                             <EventCard 
                               lesson={cell.lesson} 
@@ -370,7 +370,7 @@ function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => 
   return (
     <div
       onClick={onEdit || onView}
-      className="h-full w-full rounded-lg border-l-4 px-2 pt-1 pb-2 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden flex flex-col group"
+      className="h-full w-full rounded-lg border-l-4 px-2 py-1 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden flex flex-col group"
       style={{
         backgroundColor: courseColor.bgHex,
         borderLeftColor: courseColor.borderColor
