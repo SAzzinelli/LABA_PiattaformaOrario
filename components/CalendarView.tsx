@@ -8,11 +8,13 @@ import LessonFilters from './LessonFilters'
 import SearchOverlay from './SearchOverlay'
 import LessonDetailsModal from './LessonDetailsModal'
 import { getBaseClassrooms } from '@/lib/classrooms'
-import { generateTimeSlots, timeToMinutes } from '@/lib/timeSlots'
+import { generateTimeSlots, timeToMinutes, getLessonSlots } from '@/lib/timeSlots'
 import { Location } from '@/lib/locations'
 import { usePathname } from 'next/navigation'
 import { generateICS } from '@/lib/ics'
 import { getCourseColor, getCourseCode } from '@/lib/courseColors'
+import { getCoursesForLocation } from '@/lib/locations'
+import { ALL_COURSES } from '@/lib/courses'
 
 interface Lesson {
   id: string
@@ -49,6 +51,9 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   const [showSearch, setShowSearch] = useState(false)
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
   const [showLessonDetails, setShowLessonDetails] = useState(false)
+  const [showExportModal, setShowExportModal] = useState(false)
+  const [exportCourse, setExportCourse] = useState<string>('')
+  const [allLessons, setAllLessons] = useState<Lesson[]>([])
 
   const pathname = usePathname()
   
@@ -76,8 +81,9 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   useEffect(() => {
     checkAuth()
     loadLessons()
+    loadAllLessons() // Carica tutte le lezioni per l'esportazione
     
-    const handleExportEvent = () => handleExportToCalendar()
+    const handleExportEvent = () => setShowExportModal(true)
     window.addEventListener('export-calendar', handleExportEvent)
     
     return () => {
@@ -87,6 +93,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
 
   useEffect(() => {
     loadLessons()
+    loadAllLessons()
   }, [filterCourse, filterYear, selectedLocation])
 
   const checkAuth = async () => {
@@ -125,17 +132,50 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
     }
   }
 
+  const loadAllLessons = async () => {
+    try {
+      const res = await fetch('/api/lessons')
+      const data = await res.json()
+      
+      const locationClassrooms = getBaseClassrooms(selectedLocation)
+      const filteredLessons = data.filter((lesson: Lesson) => {
+        // Normalizza il nome dell'aula per il confronto
+        const c = lesson.classroom
+        if (selectedLocation === 'badia-ripoli') {
+          if (c === 'Magna 1' || c === 'Magna 2') return locationClassrooms.includes('Aula Magna')
+          if (c === 'Conference 1' || c === 'Conference 2') return locationClassrooms.includes('Conference')
+        }
+        return locationClassrooms.includes(c)
+      })
+      
+      setAllLessons(filteredLessons)
+    } catch (e) {
+      console.error("Failed to load all lessons", e)
+    }
+  }
+
   const handleExportToCalendar = () => {
-    const icsContent = generateICS(lessons)
+    if (!exportCourse) return
+    
+    // Filtra le lezioni per il corso selezionato
+    const filteredLessons = allLessons.filter(lesson => lesson.course === exportCourse)
+    
+    const courseCode = getCourseCode(exportCourse)
+    const fileName = `orario_laba_${courseCode.toLowerCase()}.ics`
+    
+    const icsContent = generateICS(filteredLessons)
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', 'orario_laba.ics')
+    link.setAttribute('download', fileName)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
     window.URL.revokeObjectURL(url)
+    
+    setShowExportModal(false)
+    setExportCourse('')
   }
 
   // --- LOGICA DI CALCOLO DELLA GRIGLIA ---
@@ -178,10 +218,9 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
       const gridStartMinutes = 9 * 60 // 09:00
       const startIndex = Math.floor((startMinutes - gridStartMinutes) / 30)
 
-      // Calcola durata in slot (includendo lo slot finale)
-      const endMinutes = timeToMinutes(lesson.endTime)
-      const endIndex = Math.floor((endMinutes - gridStartMinutes) / 30)
-      const span = endIndex - startIndex + 1 // Include lo slot finale
+      // Calcola durata in slot
+      // Usa getLessonSlots che calcola correttamente la durata
+      const span = getLessonSlots(lesson.startTime, lesson.endTime)
 
       if (startIndex >= 0 && startIndex < timeSlots.length) {
         // Inserisci evento nella cella di partenza
@@ -267,13 +306,20 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
 
         {/* Tabella Calendario - Scrollabile */}
         <div className="flex-1 overflow-auto bg-white" style={{ height: 'calc(100vh - 240px)' }}>
-          <table className="w-full border-collapse table-fixed" style={{ minWidth: `${80 + classrooms.length * 150}px` }}>
+          <table className="border-collapse" style={{ width: `${80 + classrooms.length * 150}px`, tableLayout: 'fixed', minWidth: `${80 + classrooms.length * 150}px`, maxWidth: `${80 + classrooms.length * 150}px` }}>
             {/* Intestazione Aule - Sticky Top */}
             <thead className="sticky top-0 z-20 bg-white shadow-sm">
               <tr>
                 <th className="w-20 bg-white border-b border-r border-gray-200 p-2 sticky left-0 z-30"></th>
-                {classrooms.map((classroom) => (
-                  <th key={classroom} className="border-b border-r border-gray-200 p-2 text-xs font-semibold text-gray-700 bg-gray-50 h-[45px]">
+                {classrooms.map((classroom, index) => (
+                  <th 
+                    key={classroom} 
+                    className="border-b border-r border-gray-200 p-2 text-xs font-semibold text-gray-700 bg-gray-50 h-[45px]"
+                    style={{ 
+                      width: '150px',
+                      ...(index === classrooms.length - 1 ? { borderRight: 'none' } : {})
+                    }}
+                  >
                     {classroom}
                   </th>
                 ))}
@@ -285,11 +331,10 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
               {timeSlots.map((time, timeIndex) => {
                 const isHour = time.endsWith(':00')
                 return (
-                  <tr key={time} className="h-[45px]">
-                    {/* Colonna Orari - Sticky Left */}
-                    <td className="sticky left-0 z-10 bg-white border-r border-gray-200 align-middle p-0">
-                      <div className="flex items-center justify-end pr-3 h-full w-full relative">
-                        {/* Linea che passa attraverso l'orario per simularlo (opzionale, stile macOS) */}
+                  <tr key={time} style={{ height: '45px', position: 'relative' }}>
+                    {/* Colonna Orari - Sticky Left - senza righe */}
+                    <td className="sticky left-0 z-10 bg-white border-r border-gray-200 p-0" style={{ verticalAlign: 'middle' }}>
+                      <div className="relative h-full w-full flex items-center justify-end pr-3">
                         <span className={`text-xs ${isHour ? 'font-bold text-gray-800' : 'text-gray-400 text-[10px]'}`}>
                           {time}
                         </span>
@@ -305,24 +350,71 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
 
                       // Se c'è un evento, renderizza cella con rowspan
                       if (cell.type === 'event') {
+                        // Calcola le posizioni delle linee orizzontali per ogni slot
+                        // Le linee devono essere centrate verticalmente su ogni riga, come nelle celle vuote
+                        const lines = []
+                        for (let i = 0; i <= cell.span; i++) {
+                          const linePosition = i * 45 + 22.5 // Centro della riga
+                          // Verifica se questa linea corrisponde a un'ora intera o mezz'ora
+                          const slotIndex = timeIndex + i
+                          const isHourLine = slotIndex < timeSlots.length && timeSlots[slotIndex]?.endsWith(':00')
+                          lines.push(
+                            <div
+                              key={`line-${i}`}
+                              className="absolute left-0 right-0 pointer-events-none z-0"
+                              style={{
+                                top: `${linePosition}px`,
+                                transform: 'translateY(-50%)',
+                                borderTop: isHourLine ? '1px solid #e5e7eb' : '0.5px solid #d1d5db'
+                              }}
+                            />
+                          )
+                        }
+                        
                         return (
                           <td 
                             key={`${time}-${classroom}`} 
                             rowSpan={cell.span} 
-                            className="border-r border-b border-t border-gray-100 p-0 align-top relative"
+                            className="border-r border-gray-100 p-0 align-top relative"
+                            style={{ 
+                              width: '150px',
+                              height: `${cell.span * 45}px`, 
+                              verticalAlign: 'top',
+                              ...(classroomIndex === classrooms.length - 1 ? { borderRight: 'none' } : {})
+                            }}
                           >
-                            <EventCard 
-                              lesson={cell.lesson} 
-                              onEdit={isAuthenticated ? () => { setEditingLesson(cell.lesson); setShowForm(true) } : undefined}
-                              onView={!isAuthenticated ? () => { setSelectedLesson(cell.lesson); setShowLessonDetails(true) } : undefined}
-                            />
+                            {/* Linee orizzontali per ogni slot - dietro la card */}
+                            {lines}
+                            <div style={{ marginTop: '22.5px', marginBottom: '-22.5px', height: '100%', paddingTop: '2px', paddingBottom: '2px', paddingLeft: '2px', paddingRight: '2px', position: 'relative', zIndex: 1 }}>
+                              <EventCard 
+                                lesson={cell.lesson} 
+                                onEdit={isAuthenticated ? () => { setEditingLesson(cell.lesson); setShowForm(true) } : undefined}
+                                onView={!isAuthenticated ? () => { setSelectedLesson(cell.lesson); setShowLessonDetails(true) } : undefined}
+                              />
+                            </div>
                           </td>
                         )
                       }
 
-                      // Cella vuota
+                      // Cella vuota - la linea è centrata verticalmente, più sottile per le mezze ore
                       return (
-                        <td key={`${time}-${classroom}`} className="border-r border-b border-t border-gray-100"></td>
+                        <td 
+                          key={`${time}-${classroom}`} 
+                          className="border-r border-gray-100 relative"
+                          style={{ 
+                            width: '150px',
+                            ...(classroomIndex === classrooms.length - 1 ? { borderRight: 'none' } : {})
+                          }}
+                        >
+                          {/* Linea orizzontale centrata verticalmente - più sottile per mezze ore */}
+                          <div 
+                            className="absolute top-1/2 left-0 right-0" 
+                            style={{ 
+                              transform: 'translateY(-50%)',
+                              borderTop: isHour ? '1px solid #e5e7eb' : '0.5px solid #d1d5db'
+                            }}
+                          ></div>
+                        </td>
                       )
                     })}
                   </tr>
@@ -364,6 +456,49 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
         onClose={() => { setShowLessonDetails(false); setSelectedLesson(null) }}
         onEdit={isAuthenticated ? (lesson) => { setEditingLesson(lesson); setShowForm(true) } : undefined}
       />
+
+      {/* Modal Esportazione Calendario */}
+      {showExportModal && (
+        <>
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-40 z-[90] animate-fade-in"
+            onClick={() => { setShowExportModal(false); setExportCourse('') }}
+          />
+          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100] bg-white rounded-lg shadow-xl border border-gray-200 min-w-[320px] max-w-md animate-scale-in">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Esporta calendario</h3>
+              <p className="text-sm text-gray-600 mb-4">Seleziona il corso da esportare:</p>
+              <select
+                value={exportCourse}
+                onChange={(e) => setExportCourse(e.target.value)}
+                className="w-full px-3 py-2 rounded-md text-sm border border-gray-300 bg-white text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
+              >
+                <option value="">Seleziona un corso</option>
+                {getCoursesForLocation(selectedLocation).map((course) => (
+                  <option key={course} value={course}>
+                    {course === 'Graphic Design & Multimedia' ? 'Graphic Design' : course}
+                  </option>
+                ))}
+              </select>
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => { setShowExportModal(false); setExportCourse('') }}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                >
+                  Annulla
+                </button>
+                <button
+                  onClick={handleExportToCalendar}
+                  disabled={!exportCourse}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                >
+                  Esporta
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -377,10 +512,12 @@ function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => 
   return (
     <div
       onClick={onEdit || onView}
-      className="h-full w-full rounded-lg border-l-4 px-2 py-1 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden flex flex-col group"
+      className="h-full w-full rounded-lg border-l-4 border border-gray-200 px-2 py-1.5 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden flex flex-col group"
       style={{
         backgroundColor: courseColor.bgHex,
-        borderLeftColor: courseColor.borderColor
+        borderLeftColor: courseColor.borderColor,
+        minHeight: '100%',
+        height: '100%'
       }}
       title={`${lesson.title} - ${lesson.startTime}-${lesson.endTime}`}
     >
@@ -390,25 +527,23 @@ function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => 
         </span>
       </div>
       
-      <div className="font-bold text-sm leading-tight mb-1 line-clamp-2" style={{ color: courseColor.textHex }}>
+      <div className="font-bold text-xs leading-tight mb-1" style={{ color: courseColor.textHex }}>
         {lesson.title}
       </div>
       
       {lesson.course && lesson.year && (
-        <div className="text-xs font-semibold opacity-80" style={{ color: courseColor.textHex }}>
+        <div className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap w-fit" style={{ backgroundColor: courseColor.borderColor, color: courseColor.textHex }}>
           {getCourseCode(lesson.course)} {lesson.year}
         </div>
       )}
       
       <div className="mt-auto text-xs opacity-80 truncate" style={{ color: courseColor.textHex }}>
-        {lesson.professor}
+        Prof. {lesson.professor}
       </div>
       
-      {lesson.group && (
-        <div className="text-[10px] font-semibold opacity-80" style={{ color: courseColor.textHex }}>
-          Gr: {lesson.group}
-        </div>
-      )}
+      <div className="text-[10px] font-semibold opacity-80" style={{ color: courseColor.textHex }}>
+        {lesson.group ? `Gruppo ${lesson.group}` : 'Tutti'}
+      </div>
     </div>
   )
 }

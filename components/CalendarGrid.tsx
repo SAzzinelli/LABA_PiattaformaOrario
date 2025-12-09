@@ -1,4 +1,4 @@
-import { generateTimeLines, getTimePosition, getTotalCalendarHeight } from '@/lib/timeSlots'
+import { generateTimeLines, getTimePosition, getTotalCalendarHeight, getLessonSlots } from '@/lib/timeSlots'
 import { getCourseColor, getCourseCode } from '@/lib/courseColors'
 import { Lesson } from '@/hooks/useLessons'
 
@@ -111,23 +111,27 @@ export default function CalendarGrid({
                             >
                                 {classroomLessons.map((lesson) => {
                                     const startPos = getTimePosition(lesson.startTime)
-                                    const endPos = getTimePosition(lesson.endTime)
-                                    // Calcola l'altezza includendo lo slot finale (endPos - startPos + 1)
-                                    const height = (endPos - startPos + 1) * rowHeight
+                                    // Calcola la durata in slot usando getLessonSlots
+                                    const slotCount = getLessonSlots(lesson.startTime, lesson.endTime)
+                                    const height = slotCount * rowHeight
 
                                     return (
                                         <div
                                             key={lesson.id}
-                                            className="absolute left-0 right-0 z-10 px-1"
+                                            className="absolute left-0 right-0 z-10"
                                             style={{
                                                 top: `${startPos * rowHeight}px`,
                                                 height: `${Math.max(height, 20)}px`,
+                                                paddingTop: '2px',
+                                                paddingBottom: '2px',
+                                                paddingLeft: '2px',
+                                                paddingRight: '2px',
                                             }}
                                         >
                                             <LessonEventCard
                                                 lesson={lesson}
                                                 startSlot={startPos}
-                                                endSlot={endPos}
+                                                slotCount={slotCount}
                                                 onEdit={isAuthenticated ? onEditLesson : undefined}
                                                 onView={!isAuthenticated ? () => onViewLesson(lesson) : undefined}
                                             />
@@ -146,16 +150,14 @@ export default function CalendarGrid({
 interface LessonEventCardProps {
     lesson: Lesson
     startSlot: number
-    endSlot: number
+    slotCount: number
     onEdit?: (lesson: Lesson) => void
     onView?: () => void
 }
 
-function LessonEventCard({ lesson, startSlot, endSlot, onEdit, onView }: LessonEventCardProps) {
+function LessonEventCard({ lesson, startSlot, slotCount, onEdit, onView }: LessonEventCardProps) {
     const formatTime = (time: string) => time.substring(0, 5)
     const courseColor = getCourseColor(lesson.course)
-    // Calcola l'altezza in slot (includendo lo slot finale)
-    const slotHeight = endSlot - startSlot + 1
 
     const handleClick = () => {
         if (onEdit) onEdit(lesson)
@@ -164,7 +166,7 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit, onView }: LessonE
 
     return (
         <div
-            className={`absolute left-0 right-0 h-full rounded cursor-pointer overflow-hidden group border-l-4 ${courseColor.border} ${courseColor.bg} hover:opacity-90 smooth-transition hover:-translate-y-0.5 hover:shadow-md`}
+            className={`absolute left-0 right-0 h-full rounded cursor-pointer overflow-hidden group border-l-4 border border-gray-200 ${courseColor.border} ${courseColor.bg} hover:opacity-90 smooth-transition hover:-translate-y-0.5 hover:shadow-md`}
             style={{
                 top: '0px',
                 borderLeftColor: courseColor.borderColor,
@@ -172,28 +174,26 @@ function LessonEventCard({ lesson, startSlot, endSlot, onEdit, onView }: LessonE
             onClick={handleClick}
             title={`${lesson.title} - ${formatTime(lesson.startTime)}-${formatTime(lesson.endTime)} - ${lesson.classroom}`}
         >
-            <div className="px-1.5 pt-0 pb-1 h-full flex flex-col">
+            <div className="px-1.5 py-1.5 h-full flex flex-col">
                 <div className={`text-[11px] font-medium ${courseColor.text} leading-tight`}>
                     {formatTime(lesson.startTime)} - {formatTime(lesson.endTime)}
                 </div>
-                <div className={`text-xs font-semibold ${courseColor.text} leading-tight truncate`}>
+                <div className={`text-[11px] font-semibold ${courseColor.text} leading-tight`} style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                     {lesson.title}
                 </div>
-                {slotHeight * 60 > 40 && (
+                {slotCount * 60 > 40 && (
                     <>
                         {lesson.course && lesson.year && (
-                            <div className={`text-[10px] font-semibold ${courseColor.text} opacity-80 truncate mt-0.5`}>
+                            <div className="inline-block px-1.5 py-0.5 rounded-full text-[9px] font-semibold mt-0.5 whitespace-nowrap w-fit" style={{ backgroundColor: courseColor.borderColor, color: courseColor.textHex }}>
                                 {getCourseCode(lesson.course)} {lesson.year}
                             </div>
                         )}
                         <div className={`text-[10px] ${courseColor.text} opacity-80 truncate mt-0.5`}>
-                            {lesson.professor}
+                            Prof. {lesson.professor}
                         </div>
-                        {lesson.group && (
-                            <div className={`text-[10px] font-semibold ${courseColor.text} opacity-80 truncate mt-0.5`}>
-                                {lesson.group}
-                            </div>
-                        )}
+                        <div className={`text-[10px] font-semibold ${courseColor.text} opacity-80 truncate mt-0.5`}>
+                            {lesson.group ? `Gruppo ${lesson.group}` : 'Tutti'}
+                        </div>
                     </>
                 )}
             </div>
