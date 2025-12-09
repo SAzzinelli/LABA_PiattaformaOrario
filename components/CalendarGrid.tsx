@@ -112,7 +112,8 @@ export default function CalendarGrid({
                                 {classroomLessons.map((lesson) => {
                                     const startPos = getTimePosition(lesson.startTime)
                                     const endPos = getTimePosition(lesson.endTime)
-                                    const height = (endPos - startPos) * rowHeight
+                                    // Calcola l'altezza includendo lo slot finale (endPos - startPos + 1)
+                                    const height = (endPos - startPos + 1) * rowHeight
 
                                     return (
                                         <div

@@ -171,10 +171,10 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
       const gridStartMinutes = 9 * 60 // 09:00
       const startIndex = Math.floor((startMinutes - gridStartMinutes) / 30)
 
-      // Calcola durata in slot (arrotondata per eccesso)
+      // Calcola durata in slot (includendo lo slot finale)
       const endMinutes = timeToMinutes(lesson.endTime)
-      const durationMinutes = endMinutes - startMinutes
-      const span = Math.ceil(durationMinutes / 30)
+      const endIndex = Math.floor((endMinutes - gridStartMinutes) / 30)
+      const span = endIndex - startIndex + 1 // Include lo slot finale
 
       if (startIndex >= 0 && startIndex < timeSlots.length) {
         // Inserisci evento nella cella di partenza
@@ -370,7 +370,7 @@ function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => 
   return (
     <div
       onClick={onEdit || onView}
-      className="h-full w-full rounded-lg border-l-4 px-2 pt-0 pb-2 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden flex flex-col group"
+      className="h-full w-full rounded-lg border-l-4 px-2 pt-1 pb-2 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden flex flex-col group"
       style={{
         backgroundColor: courseColor.bgHex,
         borderLeftColor: courseColor.borderColor
