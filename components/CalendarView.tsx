@@ -247,6 +247,13 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   const dayNumber = format(currentDate, 'd', { locale: it })
   const monthName = format(currentDate, 'MMMM yyyy', { locale: it })
 
+  // Calcola la larghezza delle colonne (sempre 150px)
+  const classroomWidth = 150
+  const tableWidth = 80 + classrooms.length * classroomWidth
+  
+  // Per Via de' Vecchietti limita la larghezza del contenitore esterno leggermente più della griglia
+  const containerMaxWidth = selectedLocation === 'via-vecchietti' ? `${tableWidth + 40}px` : '100%'
+
   return (
     <div className="flex flex-col h-full">
       {/* Barra superiore strumenti */}
@@ -286,37 +293,37 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
       </div>
 
       {/* Contenitore Calendario */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col flex-1 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col flex-1 overflow-hidden" style={{ maxWidth: containerMaxWidth, margin: selectedLocation === 'via-vecchietti' ? '0 auto' : '0' }}>
         {/* Header Giorno */}
-        <div className="px-4 py-3 text-white font-semibold flex items-center justify-between flex-shrink-0" style={{ backgroundColor: '#033157' }}>
+        <div className="px-4 py-3 text-white flex items-center justify-between flex-shrink-0" style={{ backgroundColor: '#033157' }}>
           <div className="flex items-center gap-3">
-            <span className="text-lg uppercase">{dayName}</span>
-            <span className="text-lg">{dayNumber} {monthName}</span>
+            <span className="text-lg uppercase font-bold">{dayName}</span>
+            <span className="text-base font-normal">{dayNumber} {monthName}</span>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate() - 1); setCurrentDate(d) }} className="p-1 rounded hover:bg-white hover:bg-opacity-20 transition-colors">
+            <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate() - 1); setCurrentDate(d) }} className="p-1 rounded bg-white bg-opacity-10 hover:bg-opacity-20 transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
-            <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1 rounded text-sm hover:bg-white hover:bg-opacity-20 transition-colors">Oggi</button>
-            <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate() + 1); setCurrentDate(d) }} className="p-1 rounded hover:bg-white hover:bg-opacity-20 transition-colors">
+            <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1 rounded text-sm bg-white bg-opacity-10 hover:bg-opacity-20 transition-colors">Oggi</button>
+            <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate() + 1); setCurrentDate(d) }} className="p-1 rounded bg-white bg-opacity-10 hover:bg-opacity-20 transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
         </div>
 
         {/* Tabella Calendario - Scrollabile */}
-        <div className="flex-1 overflow-auto bg-white" style={{ height: 'calc(100vh - 240px)' }}>
-          <table className="border-collapse" style={{ width: `${80 + classrooms.length * 150}px`, tableLayout: 'fixed', minWidth: `${80 + classrooms.length * 150}px`, maxWidth: `${80 + classrooms.length * 150}px` }}>
+        <div className="flex-1 overflow-auto bg-white [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" style={{ height: 'calc(100vh - 240px)' }}>
+          <table className="border-collapse" style={{ width: `${tableWidth}px`, tableLayout: 'fixed', minWidth: `${tableWidth}px`, maxWidth: `${tableWidth}px` }}>
             {/* Intestazione Aule - Sticky Top */}
             <thead className="sticky top-0 z-20 bg-white shadow-sm">
               <tr>
-                <th className="w-20 bg-white border-b border-r border-gray-200 p-2 sticky left-0 z-30"></th>
+                <th className="bg-white border-b border-r border-gray-200 p-2 sticky left-0 z-30" style={{ width: '80px', minWidth: '80px', maxWidth: '80px' }}></th>
                 {classrooms.map((classroom, index) => (
                   <th 
                     key={classroom} 
                     className="border-b border-r border-gray-200 p-2 text-xs font-semibold text-gray-700 bg-gray-50 h-[45px]"
                     style={{ 
-                      width: '150px',
+                      width: `${classroomWidth}px`,
                       ...(index === classrooms.length - 1 ? { borderRight: 'none' } : {})
                     }}
                   >
@@ -333,7 +340,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                 return (
                   <tr key={time} style={{ height: '45px', position: 'relative' }}>
                     {/* Colonna Orari - Sticky Left - senza righe */}
-                    <td className="sticky left-0 z-10 bg-white border-r border-gray-200 p-0" style={{ verticalAlign: 'middle' }}>
+                    <td className="sticky left-0 z-10 bg-white border-r border-gray-200 p-0" style={{ verticalAlign: 'middle', width: '80px', minWidth: '80px', maxWidth: '80px' }}>
                       <div className="relative h-full w-full flex items-center justify-end pr-3">
                         <span className={`text-xs ${isHour ? 'font-bold text-gray-800' : 'text-gray-400 text-[10px]'}`}>
                           {time}
@@ -377,7 +384,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                             rowSpan={cell.span} 
                             className="border-r border-gray-100 p-0 align-top relative"
                             style={{ 
-                              width: '150px',
+                              width: `${classroomWidth}px`,
                               height: `${cell.span * 45}px`, 
                               verticalAlign: 'top',
                               ...(classroomIndex === classrooms.length - 1 ? { borderRight: 'none' } : {})
@@ -402,7 +409,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                           key={`${time}-${classroom}`} 
                           className="border-r border-gray-100 relative"
                           style={{ 
-                            width: '150px',
+                            width: `${classroomWidth}px`,
                             ...(classroomIndex === classrooms.length - 1 ? { borderRight: 'none' } : {})
                           }}
                         >
