@@ -1,23 +1,33 @@
 import { NextResponse } from 'next/server'
-import { getLessons } from '@/lib/db'
+import { supabase } from '@/lib/supabase'
 
 export async function GET() {
   try {
-    // Esegui una query semplice per mantenere attivo il database
-    // Non restituiamo i dati, solo verifichiamo che la connessione funzioni
-    await getLessons({})
+    // Query significative su tabelle reali per garantire che Supabase rilevi attività
+    // Eseguiamo COUNT su più tabelle per massimizzare l'attività rilevata
+    const [lessonsResult, adminUsersResult] = await Promise.all([
+      supabase.from('lessons').select('id', { count: 'exact', head: true }),
+      supabase.from('admin_users').select('id', { count: 'exact', head: true })
+    ])
     
     return NextResponse.json({ 
+      ok: true,
       status: 'ok', 
-      message: 'Database connection active',
-      timestamp: new Date().toISOString()
+      message: 'Database keepalive successful',
+      timestamp: new Date().toISOString(),
+      stats: {
+        lessons: lessonsResult.count || 0,
+        admin_users: adminUsersResult.count || 0
+      }
     })
   } catch (error) {
-    console.error('Keepalive error:', error)
+    console.error('❌ Errore keepalive database:', error)
     return NextResponse.json(
       { 
+        ok: false,
         status: 'error', 
-        message: 'Database connection failed',
+        message: 'Database keepalive failed',
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString()
       },
       { status: 500 }
