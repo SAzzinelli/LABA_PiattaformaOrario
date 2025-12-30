@@ -5,9 +5,10 @@ export async function GET() {
   try {
     // Query significative su tabelle reali per garantire che Supabase rilevi attività
     // Eseguiamo COUNT su più tabelle per massimizzare l'attività rilevata
+    // Usiamo la sintassi corretta per far apparire le chiamate nelle statistiche REST
     const [lessonsResult, adminUsersResult] = await Promise.all([
-      supabase.from('lessons').select('id', { count: 'exact', head: true }),
-      supabase.from('admin_users').select('id', { count: 'exact', head: true })
+      supabase.from('lessons').select('*', { count: 'exact', head: true }),
+      supabase.from('admin_users').select('*', { count: 'exact', head: true })
     ])
     
     return NextResponse.json({ 
@@ -17,7 +18,8 @@ export async function GET() {
       timestamp: new Date().toISOString(),
       stats: {
         lessons: lessonsResult.count || 0,
-        admin_users: adminUsersResult.count || 0
+        admin_users: adminUsersResult.count || 0,
+        rest_api: true
       }
     })
   } catch (error) {
