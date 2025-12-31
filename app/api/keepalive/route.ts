@@ -3,13 +3,39 @@ import { supabase } from '@/lib/supabase'
 
 export async function GET() {
   try {
-    // Query significative su tabelle reali per garantire che Supabase rilevi attività
-    // Eseguiamo COUNT su più tabelle per massimizzare l'attività rilevata
-    // Usiamo la sintassi corretta per far apparire le chiamate nelle statistiche REST
-    const [lessonsResult, adminUsersResult] = await Promise.all([
-      supabase.from('lessons').select('*', { count: 'exact', head: true }),
-      supabase.from('admin_users').select('*', { count: 'exact', head: true })
-    ])
+    // Usa una tabella dedicata 'keepalive_log' che non contiene dati sensibili
+    // RLS è abilitato con policy permissiva (vedi supabase/keepalive_log.sql)
+    console.log('🔄 Chiamata REST Supabase su tabella keepalive_log...')
+    
+    const result = await supabase
+      .from('keepalive_log')
+      .select('id', { count: 'exact', head: true })
+    
+    console.log('📊 Risultato completo Supabase:', {
+      hasError: !!result.error,
+      count: result.count,
+      error: result.error ? {
+        message: result.error.message,
+        code: result.error.code,
+        details: result.error.details,
+        hint: result.error.hint
+      } : null
+    })
+    
+    if (result.error) {
+      console.warn('⚠️ Errore chiamata REST Supabase:', JSON.stringify(result.error, null, 2))
+      return NextResponse.json(
+        { 
+          ok: false,
+          status: 'error', 
+          message: 'Database keepalive failed',
+          error: result.error.message || 'Unknown error',
+          code: result.error.code,
+          timestamp: new Date().toISOString()
+        },
+        { status: 500 }
+      )
+    }
     
     return NextResponse.json({ 
       ok: true,
@@ -17,8 +43,7 @@ export async function GET() {
       message: 'Database keepalive successful',
       timestamp: new Date().toISOString(),
       stats: {
-        lessons: lessonsResult.count || 0,
-        admin_users: adminUsersResult.count || 0,
+        count: result.count || 0,
         rest_api: true
       }
     })
