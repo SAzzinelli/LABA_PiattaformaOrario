@@ -1,0 +1,3 @@
+# Next.js 16 and @supabase/supabase-js require Node >= 20
+[variables]
+NODE_VERSION = "20"
