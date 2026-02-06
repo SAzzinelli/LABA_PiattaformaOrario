@@ -47,6 +47,7 @@ export function useLessons(initialLessons: Lesson[] = []) {
 
   useEffect(() => {
     loadLessons()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load when filters change; loadLessons is stable
   }, [filterCourses, filterYears])
 
   const deleteLesson = async (id: string) => {

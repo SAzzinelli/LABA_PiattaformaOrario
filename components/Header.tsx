@@ -42,6 +42,7 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- auth check on mount (async setState in callback)
     checkAuth()
   }, [])
   

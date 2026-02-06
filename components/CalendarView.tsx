@@ -119,7 +119,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
     }
   }
   
-  // Gestione URL e Location
+  // Gestione URL e Location (sync state con pathname)
   useEffect(() => {
     if (pathname) {
       const locationFromPath = getLocationFromPath()
@@ -129,9 +129,10 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
         setFilterYear(null)
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- getLocationFromPath from pathname
   }, [pathname, selectedLocation])
 
-  // Caricamento dati e Auth
+  // Caricamento dati e Auth al mount
   useEffect(() => {
     checkAuth()
     loadLessons()
@@ -139,11 +140,14 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
     const handleExportEvent = () => setShowExportModal(true)
     window.addEventListener('export-calendar', handleExportEvent)
     return () => window.removeEventListener('export-calendar', handleExportEvent)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
   }, [])
 
+  // Ricarica lezioni quando cambiano filtri
   useEffect(() => {
     loadLessons()
     loadAllLessons()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load when filters change; loadLessons/loadAllLessons are stable
   }, [filterCourse, filterYear, selectedLocation])
 
   const handleExportToCalendar = () => {
@@ -232,7 +236,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
     })
 
     return matrix
-  }, [lessons, currentDate, classrooms, timeSlots, selectedLocation])
+  }, [lessons, currentDate, classrooms, timeSlots])
 
   // Formattazione data
   const dayName = format(currentDate, 'EEEE', { locale: it })
