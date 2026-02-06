@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { getClassroomsForLocation } from '@/lib/classrooms'
 import { ALL_COURSES, getYearsForCourse, isTriennale, isBiennale } from '@/lib/courses'
 import { Location, getCoursesForLocation } from '@/lib/locations'
@@ -43,38 +43,38 @@ export default function LessonForm({ lesson, location, onClose, onDelete }: Less
   
   // Filtra i corsi disponibili per la sede
   const courseOptions = ALL_COURSES.filter(c => availableCourses.includes(c))
-  const [formData, setFormData] = useState({
-    title: '',
-    startTime: '',
-    endTime: '',
-    dayOfWeek: 1,
-    classroom: '',
-    professor: '',
-    course: '',
-    year: null as number | null,
-    group: '',
-    notes: '',
-  })
+
+  const getInitialFormData = (l: Lesson | null | undefined) =>
+    l
+      ? {
+          title: l.title,
+          startTime: l.startTime,
+          endTime: l.endTime,
+          dayOfWeek: l.dayOfWeek,
+          classroom: l.classroom,
+          professor: l.professor,
+          course: l.course || '',
+          year: l.year ?? null,
+          group: l.group || '',
+          notes: l.notes || '',
+        }
+      : {
+          title: '',
+          startTime: '',
+          endTime: '',
+          dayOfWeek: 1,
+          classroom: '',
+          professor: '',
+          course: '',
+          year: null as number | null,
+          group: '',
+          notes: '',
+        }
+
+  const [formData, setFormData] = useState(() => getInitialFormData(lesson))
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [updateScope, setUpdateScope] = useState<'single' | 'all_future'>('single')
-
-  useEffect(() => {
-    if (lesson) {
-      setFormData({
-        title: lesson.title,
-        startTime: lesson.startTime,
-        endTime: lesson.endTime,
-        dayOfWeek: lesson.dayOfWeek,
-        classroom: lesson.classroom,
-        professor: lesson.professor,
-        course: lesson.course || '',
-        year: lesson.year || null,
-        group: lesson.group || '',
-        notes: lesson.notes || '',
-      })
-    }
-  }, [lesson])
 
   const availableYears = formData.course ? getYearsForCourse(formData.course as any) : []
 
@@ -244,7 +244,7 @@ export default function LessonForm({ lesson, location, onClose, onDelete }: Less
                 className="input-modern w-full px-4 py-2.5 rounded-lg"
                 required
               >
-                <option value="">Seleziona un'aula</option>
+                <option value="">Seleziona un&apos;aula</option>
                 {availableClassrooms.map((classroom) => (
                   <option key={classroom} value={classroom}>
                     {classroom}
@@ -308,7 +308,7 @@ export default function LessonForm({ lesson, location, onClose, onDelete }: Less
 
           <div>
             <label htmlFor="group" className="block text-sm font-medium text-gray-700 mb-1">
-              Gruppo (lascia vuoto per "tutti")
+              Gruppo (lascia vuoto per &quot;tutti&quot;)
             </label>
             <input
               id="group"

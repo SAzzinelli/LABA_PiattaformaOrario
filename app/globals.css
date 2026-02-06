@@ -1,6 +1,15 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-laba-primary: #033157;
+  --color-laba-monday: #FF6B6B;
+  --color-laba-tuesday: #4ECDC4;
+  --color-laba-wednesday: #45B7D1;
+  --color-laba-thursday: #FFA07A;
+  --color-laba-friday: #98D8C8;
+  --color-laba-saturday: #F7DC6F;
+  --color-laba-sunday: #BB8FCE;
+}
 
 @keyframes accordion-down {
   from {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
 
@@ -29,39 +29,27 @@ const DAYS = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Vene
 
 export default function SearchOverlay({ isOpen, onClose, onSelectLesson, lessons }: SearchOverlayProps) {
   const [searchQuery, setSearchQuery] = useState('')
-  const [filteredLessons, setFilteredLessons] = useState<Lesson[]>([])
 
-  useEffect(() => {
-    if (!isOpen) {
-      setSearchQuery('')
-      setFilteredLessons([])
-      return
-    }
-  }, [isOpen])
-
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredLessons([])
-      return
-    }
-
+  const filteredLessons = useMemo(() => {
+    if (searchQuery.trim() === '') return []
     const query = searchQuery.toLowerCase().trim()
-    const filtered = lessons.filter(lesson => {
-      return (
-        lesson.title.toLowerCase().includes(query) ||
-        lesson.professor.toLowerCase().includes(query) ||
-        lesson.classroom.toLowerCase().includes(query) ||
-        (lesson.course && lesson.course.toLowerCase().includes(query)) ||
-        (lesson.notes && lesson.notes.toLowerCase().includes(query))
-      )
-    })
-
-    setFilteredLessons(filtered)
+    return lessons.filter(lesson =>
+      lesson.title.toLowerCase().includes(query) ||
+      lesson.professor.toLowerCase().includes(query) ||
+      lesson.classroom.toLowerCase().includes(query) ||
+      (lesson.course && lesson.course.toLowerCase().includes(query)) ||
+      (lesson.notes && lesson.notes.toLowerCase().includes(query))
+    )
   }, [searchQuery, lessons])
+
+  const handleClose = () => {
+    setSearchQuery('')
+    onClose()
+  }
 
   const handleSelectLesson = (lesson: Lesson) => {
     onSelectLesson(lesson, lesson.dayOfWeek)
-    onClose()
+    handleClose()
   }
 
   if (!isOpen) return null
@@ -71,7 +59,7 @@ export default function SearchOverlay({ isOpen, onClose, onSelectLesson, lessons
       {/* Backdrop blurrato */}
       <div 
         className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 animate-fade-in"
-        onClick={onClose}
+        onClick={handleClose}
       />
       
       {/* Overlay contenuto - Mobile first design */}
@@ -84,7 +72,7 @@ export default function SearchOverlay({ isOpen, onClose, onSelectLesson, lessons
           <div className="bg-laba-primary text-white p-3 sm:p-4 flex items-center justify-between flex-shrink-0">
             <h2 className="text-lg sm:text-xl font-bold">Cerca Lezione</h2>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="w-8 h-8 rounded-full text-white hover:bg-white hover:bg-opacity-20 smooth-transition flex items-center justify-center text-2xl flex-shrink-0"
             >
               ×

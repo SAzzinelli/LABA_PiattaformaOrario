@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import LoginModal from './LoginModal'
 import { Location } from '@/lib/locations'
 import { useRouter, usePathname } from 'next/navigation'
@@ -34,6 +35,12 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
   const [showLogin, setShowLogin] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
 
+  const checkAuth = async () => {
+    const res = await fetch('/api/auth/check')
+    const data = await res.json()
+    setIsAuthenticated(data.authenticated)
+  }
+
   useEffect(() => {
     checkAuth()
   }, [])
@@ -48,12 +55,6 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
     window.addEventListener('keydown', handleEscape)
     return () => window.removeEventListener('keydown', handleEscape)
   }, [showMenu])
-
-  const checkAuth = async () => {
-    const res = await fetch('/api/auth/check')
-    const data = await res.json()
-    setIsAuthenticated(data.authenticated)
-  }
 
   const handleLogin = () => {
     setShowLogin(true)
@@ -77,11 +78,12 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
         <div className="container mx-auto px-2 sm:px-4">
           <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
             {/* Logo a sinistra */}
-            <div className="flex items-center flex-shrink-0 animate-fade-in">
-              <img 
-                src="/logoSito.svg" 
-                alt="LABA" 
-                className="h-8 sm:h-10 w-auto brightness-0 invert transition-transform duration-300 hover:scale-110"
+            <div className="relative flex items-center flex-shrink-0 animate-fade-in h-8 sm:h-10 w-24 sm:w-28">
+              <Image
+                src="/logoSito.svg"
+                alt="LABA"
+                fill
+                className="object-contain object-left brightness-0 invert transition-transform duration-300 hover:scale-110"
               />
             </div>
             
@@ -105,7 +107,7 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
                     : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
                 }`}
               >
-                Via de' Vecchietti
+                Via de&apos; Vecchietti
               </button>
             </div>
             
@@ -129,7 +131,7 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
                     ? 'bg-white text-laba-primary shadow-md'
                     : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
                 }`}
-                title="Via de' Vecchietti"
+                title={"Via de' Vecchietti"}
               >
                 Vecchietti
               </button>

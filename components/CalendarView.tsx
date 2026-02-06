@@ -67,6 +67,57 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   }
   
   const [selectedLocation, setSelectedLocation] = useState<Location>(initialLocation || 'badia-ripoli')
+
+  const checkAuth = async () => {
+    try {
+      const res = await fetch('/api/auth/check')
+      const data = await res.json()
+      setIsAuthenticated(data.authenticated)
+    } catch (e) {
+      console.error("Auth check failed", e)
+    }
+  }
+
+  const loadLessons = async () => {
+    const params = new URLSearchParams()
+    if (filterCourse) params.append('course', filterCourse)
+    if (filterYear !== null) params.append('year', filterYear.toString())
+    try {
+      const res = await fetch(`/api/lessons?${params.toString()}`)
+      const data = await res.json()
+      const locationClassrooms = getBaseClassrooms(selectedLocation)
+      const filteredLessons = data.filter((lesson: Lesson) => {
+        const c = lesson.classroom
+        if (selectedLocation === 'badia-ripoli') {
+          if (c === 'Magna 1' || c === 'Magna 2') return locationClassrooms.includes('Aula Magna')
+          if (c === 'Conference 1' || c === 'Conference 2') return locationClassrooms.includes('Conference')
+        }
+        return locationClassrooms.includes(c)
+      })
+      setLessons(filteredLessons)
+    } catch (e) {
+      console.error("Failed to load lessons", e)
+    }
+  }
+
+  const loadAllLessons = async () => {
+    try {
+      const res = await fetch('/api/lessons')
+      const data = await res.json()
+      const locationClassrooms = getBaseClassrooms(selectedLocation)
+      const filteredLessons = data.filter((lesson: Lesson) => {
+        const c = lesson.classroom
+        if (selectedLocation === 'badia-ripoli') {
+          if (c === 'Magna 1' || c === 'Magna 2') return locationClassrooms.includes('Aula Magna')
+          if (c === 'Conference 1' || c === 'Conference 2') return locationClassrooms.includes('Conference')
+        }
+        return locationClassrooms.includes(c)
+      })
+      setAllLessons(filteredLessons)
+    } catch (e) {
+      console.error("Failed to load all lessons", e)
+    }
+  }
   
   // Gestione URL e Location
   useEffect(() => {
@@ -84,78 +135,16 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
   useEffect(() => {
     checkAuth()
     loadLessons()
-    loadAllLessons() // Carica tutte le lezioni per l'esportazione
-    
+    loadAllLessons()
     const handleExportEvent = () => setShowExportModal(true)
     window.addEventListener('export-calendar', handleExportEvent)
-    
-    return () => {
-      window.removeEventListener('export-calendar', handleExportEvent)
-    }
+    return () => window.removeEventListener('export-calendar', handleExportEvent)
   }, [])
 
   useEffect(() => {
     loadLessons()
     loadAllLessons()
   }, [filterCourse, filterYear, selectedLocation])
-
-  const checkAuth = async () => {
-    try {
-      const res = await fetch('/api/auth/check')
-      const data = await res.json()
-      setIsAuthenticated(data.authenticated)
-    } catch (e) {
-      console.error("Auth check failed", e)
-    }
-  }
-
-  const loadLessons = async () => {
-    const params = new URLSearchParams()
-    if (filterCourse) params.append('course', filterCourse)
-    if (filterYear !== null) params.append('year', filterYear.toString())
-    
-    try {
-      const res = await fetch(`/api/lessons?${params.toString()}`)
-      const data = await res.json()
-      
-      const locationClassrooms = getBaseClassrooms(selectedLocation)
-      const filteredLessons = data.filter((lesson: Lesson) => {
-        // Normalizza il nome dell'aula per il confronto
-        const c = lesson.classroom
-        if (selectedLocation === 'badia-ripoli') {
-          if (c === 'Magna 1' || c === 'Magna 2') return locationClassrooms.includes('Aula Magna')
-          if (c === 'Conference 1' || c === 'Conference 2') return locationClassrooms.includes('Conference')
-        }
-        return locationClassrooms.includes(c)
-      })
-      
-      setLessons(filteredLessons)
-    } catch (e) {
-      console.error("Failed to load lessons", e)
-    }
-  }
-
-  const loadAllLessons = async () => {
-    try {
-      const res = await fetch('/api/lessons')
-      const data = await res.json()
-      
-      const locationClassrooms = getBaseClassrooms(selectedLocation)
-      const filteredLessons = data.filter((lesson: Lesson) => {
-        // Normalizza il nome dell'aula per il confronto
-        const c = lesson.classroom
-        if (selectedLocation === 'badia-ripoli') {
-          if (c === 'Magna 1' || c === 'Magna 2') return locationClassrooms.includes('Aula Magna')
-          if (c === 'Conference 1' || c === 'Conference 2') return locationClassrooms.includes('Conference')
-        }
-        return locationClassrooms.includes(c)
-      })
-      
-      setAllLessons(filteredLessons)
-    } catch (e) {
-      console.error("Failed to load all lessons", e)
-    }
-  }
 
   const handleExportToCalendar = () => {
     if (!exportCourse) return
@@ -454,6 +443,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
       {/* Modali e Overlay */}
       {showForm && (
         <LessonForm
+          key={editingLesson?.id ?? 'new'}
           lesson={editingLesson}
           location={selectedLocation}
           onClose={() => { setShowForm(false); setEditingLesson(null); loadLessons() }}

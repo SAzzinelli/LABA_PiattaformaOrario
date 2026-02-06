@@ -1,5 +1,7 @@
 'use client'
 
+import type { ReactNode } from 'react'
+
 type ViewType = 'calendar' | 'list'
 
 interface ViewSelectorProps {
@@ -8,7 +10,7 @@ interface ViewSelectorProps {
 }
 
 export default function ViewSelector({ view, onViewChange }: ViewSelectorProps) {
-  const views: { value: ViewType; label: string; icon: JSX.Element }[] = [
+  const views: { value: ViewType; label: string; icon: ReactNode }[] = [
     { 
       value: 'calendar', 
       label: 'Calendario',
