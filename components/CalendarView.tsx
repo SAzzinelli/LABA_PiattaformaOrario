@@ -9,7 +9,7 @@ import SearchOverlay from './SearchOverlay'
 import LessonDetailsModal from './LessonDetailsModal'
 import ListView from './ListView'
 import ViewSelector from './ViewSelector'
-import { getBaseClassrooms } from '@/lib/classrooms'
+import { getBaseClassrooms, resolveClassroomToColumns } from '@/lib/classrooms'
 import { generateTimeSlots, timeToMinutes, getLessonSlots } from '@/lib/timeSlots'
 import { Location } from '@/lib/locations'
 import { usePathname } from 'next/navigation'
@@ -36,8 +36,9 @@ interface CalendarViewProps {
 // Struttura della cella della griglia
 type GridCell = 
   | { type: 'empty' }
-  | { type: 'event', lesson: Lesson, span: number }
+  | { type: 'event', lesson: Lesson, span: number, colSpan?: number }
   | { type: 'occupied' }
+  | { type: 'occupied-h' }  // occupata orizzontalmente da evento a sinistra (colSpan)
 
 export default function CalendarView({ initialLocation }: CalendarViewProps = {}) {
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -81,12 +82,8 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
       const data = await res.json()
       const locationClassrooms = getBaseClassrooms(selectedLocation)
       const filteredLessons = data.filter((lesson: Lesson) => {
-        const c = lesson.classroom
-        if (selectedLocation === 'badia-ripoli') {
-          if (c === 'Magna 1' || c === 'Magna 2') return locationClassrooms.includes('Aula Magna')
-          if (c === 'Conference 1' || c === 'Conference 2') return locationClassrooms.includes('Conference')
-        }
-        return locationClassrooms.includes(c)
+        const { startCol } = resolveClassroomToColumns(lesson.classroom, locationClassrooms)
+        return startCol >= 0
       })
       setLessons(filteredLessons)
     } catch (e) {
@@ -137,45 +134,33 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
 
     // Popola la matrice
     dayLessons.forEach(lesson => {
-      // Trova indice aula
-      let classroomIndex = classrooms.indexOf(lesson.classroom)
-      if (classroomIndex === -1) {
-        // Gestione varianti aule
-        if (lesson.classroom === 'Magna 1' || lesson.classroom === 'Magna 2') {
-          classroomIndex = classrooms.indexOf('Aula Magna')
-        } else if (lesson.classroom === 'Conference 1' || lesson.classroom === 'Conference 2') {
-          classroomIndex = classrooms.indexOf('Conference')
-        }
-      }
+      const { startCol: classroomIndex, colSpan } = resolveClassroomToColumns(lesson.classroom, classrooms)
       
       if (classroomIndex === -1) {
-        // Debug: log per vedere lezioni con aula non trovata
-        console.warn(`Aula non trovata per lezione: ${lesson.title} - Aula: ${lesson.classroom} - Aule disponibili:`, classrooms)
-        return // Aula non trovata in questa sede
+        return
       }
 
-      // Trova indice orario inizio
-      // Usa timeToMinutes per trovare lo slot corretto
       const startMinutes = timeToMinutes(lesson.startTime)
-      const gridStartMinutes = 9 * 60 // 09:00
+      const gridStartMinutes = 9 * 60
       const startIndex = Math.floor((startMinutes - gridStartMinutes) / 30)
-
-      // Calcola durata in slot
-      // Usa getLessonSlots che calcola correttamente la durata
       const span = getLessonSlots(lesson.startTime, lesson.endTime)
 
       if (startIndex >= 0 && startIndex < timeSlots.length) {
-        // Inserisci evento nella cella di partenza
         matrix[startIndex][classroomIndex] = { 
           type: 'event', 
           lesson, 
-          span: Math.min(span, timeSlots.length - startIndex) // Non uscire dalla griglia
+          span: Math.min(span, timeSlots.length - startIndex),
+          colSpan: colSpan > 1 ? colSpan : undefined
         }
 
-        // Marca le celle successive come occupate
-        for (let i = 1; i < span; i++) {
-          if (startIndex + i < timeSlots.length) {
-            matrix[startIndex + i][classroomIndex] = { type: 'occupied' }
+        // Marca celle successive ORIZZONTALI come occupied-h (per colSpan)
+        for (let c = 1; c < colSpan && classroomIndex + c < classrooms.length; c++) {
+          matrix[startIndex][classroomIndex + c] = { type: 'occupied-h' }
+        }
+        for (let r = 1; r < span && startIndex + r < timeSlots.length; r++) {
+          matrix[startIndex + r][classroomIndex] = { type: 'occupied' }
+          for (let c = 1; c < colSpan && classroomIndex + c < classrooms.length; c++) {
+            matrix[startIndex + r][classroomIndex + c] = { type: 'occupied-h' }
           }
         }
       }
@@ -300,10 +285,8 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                     {classrooms.map((classroom, classroomIndex) => {
                       const cell = gridMatrix[timeIndex][classroomIndex]
                       
-                      // Se la cella è occupata da un evento sopra, non renderizzarla
-                      if (cell.type === 'occupied') return null
+                      if (cell.type === 'occupied' || cell.type === 'occupied-h') return null
 
-                      // Se c'è un evento, renderizza cella con rowspan
                       if (cell.type === 'event') {
                         // Calcola le posizioni delle linee orizzontali per ogni slot
                         // Le linee devono essere centrate verticalmente su ogni riga, come nelle celle vuote
@@ -326,16 +309,20 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                           )
                         }
                         
+                        const colSpan = cell.colSpan ?? 1
+                        const cellWidth = classroomWidth * colSpan
                         return (
                           <td 
                             key={`${time}-${classroom}`} 
-                            rowSpan={cell.span} 
+                            rowSpan={cell.span}
+                            colSpan={colSpan}
                             className="border-r border-gray-100 p-0 align-top relative"
                             style={{ 
-                              width: `${classroomWidth}px`,
+                              width: `${cellWidth}px`,
+                              minWidth: `${cellWidth}px`,
                               height: `${cell.span * 45}px`, 
                               verticalAlign: 'top',
-                              ...(classroomIndex === classrooms.length - 1 ? { borderRight: 'none' } : {})
+                              ...(classroomIndex + colSpan - 1 >= classrooms.length - 1 ? { borderRight: 'none' } : {})
                             }}
                           >
                             {/* Linee orizzontali per ogni slot - dietro la card */}

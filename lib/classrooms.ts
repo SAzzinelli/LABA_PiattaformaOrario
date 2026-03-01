@@ -1,4 +1,25 @@
-// Aule per Piazza di Badia a Ripoli
+// Colonne calendario Badia: Magna 1, Magna 2, Conference 1, Conference 2 separate (no collapse)
+export const BADIA_CALENDAR_COLUMNS = [
+  'Magna 1',
+  'Magna 2',
+  'Conference 1',
+  'Conference 2',
+  'Photo LAB 1',
+  'Photo LAB 2',
+  'Visual HUB',
+  'Movie Hall',
+  '3D LAB',
+  'Multimedia LAB',
+  'Digital HUB',
+  'Design LAB',
+  'Pittura',
+  'Tecn. Grafiche',
+  'Studio 1',
+  'Studio 2',
+  'Studio 3',
+] as const
+
+// Aule per Piazza di Badia a Ripoli (include varianti per backward compat e form)
 export const CLASSROOMS_BADIA_RIPOLI = [
   'Aula Magna',
   'Magna 1',
@@ -6,6 +27,8 @@ export const CLASSROOMS_BADIA_RIPOLI = [
   'Conference',
   'Conference 1',
   'Conference 2',
+  'Conference 1+2',
+  'Magna 1+2',
   'Photo LAB 1',
   'Photo LAB 2',
   'Visual HUB',
@@ -91,72 +114,16 @@ export function getClassroomsForLocation(location: 'badia-ripoli' | 'via-vecchie
   }
 }
 
-// Funzione per ottenere tutte le aule base (senza varianti) nell'ordine corretto
-// Ora accetta un parametro opzionale per la sede
+// Funzione per ottenere le colonne del calendario (Magna 1, Magna 2, Conference 1, Conference 2 separate)
 export function getBaseClassrooms(location?: 'badia-ripoli' | 'via-vecchietti'): string[] {
-  // Se viene specificata una sede, usa le aule di quella sede
-  if (location) {
-    const locationClassrooms = getClassroomsForLocation(location)
-    
-    // Per Badia a Ripoli, gestisci le varianti (Magna 1/2 -> Aula Magna, Conference 1/2 -> Conference)
-    if (location === 'badia-ripoli') {
-      const baseSet = new Set<string>()
-      const result: string[] = []
-      
-      locationClassrooms.forEach(aula => {
-        let baseAula = aula
-        if (aula === 'Magna 1' || aula === 'Magna 2') {
-          baseAula = 'Aula Magna'
-        } else if (aula === 'Conference 1' || aula === 'Conference 2') {
-          baseAula = 'Conference'
-        }
-        
-        if (!baseSet.has(baseAula)) {
-          baseSet.add(baseAula)
-          result.push(baseAula)
-        }
-      })
-      
-      return result
-    } else {
-      // Per Via de Vecchietti, tutte le aule sono già "base" (nessuna variante)
-      return locationClassrooms
-    }
+  if (location === 'badia-ripoli') {
+    return Array.from(BADIA_CALENDAR_COLUMNS)
   }
-  
-  // Altrimenti usa il comportamento originale (tutte le aule)
-  const ordered = getOrderedClassrooms()
-  const baseSet = new Set<string>()
-  
-  ordered.forEach(aula => {
-    if (aula === 'Magna 1' || aula === 'Magna 2') {
-      baseSet.add('Aula Magna')
-    } else if (aula === 'Conference 1' || aula === 'Conference 2') {
-      baseSet.add('Conference')
-    } else {
-      baseSet.add(aula)
-    }
-  })
-  
-  // Mantieni l'ordine originale
-  const result: string[] = []
-  const seen = new Set<string>()
-  
-  ordered.forEach(aula => {
-    let baseAula = aula
-    if (aula === 'Magna 1' || aula === 'Magna 2') {
-      baseAula = 'Aula Magna'
-    } else if (aula === 'Conference 1' || aula === 'Conference 2') {
-      baseAula = 'Conference'
-    }
-    
-    if (!seen.has(baseAula)) {
-      seen.add(baseAula)
-      result.push(baseAula)
-    }
-  })
-  
-  return result
+  if (location === 'via-vecchietti') {
+    return Array.from(CLASSROOMS_VIA_VECCHIETTI)
+  }
+  // Default: Badia
+  return Array.from(BADIA_CALENDAR_COLUMNS)
 }
 
 // Funzione per verificare se un'aula è interna
@@ -170,25 +137,12 @@ export function isExternalClassroom(classroom: string): boolean {
 }
 
 // Funzione per ottenere l'indice della prima aula esterna (basato su aule base)
-// Accetta un parametro opzionale per la sede
 export function getFirstExternalIndex(location?: 'badia-ripoli' | 'via-vecchietti'): number {
-  // Per Via de Vecchietti non ci sono aule "esterne", tutte sono considerate interne
   if (location === 'via-vecchietti') {
-    return getBaseClassrooms('via-vecchietti').length // Tutte le aule sono "interne"
+    return getBaseClassrooms('via-vecchietti').length
   }
-  
-  // Per Badia a Ripoli, usa la logica originale
-  const internalBase = new Set<string>()
-  INTERNAL_CLASSROOMS.forEach(aula => {
-    // Gestisce le varianti di Conference
-    if (aula === 'Conference 1' || aula === 'Conference 2') {
-      internalBase.add('Conference')
-    } else {
-      // Aula Magna, Photo LAB 1, Photo LAB 2, Visual HUB, Movie Hall, 3D LAB, Multimedia LAB, Digital HUB
-      internalBase.add(aula)
-    }
-  })
-  return internalBase.size
+  // Badia: Magna 1, Magna 2, Conf 1, Conf 2, Photo 1, 2, Visual, Movie, 3D, Multimedia, Digital = 11 interne
+  return 11
 }
 
 // Funzione per ottenere le varianti di un'aula base
@@ -200,4 +154,28 @@ export function getClassroomVariants(baseClassroom: string): string[] {
     return ['Conference', 'Conference 1', 'Conference 2']
   }
   return [baseClassroom]
+}
+
+/** Risolve aula lezione -> { startCol, colSpan } per la griglia. Gestisce Conference 1+2, Magna 1+2. */
+export function resolveClassroomToColumns(
+  classroom: string,
+  columns: string[]
+): { startCol: number; colSpan: number } {
+  const idx = (c: string) => columns.indexOf(c)
+  // Spanning: Conference 1+2 -> colonne Conference 1 e 2
+  if (classroom === 'Conference 1+2') {
+    const start = idx('Conference 1')
+    return start >= 0 ? { startCol: start, colSpan: 2 } : { startCol: -1, colSpan: 1 }
+  }
+  if (classroom === 'Magna 1+2') {
+    const start = idx('Magna 1')
+    return start >= 0 ? { startCol: start, colSpan: 2 } : { startCol: -1, colSpan: 1 }
+  }
+  // Mapping aula generica -> prima colonna disponibile
+  const direct = idx(classroom)
+  if (direct >= 0) return { startCol: direct, colSpan: 1 }
+  if (classroom === 'Aula Magna') return { startCol: idx('Magna 1'), colSpan: 1 }
+  if (classroom === 'Conference') return { startCol: idx('Conference 1'), colSpan: 1 }
+  if (classroom === 'Magna') return { startCol: idx('Magna 1'), colSpan: 1 }
+  return { startCol: -1, colSpan: 1 }
 }

@@ -94,11 +94,12 @@ export function convertJsonToDb(json: JsonLesson, platformCourse: string): DbLes
   }
 }
 
-/** Deduplica lezioni uguali (stesso slot settimanale) - tiene la prima */
+/** Deduplica lezioni uguali (stesso slot settimanale, stesso corso/anno/gruppo) - tiene la prima per evitare duplicati in aule diverse */
 function deduplicateLessons(lessons: DbLesson[]): DbLesson[] {
   const seen = new Set<string>()
   return lessons.filter((l) => {
-    const key = `${l.course}-${l.year}-${l.title}-${l.day_of_week}-${l.start_time}-${l.end_time}-${l.classroom}-${l.professor}-${l.group_name ?? ''}`
+    // Chiave SENZA classroom: stessa lezione nello stesso slot = una sola (evita "Informatica" in Visual HUB + Movie Hall + Multimedia LAB)
+    const key = `${l.course}-${l.year}-${l.title}-${l.day_of_week}-${l.start_time}-${l.end_time}-${l.professor}-${l.group_name ?? ''}`
     if (seen.has(key)) return false
     seen.add(key)
     return true
