@@ -19,7 +19,7 @@ export default async function LocationPage({ params }: LocationPageProps) {
   return (
     <div className="h-screen bg-gray-50 flex flex-col overflow-hidden max-w-full">
       <Header />
-      <main className="container mx-auto px-2 py-2 flex-1 overflow-hidden flex flex-col min-w-0 max-w-full lg:max-w-6xl">
+      <main className="container mx-auto px-2 py-2 flex-1 overflow-hidden flex flex-col min-w-0 max-w-full">
         <CalendarView initialLocation={location as Location} />
       </main>
     </div>
