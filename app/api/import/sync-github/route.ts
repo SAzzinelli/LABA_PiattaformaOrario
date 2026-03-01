@@ -21,6 +21,23 @@ export async function POST(request: NextRequest) {
 
   try {
     const client = supabaseAdmin ?? supabase
+    const body = await request.json().catch(() => ({}))
+    const clearFirst = body?.clearFirst === true
+
+    if (clearFirst) {
+      const { error: delErr } = await client
+        .from('lessons')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000')
+      if (delErr) {
+        console.error('Clear lessons error:', delErr)
+        return NextResponse.json(
+          { error: `Errore durante lo svuotamento: ${delErr.message}` },
+          { status: 500 }
+        )
+      }
+    }
+
     const results = await syncFromGitHub(client)
 
     const total = results.reduce(

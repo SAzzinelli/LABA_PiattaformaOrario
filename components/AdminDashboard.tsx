@@ -451,14 +451,16 @@ function OrariSyncTab({ onRefresh }: { onRefresh?: () => void }) {
   const [result, setResult] = useState<{ total?: { imported: number; errors: number }; results: Array<{ corso: string; imported?: number; errors?: number; entries?: number; ok?: boolean; error?: string }> } | null>(null)
   const [resultType, setResultType] = useState<'sync' | 'push' | null>(null)
 
-  const handleSync = async () => {
+  const handleSync = async (clearFirst = false) => {
     setSyncing(true)
     setResult(null)
     setResultType(null)
     try {
       const res = await fetch('/api/import/sync-github', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
+        body: JSON.stringify({ clearFirst }),
       })
       const data = await res.json()
       if (res.ok) {
@@ -511,13 +513,23 @@ function OrariSyncTab({ onRefresh }: { onRefresh?: () => void }) {
           <p className="text-gray-600 mb-3 text-sm">
             Sincronizza gli orari dal repository LABA_Orari. I dati vengono scaricati e importati nel database.
           </p>
-          <button
-            onClick={handleSync}
-            disabled={syncing}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-          >
-            {syncing ? 'Sincronizzazione...' : 'Sincronizza da GitHub'}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => handleSync(false)}
+              disabled={syncing}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+            >
+              {syncing ? 'Sincronizzazione...' : 'Sincronizza da GitHub'}
+            </button>
+            <button
+              onClick={() => handleSync(true)}
+              disabled={syncing}
+              title="Elimina tutte le lezioni e importa da zero. Utile per risolvere doppioni o dati corrotti."
+              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+            >
+              {syncing ? 'Sincronizzazione...' : 'Svuota e Sincronizza'}
+            </button>
+          </div>
         </div>
         <div className="border-t border-gray-200 pt-4">
           <h3 className="font-semibold text-gray-900 mb-2">Da Piattaforma → GitHub</h3>
