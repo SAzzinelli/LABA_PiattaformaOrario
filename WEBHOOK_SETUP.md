@@ -1,4 +1,6 @@
-# Sync automatico da GitHub
+# Sync e Pubblicazione GitHub
+
+## Sync automatico (GitHub → Piattaforma)
 
 Quando modifichi i JSON degli orari nel repo **LABA_Orari** su GitHub, la piattaforma può sincronizzarsi automaticamente senza dover cliccare "Sync" da Admin.
 
@@ -40,3 +42,27 @@ Dopo aver creato il webhook, GitHub invia un "ping" per testare. Controlla che c
 - **Nessun doppione**: il sync elimina le lezioni esistenti per corso+anno e reinserisce i dati da GitHub. Non si creano duplicati.
 - **Solo push su main**: il sync parte solo quando fai push sul branch `main` (o `master`) di LABA_Orari.
 - **Risposta immediata**: la piattaforma risponde subito a GitHub (entro pochi secondi) e esegue il sync in background.
+
+---
+
+## Pubblicazione su GitHub (Piattaforma → GitHub)
+
+Quando modifichi le lezioni su orario.laba.biz, puoi pubblicarle su LABA_Orari con il pulsante **"Pubblica su GitHub"** nella sezione Admin → Orari.
+
+### Configurazione
+
+1. **Crea un Personal Access Token su GitHub**
+   - GitHub → Settings → Developer settings → Personal access tokens
+   - Generate new token (classic)
+   - Permessi: `repo` (accesso completo ai repository)
+   - Copia il token
+
+2. **Aggiungi su Railway**
+   - Variables → Add Variable
+   - Nome: `GITHUB_TOKEN`
+   - Valore: il token generato
+
+3. **Opzionale** – Anno accademico per le date dei semestri
+   - Nome: `GITHUB_EXPORT_YEAR_START`
+   - Valore: `2025` (anno di inizio dell’anno accademico 2025-26)
+   - Default: anno corrente se non impostato

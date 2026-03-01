@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getLessons, addLesson, LessonFilters } from '@/lib/db'
 import { verifyToken } from '@/lib/auth'
+import { triggerPushToGitHub } from '@/lib/pushToGitHub'
 
 export async function GET(request: NextRequest) {
   try {
@@ -38,6 +39,7 @@ export async function POST(request: NextRequest) {
   try {
     const data = await request.json()
     const lesson = await addLesson(data)
+    triggerPushToGitHub()
     return NextResponse.json(lesson, { status: 201 })
   } catch (error) {
     console.error('Error creating lesson:', error)

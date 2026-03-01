@@ -444,14 +444,17 @@ function ChangesTab({ changes, lessons, onAdd, onDelete, onRefresh }: any) {
   )
 }
 
-// Tab Orari - Sincronizzazione da GitHub
+// Tab Orari - Sincronizzazione e Pubblicazione GitHub
 function OrariSyncTab({ onRefresh }: { onRefresh?: () => void }) {
   const [syncing, setSyncing] = useState(false)
-  const [result, setResult] = useState<{ total: { imported: number; errors: number }; results: Array<{ corso: string; imported: number; errors: number }> } | null>(null)
+  const [pushing, setPushing] = useState(false)
+  const [result, setResult] = useState<{ total?: { imported: number; errors: number }; results: Array<{ corso: string; imported?: number; errors?: number; entries?: number; ok?: boolean; error?: string }> } | null>(null)
+  const [resultType, setResultType] = useState<'sync' | 'push' | null>(null)
 
   const handleSync = async () => {
     setSyncing(true)
     setResult(null)
+    setResultType(null)
     try {
       const res = await fetch('/api/import/sync-github', {
         method: 'POST',
@@ -460,6 +463,7 @@ function OrariSyncTab({ onRefresh }: { onRefresh?: () => void }) {
       const data = await res.json()
       if (res.ok) {
         setResult(data)
+        setResultType('sync')
         onRefresh?.()
       } else {
         alert(data.error || 'Errore durante la sincronizzazione')
@@ -472,38 +476,94 @@ function OrariSyncTab({ onRefresh }: { onRefresh?: () => void }) {
     }
   }
 
+  const handlePush = async () => {
+    setPushing(true)
+    setResult(null)
+    setResultType(null)
+    try {
+      const res = await fetch('/api/export/push-github', {
+        method: 'POST',
+        credentials: 'include',
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setResult(data)
+        setResultType('push')
+      } else {
+        alert(data.error || 'Errore durante la pubblicazione')
+      }
+    } catch (error) {
+      console.error('Push error:', error)
+      alert('Errore di connessione')
+    } finally {
+      setPushing(false)
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold text-gray-900">Orari da LABA_Orari</h2>
+        <h2 className="text-xl font-bold text-gray-900">Orari e GitHub</h2>
       </div>
-      <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
-        <p className="text-gray-600 mb-4">
-          Sincronizza automaticamente gli orari dal repository GitHub (LABA_Orari). 
-          I dati vengono scaricati da GitHub Pages e importati nel database, sostituendo le lezioni esistenti per ogni corso/anno.
-        </p>
-        <button
-          onClick={handleSync}
-          disabled={syncing}
-          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-        >
-          {syncing ? 'Sincronizzazione in corso...' : 'Sincronizza da GitHub'}
-        </button>
+      <div className="bg-white rounded-lg shadow p-6 border border-gray-200 space-y-4">
+        <div>
+          <h3 className="font-semibold text-gray-900 mb-2">Da GitHub → Piattaforma</h3>
+          <p className="text-gray-600 mb-3 text-sm">
+            Sincronizza gli orari dal repository LABA_Orari. I dati vengono scaricati e importati nel database.
+          </p>
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+          >
+            {syncing ? 'Sincronizzazione...' : 'Sincronizza da GitHub'}
+          </button>
+        </div>
+        <div className="border-t border-gray-200 pt-4">
+          <h3 className="font-semibold text-gray-900 mb-2">Da Piattaforma → GitHub</h3>
+          <p className="text-gray-600 mb-3 text-sm">
+            Pubblica le modifiche fatte qui su orario.laba.biz sul repository LABA_Orari. Richiede GITHUB_TOKEN su Railway.
+          </p>
+          <button
+            onClick={handlePush}
+            disabled={pushing}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+          >
+            {pushing ? 'Pubblicazione...' : 'Pubblica su GitHub'}
+          </button>
+        </div>
       </div>
       {result && (
         <div className="bg-white rounded-lg shadow p-4 border border-gray-200">
           <h3 className="font-semibold text-gray-900 mb-2">Risultato</h3>
-          <p className="text-sm text-gray-600 mb-2">
-            Importate: <strong>{result.total.imported}</strong> lezioni
-            {result.total.errors > 0 && (
-              <span className="text-red-600 ml-2">Errori: {result.total.errors}</span>
-            )}
-          </p>
+          {resultType === 'sync' && result.total && (
+            <p className="text-sm text-gray-600 mb-2">
+              Importate: <strong>{result.total.imported}</strong> lezioni
+              {result.total.errors > 0 && (
+                <span className="text-red-600 ml-2">Errori: {result.total.errors}</span>
+              )}
+            </p>
+          )}
+          {resultType === 'push' && (
+            <p className="text-sm text-gray-600 mb-2">
+              Occorrenze esportate: <strong>{result.totalEntries ?? 0}</strong>
+              {result.results.some((r) => !r.ok) && (
+                <span className="text-red-600 ml-2">Alcuni file falliti</span>
+              )}
+            </p>
+          )}
           <div className="max-h-48 overflow-y-auto text-sm">
             {result.results.map((r, i) => (
               <div key={i} className="flex justify-between py-1">
                 <span>{r.corso}</span>
-                <span>{r.imported} importate</span>
+                {resultType === 'sync' && (
+                  <span>{r.imported ?? 0} importate</span>
+                )}
+                {resultType === 'push' && (
+                  <span className={r.ok ? '' : 'text-red-600'}>
+                    {r.ok ? `${r.entries ?? 0} ok` : (r.error ?? 'errore')}
+                  </span>
+                )}
               </div>
             ))}
           </div>

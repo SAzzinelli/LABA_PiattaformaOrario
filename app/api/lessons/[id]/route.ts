@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { updateLesson, deleteLesson } from '@/lib/db'
 import { verifyToken } from '@/lib/auth'
+import { triggerPushToGitHub } from '@/lib/pushToGitHub'
 
 export async function PUT(
   request: NextRequest,
@@ -25,6 +26,7 @@ export async function PUT(
     if (!lesson) {
       return NextResponse.json({ error: 'Lezione non trovata' }, { status: 404 })
     }
+    triggerPushToGitHub()
     return NextResponse.json(lesson)
   } catch (error) {
     console.error('Error updating lesson:', error)
@@ -56,6 +58,7 @@ export async function DELETE(
     if (!success) {
       return NextResponse.json({ error: 'Lezione non trovata' }, { status: 404 })
     }
+    triggerPushToGitHub()
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting lesson:', error)
