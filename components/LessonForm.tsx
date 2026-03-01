@@ -123,7 +123,7 @@ export default function LessonForm({ lesson, location, onClose, onDelete }: Less
   const courseColor = getCourseColor(lesson?.course, lesson?.year)
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-scale-in shadow-2xl flex flex-col">
         {/* Header con colore del corso (meno saturo) */}
         <div
@@ -139,7 +139,7 @@ export default function LessonForm({ lesson, location, onClose, onDelete }: Less
             </h2>
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-black hover:bg-opacity-10 transition-colors"
+              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-black/10 transition-colors"
               style={{ color: courseColor.textHex }}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

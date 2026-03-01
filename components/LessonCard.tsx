@@ -77,7 +77,7 @@ export default function LessonCard({ lesson, compact = false, onEdit, onDelete }
           <div className="flex gap-2 ml-4">
             <button
               onClick={() => onEdit(lesson)}
-              className="px-3 py-1 bg-laba-primary text-white text-sm rounded hover:bg-opacity-90"
+              className="px-3 py-1 bg-laba-primary text-white text-sm rounded hover:opacity-90"
             >
               Modifica
             </button>

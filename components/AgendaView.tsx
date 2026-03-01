@@ -51,7 +51,7 @@ export default function AgendaView({
                     >
                         <div className="flex justify-between items-start mb-2">
                             <div className="flex flex-col">
-                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full w-fit mb-1 ${courseColor.bg} ${courseColor.text} bg-opacity-20`}>
+                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full w-fit mb-1 ${courseColor.bg} ${courseColor.text}`}>
                                     {lesson.startTime.substring(0, 5)} - {lesson.endTime.substring(0, 5)}
                                 </span>
                                 <h3 className="font-bold text-gray-900 text-lg leading-tight">

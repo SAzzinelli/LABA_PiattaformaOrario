@@ -300,11 +300,11 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             <span className="text-xs sm:text-base font-normal">{dayNumber} {monthName}</span>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate() - 1); setCurrentDate(d) }} className="p-1 rounded bg-white bg-opacity-10 hover:bg-opacity-20 transition-colors">
+            <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate() - 1); setCurrentDate(d) }} className="p-1 rounded bg-white/10 hover:bg-white/20 text-white transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
-            <button onClick={() => setCurrentDate(new Date())} className="px-2 sm:px-3 py-1 rounded text-xs sm:text-sm bg-white bg-opacity-10 hover:bg-opacity-20 transition-colors">Oggi</button>
-            <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate() + 1); setCurrentDate(d) }} className="p-1 rounded bg-white bg-opacity-10 hover:bg-opacity-20 transition-colors">
+            <button onClick={() => setCurrentDate(new Date())} className="px-2 sm:px-3 py-1 rounded text-xs sm:text-sm bg-white/10 hover:bg-white/20 text-white transition-colors">Oggi</button>
+            <button onClick={() => { const d = new Date(currentDate); d.setDate(d.getDate() + 1); setCurrentDate(d) }} className="p-1 rounded bg-white/10 hover:bg-white/20 text-white transition-colors">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
@@ -502,7 +502,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
       {showExportModal && (
         <>
           <div 
-            className="fixed inset-0 bg-black bg-opacity-40 z-[90] animate-fade-in"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[90] animate-fade-in"
             onClick={() => { setShowExportModal(false); setExportCourse('') }}
           />
           <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100] bg-white rounded-lg shadow-xl border border-gray-200 min-w-[320px] max-w-md animate-scale-in">

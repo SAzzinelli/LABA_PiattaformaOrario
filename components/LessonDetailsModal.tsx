@@ -51,7 +51,7 @@ export default function LessonDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in"
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -77,7 +77,7 @@ export default function LessonDetailsModal({
             </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black hover:bg-opacity-10 transition-colors"
+              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/10 transition-colors"
               style={{ color: courseColor.textHex }}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

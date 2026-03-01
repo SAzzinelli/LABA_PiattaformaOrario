@@ -94,8 +94,8 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
                 onClick={() => handleLocationChange('badia-ripoli')}
                 className={`px-3 py-1.5 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
                   currentLocation === 'badia-ripoli'
-                    ? 'bg-white text-laba-primary shadow-md'
-                    : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
+                    ? 'bg-white text-[#033157] shadow-md'
+                    : 'bg-white/20 text-white hover:bg-white/30'
                 }`}
               >
                 Piazza di Badia a Ripoli
@@ -104,8 +104,8 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
                 onClick={() => handleLocationChange('via-vecchietti')}
                 className={`px-3 py-1.5 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
                   currentLocation === 'via-vecchietti'
-                    ? 'bg-white text-laba-primary shadow-md'
-                    : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
+                    ? 'bg-white text-[#033157] shadow-md'
+                    : 'bg-white/20 text-white hover:bg-white/30'
                 }`}
               >
                 Via de&apos; Vecchietti
@@ -118,8 +118,8 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
                 onClick={() => handleLocationChange('badia-ripoli')}
                 className={`px-2 py-1 rounded-md font-medium text-[10px] transition-all truncate max-w-[45%] ${
                   currentLocation === 'badia-ripoli'
-                    ? 'bg-white text-laba-primary shadow-md'
-                    : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
+                    ? 'bg-white text-[#033157] shadow-md'
+                    : 'bg-white/20 text-white hover:bg-white/30'
                 }`}
                 title="Piazza di Badia a Ripoli"
               >
@@ -129,8 +129,8 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
                 onClick={() => handleLocationChange('via-vecchietti')}
                 className={`px-2 py-1 rounded-md font-medium text-[10px] transition-all truncate max-w-[45%] ${
                   currentLocation === 'via-vecchietti'
-                    ? 'bg-white text-laba-primary shadow-md'
-                    : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
+                    ? 'bg-white text-[#033157] shadow-md'
+                    : 'bg-white/20 text-white hover:bg-white/30'
                 }`}
                 title={"Via de' Vecchietti"}
               >
@@ -142,7 +142,7 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
             <nav className="flex items-center flex-shrink-0">
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-1.5 sm:p-2 rounded-lg text-white hover:bg-white hover:bg-opacity-20 transition-colors relative z-[100]"
+                className="p-1.5 sm:p-2 rounded-lg text-white hover:bg-white/20 transition-colors relative z-[100]"
                 aria-label="Menu"
               >
                 <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,9 +164,9 @@ export default function Header({ selectedLocation, onLocationChange }: HeaderPro
       {/* Menu dropdown semplice */}
       {showMenu && (
         <>
-          {/* Backdrop con opacità scura */}
+          {/* Backdrop blur + opacità */}
           <div 
-            className="fixed inset-0 bg-black bg-opacity-40 z-[90] animate-fade-in"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[90] animate-fade-in"
             onClick={() => setShowMenu(false)}
           />
           

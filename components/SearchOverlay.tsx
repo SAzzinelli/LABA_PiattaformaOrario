@@ -58,7 +58,7 @@ export default function SearchOverlay({ isOpen, onClose, onSelectLesson, lessons
     <>
       {/* Backdrop blurrato */}
       <div 
-        className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 animate-fade-in"
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 animate-fade-in"
         onClick={handleClose}
       />
       
@@ -73,7 +73,7 @@ export default function SearchOverlay({ isOpen, onClose, onSelectLesson, lessons
             <h2 className="text-lg sm:text-xl font-bold">Cerca Lezione</h2>
             <button
               onClick={handleClose}
-              className="w-8 h-8 rounded-full text-white hover:bg-white hover:bg-opacity-20 smooth-transition flex items-center justify-center text-2xl flex-shrink-0"
+              className="w-8 h-8 rounded-full text-white hover:bg-white/20 smooth-transition flex items-center justify-center text-2xl flex-shrink-0"
             >
               ×
             </button>

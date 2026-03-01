@@ -41,7 +41,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-laba-primary">Login Admin</h2>
@@ -92,7 +92,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 rounded-full bg-laba-primary text-white py-2 px-4 text-sm font-medium transition-all duration-200 hover:bg-opacity-90 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
+              className="flex-1 rounded-full bg-laba-primary text-white py-2 px-4 text-sm font-medium transition-all duration-200 hover:opacity-90 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
             >
               {loading ? 'Accesso in corso...' : 'Accedi'}
             </button>
