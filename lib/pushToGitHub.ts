@@ -13,22 +13,19 @@ export function triggerPushToGitHub(): void {
     return
   }
   const client = supabaseAdmin ?? supabase
-  client
-    .from('lessons')
-    .select('title, start_time, end_time, day_of_week, classroom, professor, course, year, group_name, notes')
-    .not('course', 'is', null)
-    .not('year', 'is', null)
-    .then(({ data: lessons, error }) => {
+  void (async () => {
+    try {
+      const { data: lessons, error } = await client
+        .from('lessons')
+        .select('title, start_time, end_time, day_of_week, classroom, professor, course, year, group_name, notes')
+        .not('course', 'is', null)
+        .not('year', 'is', null)
       if (error || !lessons?.length) return
-      return exportToGitHub(lessons, { token })
-    })
-    .then((results) => {
-      if (results) {
-        const ok = results.filter((r) => r.ok).length
-        console.log(`[Push GitHub] Completato: ${ok}/${results.length} file`)
-      }
-    })
-    .catch((err) => {
-      console.error('[Push GitHub] Errore:', err?.message ?? err)
-    })
+      const results = await exportToGitHub(lessons, { token })
+      const ok = results.filter((r) => r.ok).length
+      console.log(`[Push GitHub] Completato: ${ok}/${results.length} file`)
+    } catch (err: unknown) {
+      console.error('[Push GitHub] Errore:', err instanceof Error ? err.message : err)
+    }
+  })()
 }

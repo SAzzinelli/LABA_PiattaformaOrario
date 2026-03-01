@@ -142,7 +142,7 @@ export async function exportToGitHub(
     }
   }
 
-  for (const [key, less] of byFile.entries()) {
+  for (const [key, less] of Array.from(byFile.entries())) {
     const [corso, annoStr, semStr] = key.split('-')
     const anno = parseInt(annoStr, 10)
     const sem = parseInt(semStr, 10)

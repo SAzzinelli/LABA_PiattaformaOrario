@@ -546,7 +546,7 @@ function OrariSyncTab({ onRefresh }: { onRefresh?: () => void }) {
           )}
           {resultType === 'push' && (
             <p className="text-sm text-gray-600 mb-2">
-              Occorrenze esportate: <strong>{result.totalEntries ?? 0}</strong>
+              Occorrenze esportate: <strong>{result.results.reduce((s, r) => s + (r.entries ?? 0), 0)}</strong>
               {result.results.some((r) => !r.ok) && (
                 <span className="text-red-600 ml-2">Alcuni file falliti</span>
               )}

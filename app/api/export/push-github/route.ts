@@ -5,12 +5,12 @@
  * Richiede autenticazione admin e GITHUB_TOKEN configurato.
  */
 
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/auth'
 import { supabaseAdmin, supabase } from '@/lib/supabase'
 import { exportToGitHub } from '@/lib/exportToGitHub'
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const token = request.cookies.get('auth-token')?.value
   if (!token) {
     return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
