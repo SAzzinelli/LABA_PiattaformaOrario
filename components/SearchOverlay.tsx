@@ -59,12 +59,12 @@ export default function SearchOverlay({ isOpen, onClose, onSelectLesson, lessons
     <>
       {/* Backdrop blurrato */}
       <div 
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 animate-fade-in"
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[150] animate-fade-in"
         onClick={handleClose}
       />
       
       {/* Overlay contenuto - Mobile first design */}
-      <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-20 px-0 sm:px-4 animate-scale-in pointer-events-none">
+      <div className="fixed inset-0 z-[150] flex items-start justify-center pt-16 sm:pt-20 px-0 sm:px-4 animate-scale-in pointer-events-none">
         <div 
           className="card-modern w-full h-full sm:h-auto sm:max-w-3xl sm:max-h-[70vh] overflow-hidden pointer-events-auto flex flex-col"
           onClick={(e) => e.stopPropagation()}

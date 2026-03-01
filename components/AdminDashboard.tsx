@@ -617,7 +617,7 @@ function AbsenceForm({ lessons, onClose, onSuccess }: any) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[150] p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
         <h3 className="text-lg font-bold mb-4">Nuova Assenza</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -736,7 +736,7 @@ function MakeupForm({ lessons, onClose, onSuccess }: any) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[150] p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
         <h3 className="text-lg font-bold mb-4">Nuovo Recupero</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -898,7 +898,7 @@ function ChangeForm({ lessons, onClose, onSuccess }: any) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[150] p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
         <h3 className="text-lg font-bold mb-4">Nuovo Cambio Aula</h3>
         <form onSubmit={handleSubmit} className="space-y-4">

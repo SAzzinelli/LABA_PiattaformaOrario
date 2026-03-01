@@ -91,14 +91,6 @@ function normalizeClassroom(aula: string): string {
   return map[aula] ?? aula
 }
 
-/** Correzioni aula per lezioni note (1 sem GD2): Vivarelli Storia dell'Arte Moderna -> Magna 2 */
-function resolveClassroom(json: JsonLesson): string {
-  const base = normalizeClassroom(json.aula)
-  if (json.corso === "Storia dell'Arte Moderna" && json.docente === 'Vivarelli' && (base === 'Magna 1+2' || json.aula === 'Magna 1+2')) {
-    return 'Magna 2'
-  }
-  return base
-}
 
 export function convertJsonToDb(json: JsonLesson, platformCourse: string, semester: number): DbLesson {
   return {
@@ -106,7 +98,7 @@ export function convertJsonToDb(json: JsonLesson, platformCourse: string, semest
     start_time: extractTime(json.start),
     end_time: extractTime(json.end),
     day_of_week: getDayOfWeek(json.start),
-    classroom: resolveClassroom(json),
+    classroom: normalizeClassroom(json.aula),
     professor: json.docente,
     course: platformCourse,
     year: json.anno,

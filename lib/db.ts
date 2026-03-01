@@ -199,6 +199,30 @@ export async function updateLesson(
   }
 }
 
+/** Ottiene i professori distinti dal DB (per dropdown) */
+export async function getDistinctProfessors(): Promise<string[]> {
+  try {
+    const { data, error } = await supabase.from('lessons').select('professor')
+    if (error) return []
+    const set = new Set((data || []).map((r: any) => r.professor).filter(Boolean))
+    return Array.from(set).sort()
+  } catch {
+    return []
+  }
+}
+
+/** Ottiene le aule distinti dal DB (per dropdown, unione con lista canonica) */
+export async function getDistinctClassrooms(): Promise<string[]> {
+  try {
+    const { data, error } = await supabase.from('lessons').select('classroom')
+    if (error) return []
+    const set = new Set((data || []).map((r: any) => r.classroom).filter(Boolean))
+    return Array.from(set).sort()
+  } catch {
+    return []
+  }
+}
+
 export async function deleteLesson(id: string): Promise<boolean> {
   try {
     const { error } = await supabase.from('lessons').delete().eq('id', id)

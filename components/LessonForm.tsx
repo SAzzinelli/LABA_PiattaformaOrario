@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { getClassroomsForLocation } from '@/lib/classrooms'
 import { ALL_COURSES, getYearsForCourse, isTriennale, isBiennale } from '@/lib/courses'
+import { getGroupsForCourse } from '@/lib/courseGroups'
 import { Location, getCoursesForLocation } from '@/lib/locations'
 import { getCourseColor } from '@/lib/courseColors'
 
@@ -38,7 +39,6 @@ const DAYS_OF_WEEK = [
 ]
 
 export default function LessonForm({ lesson, location, onClose, onDelete }: LessonFormProps) {
-  const availableClassrooms = getClassroomsForLocation(location)
   const availableCourses = getCoursesForLocation(location)
   
   // Filtra i corsi disponibili per la sede
@@ -75,8 +75,25 @@ export default function LessonForm({ lesson, location, onClose, onDelete }: Less
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [updateScope, setUpdateScope] = useState<'single' | 'all_future'>('single')
+  const [professorOptions, setProfessorOptions] = useState<string[]>([])
+  const [extraClassrooms, setExtraClassrooms] = useState<string[]>([])
+  const canonicalClassrooms = getClassroomsForLocation(location)
+
+  useEffect(() => {
+    fetch('/api/lessons/options')
+      .then(res => res.json())
+      .then(data => {
+        setProfessorOptions(data.professors || [])
+        const fromDb = data.classrooms || []
+        setExtraClassrooms(fromDb.filter((a: string) => !canonicalClassrooms.includes(a)))
+      })
+      .catch(() => { setProfessorOptions([]); setExtraClassrooms([]) })
+  }, [location])
+
+  const availableClassrooms = [...canonicalClassrooms, ...extraClassrooms]
 
   const availableYears = formData.course ? getYearsForCourse(formData.course as any) : []
+  const availableGroups = getGroupsForCourse(formData.course || '', formData.year)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -123,7 +140,7 @@ export default function LessonForm({ lesson, location, onClose, onDelete }: Less
   const courseColor = getCourseColor(lesson?.course, lesson?.year)
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[150] animate-fade-in">
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-scale-in shadow-2xl flex flex-col">
         {/* Header con colore del corso (meno saturo) */}
         <div
@@ -223,14 +240,21 @@ export default function LessonForm({ lesson, location, onClose, onDelete }: Less
               <label htmlFor="professor" className="block text-sm font-medium text-gray-700 mb-1">
                 Professore *
               </label>
-              <input
+              <select
                 id="professor"
-                type="text"
                 value={formData.professor}
                 onChange={(e) => setFormData({ ...formData, professor: e.target.value })}
                 className="input-modern w-full px-4 py-2.5 rounded-lg"
                 required
-              />
+              >
+                <option value="">Seleziona professore</option>
+                {professorOptions.map((p) => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+                {formData.professor && !professorOptions.includes(formData.professor) && (
+                  <option value={formData.professor}>{formData.professor}</option>
+                )}
+              </select>
             </div>
 
             <div>
@@ -263,7 +287,15 @@ export default function LessonForm({ lesson, location, onClose, onDelete }: Less
                 id="course"
                 value={formData.course}
                 onChange={(e) => {
-                  setFormData({ ...formData, course: e.target.value, year: null })
+                  const newCourse = e.target.value
+                  const newGroups = getGroupsForCourse(newCourse, null)
+                  const keepGroup = formData.group && newGroups.includes(formData.group)
+                  setFormData({
+                    ...formData,
+                    course: newCourse,
+                    year: null,
+                    group: keepGroup ? formData.group : '',
+                  })
                 }}
                 className="input-modern w-full px-4 py-2.5 rounded-lg"
               >
@@ -292,7 +324,16 @@ export default function LessonForm({ lesson, location, onClose, onDelete }: Less
               <select
                 id="year"
                 value={formData.year || ''}
-                onChange={(e) => setFormData({ ...formData, year: e.target.value ? parseInt(e.target.value) : null })}
+                onChange={(e) => {
+                  const newYear = e.target.value ? parseInt(e.target.value) : null
+                  const newGroups = getGroupsForCourse(formData.course || '', newYear)
+                  const keepGroup = formData.group && newGroups.includes(formData.group)
+                  setFormData({
+                    ...formData,
+                    year: newYear,
+                    group: keepGroup ? formData.group : '',
+                  })
+                }}
                 disabled={!formData.course}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-laba-primary focus:border-laba-primary transition-all duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
               >
@@ -310,14 +351,20 @@ export default function LessonForm({ lesson, location, onClose, onDelete }: Less
             <label htmlFor="group" className="block text-sm font-medium text-gray-700 mb-1">
               Gruppo (lascia vuoto per &quot;tutti&quot;)
             </label>
-            <input
+            <select
               id="group"
-              type="text"
               value={formData.group}
               onChange={(e) => setFormData({ ...formData, group: e.target.value })}
-                className="input-modern w-full px-4 py-2.5 rounded-lg"
-              placeholder="Es: Gruppo A, Gruppo B, oppure lascia vuoto"
-            />
+              className="input-modern w-full px-4 py-2.5 rounded-lg"
+            >
+              <option value="">Tutti / Nessun gruppo</option>
+              {availableGroups.map((g) => (
+                <option key={g} value={g}>Gruppo {g}</option>
+              ))}
+              {formData.group && !availableGroups.includes(formData.group) && (
+                <option value={formData.group}>Gruppo {formData.group}</option>
+              )}
+            </select>
           </div>
 
           <div>
