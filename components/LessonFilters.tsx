@@ -47,7 +47,7 @@ export default function LessonFilters({
             onCourseChange(e.target.value)
             onYearChange(null)
           }}
-          className={`px-3 py-2 rounded-lg text-sm border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-laba-primary/30 focus:border-laba-primary ${compact ? 'w-full flex-1' : 'min-w-[160px]'}`}
+          className={`cursor-pointer px-3 py-2 rounded-lg text-sm border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-laba-primary/30 focus:border-laba-primary ${compact ? 'w-full flex-1' : 'min-w-[160px]'}`}
         >
           <option value="">Tutti i corsi</option>
           {courseOptions.map((c) => (
@@ -68,7 +68,7 @@ export default function LessonFilters({
           value={year?.toString() || ''}
           onChange={(e) => onYearChange(e.target.value ? parseInt(e.target.value) : null)}
           disabled={!course}
-          className={`px-3 py-2 rounded-lg text-sm border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-laba-primary/30 focus:border-laba-primary disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed ${compact ? 'w-full flex-1' : 'min-w-[110px]'}`}
+          className={`cursor-pointer px-3 py-2 rounded-lg text-sm border border-gray-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-laba-primary/30 focus:border-laba-primary disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed ${compact ? 'w-full flex-1' : 'min-w-[110px]'}`}
         >
           <option value="">Tutti gli anni</option>
           {availableYears.map((y) => (

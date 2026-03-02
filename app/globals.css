@@ -46,6 +46,13 @@
   --laba-primary: #033157;
 }
 
+/* Cursor manina per elementi cliccabili */
+button,
+a,
+select {
+  cursor: pointer;
+}
+
 body {
   color: var(--laba-primary);
   background: #f8f9fa;

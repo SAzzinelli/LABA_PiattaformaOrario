@@ -30,7 +30,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl mx-auto">
             <button
               onClick={() => router.push("/badia-ripoli")}
-              className="group relative overflow-hidden rounded-2xl bg-white p-6 sm:p-8 text-left shadow-lg shadow-slate-200/60 border border-slate-100 hover:shadow-xl hover:shadow-slate-200/80 hover:border-slate-200 transition-all duration-300 hover:-translate-y-1"
+              className="cursor-pointer group relative overflow-hidden rounded-2xl bg-white p-6 sm:p-8 text-left shadow-lg shadow-slate-200/60 border border-slate-100 hover:shadow-xl hover:shadow-slate-200/80 hover:border-slate-200 transition-all duration-300 hover:-translate-y-1"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-[#033157]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="relative flex items-center justify-between gap-6">
@@ -79,7 +79,7 @@ export default function Home() {
 
             <button
               onClick={() => router.push("/via-vecchietti")}
-              className="group relative overflow-hidden rounded-2xl bg-white p-6 sm:p-8 text-left shadow-lg shadow-slate-200/60 border border-slate-100 hover:shadow-xl hover:shadow-slate-200/80 hover:border-slate-200 transition-all duration-300 hover:-translate-y-1"
+              className="cursor-pointer group relative overflow-hidden rounded-2xl bg-white p-6 sm:p-8 text-left shadow-lg shadow-slate-200/60 border border-slate-100 hover:shadow-xl hover:shadow-slate-200/80 hover:border-slate-200 transition-all duration-300 hover:-translate-y-1"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-[#033157]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="relative flex items-center justify-between gap-6">

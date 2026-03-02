@@ -37,7 +37,7 @@ export default function ViewSelector({ view, onViewChange }: ViewSelectorProps) 
         <button
           key={v.value}
           onClick={() => onViewChange(v.value)}
-          className={`px-4 py-2.5 sm:py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 min-w-0 flex-1 sm:flex-initial ${
+          className={`cursor-pointer px-4 py-2.5 sm:py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 min-w-0 flex-1 sm:flex-initial ${
             view === v.value
               ? 'bg-white text-laba-primary shadow-sm'
               : 'text-gray-600 hover:bg-gray-50 active:bg-gray-100'

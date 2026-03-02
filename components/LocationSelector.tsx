@@ -16,7 +16,7 @@ export default function LocationSelector({ selectedLocation, onLocationChange }:
       <div className="flex gap-2">
         <button
           onClick={() => onLocationChange('badia-ripoli')}
-          className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+          className={`cursor-pointer px-4 py-2 rounded-lg font-medium text-sm transition-all ${
             selectedLocation === 'badia-ripoli'
               ? 'bg-laba-primary text-white shadow-md'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -26,7 +26,7 @@ export default function LocationSelector({ selectedLocation, onLocationChange }:
         </button>
         <button
           onClick={() => onLocationChange('via-vecchietti')}
-          className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+          className={`cursor-pointer px-4 py-2 rounded-lg font-medium text-sm transition-all ${
             selectedLocation === 'via-vecchietti'
               ? 'bg-laba-primary text-white shadow-md'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'

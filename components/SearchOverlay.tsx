@@ -58,7 +58,7 @@ export default function SearchOverlay({ isOpen, onClose, onSelectLesson, lessons
     <>
       {/* Backdrop blurrato */}
       <div 
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[150] animate-fade-in"
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[150] animate-fade-in cursor-pointer"
         onClick={handleClose}
       />
       
@@ -73,7 +73,7 @@ export default function SearchOverlay({ isOpen, onClose, onSelectLesson, lessons
             <h2 className="text-lg sm:text-xl font-bold">Cerca Lezione</h2>
             <button
               onClick={handleClose}
-              className="w-8 h-8 rounded-full text-white hover:bg-white/20 smooth-transition flex items-center justify-center text-2xl flex-shrink-0"
+              className="cursor-pointer w-8 h-8 rounded-full text-white hover:bg-white/20 smooth-transition flex items-center justify-center text-2xl flex-shrink-0"
             >
               ×
             </button>
@@ -112,7 +112,7 @@ export default function SearchOverlay({ isOpen, onClose, onSelectLesson, lessons
                     <button
                       key={lesson.id}
                       onClick={() => handleSelectLesson(lesson)}
-                      className="w-full p-3 sm:p-4 text-left hover:opacity-95 active:opacity-90 smooth-transition"
+                      className="cursor-pointer w-full p-3 sm:p-4 text-left hover:opacity-95 active:opacity-90 smooth-transition"
                       style={{ backgroundColor: courseColor.borderColor + '0a' }}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">

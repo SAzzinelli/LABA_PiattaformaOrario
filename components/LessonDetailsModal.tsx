@@ -52,7 +52,7 @@ export default function LessonDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[150] animate-fade-in"
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[150] animate-fade-in cursor-pointer"
       onClick={onClose}
     >
       <div
@@ -209,7 +209,7 @@ export default function LessonDetailsModal({
                 onEdit(lesson)
                 onClose()
               }}
-              className="px-4 py-2 rounded-lg font-medium text-sm transition-colors"
+              className="cursor-pointer px-4 py-2 rounded-lg font-medium text-sm transition-colors"
               style={{
                 backgroundColor: courseColor.bgHex,
                 color: courseColor.textHex,
