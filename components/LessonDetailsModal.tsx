@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { getCourseColor } from '@/lib/courseColors'
+import { getCourseColor, getCourseCode } from '@/lib/courseColors'
 import { formatProfessorLines } from '@/lib/formatting'
 
 interface AdditionalCourse {
@@ -52,7 +52,17 @@ export default function LessonDetailsModal({
 }: LessonDetailsModalProps) {
   if (!isOpen || !lesson) return null
 
-  const courseColor = getCourseColor(lesson.course, lesson.year)
+  const allCourses = (() => {
+    const out: { course: string; year: number }[] = []
+    if (lesson.course && lesson.year != null) out.push({ course: lesson.course, year: lesson.year })
+    for (const ac of lesson.additionalCourses ?? []) {
+      if (ac?.course && ac?.year != null && !out.some(c => c.course === ac.course && c.year === ac.year)) {
+        out.push({ course: ac.course, year: ac.year })
+      }
+    }
+    return out
+  })()
+  const courseColor = getCourseColor(allCourses[0]?.course ?? lesson.course, allCourses[0]?.year ?? lesson.year)
   const dayName = DAYS_OF_WEEK[lesson.dayOfWeek]
   const formattedDate = format(currentDate, 'd MMMM yyyy', { locale: it })
 
@@ -149,32 +159,23 @@ export default function LessonDetailsModal({
             </div>
           </div>
 
-          {/* Corso e Gruppo come pill */}
+          {/* Corsi e Gruppo come pill */}
           <div className="flex flex-wrap gap-2 items-center">
-            {(lesson.course || (lesson.additionalCourses?.length ?? 0) > 0) && (
+            {allCourses.length > 0 && (
               <div>
                 <div className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1.5">
-                  Corso{(lesson.additionalCourses?.length ?? 0) > 0 ? 'i' : ''}
+                  Corso{allCourses.length > 1 ? 'i' : ''}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {lesson.course && (
-                    <span
-                      className="inline-flex px-3 py-1.5 rounded-full text-sm font-semibold"
-                      style={{ backgroundColor: courseColor.borderColor, color: courseColor.textHex }}
-                    >
-                      {lesson.course}
-                      {lesson.year && ` ${lesson.year}°`}
-                    </span>
-                  )}
-                  {lesson.additionalCourses?.map((ac, i) => {
-                    const acColor = getCourseColor(ac.course, ac.year)
+                  {allCourses.map((c, i) => {
+                    const cColor = getCourseColor(c.course, c.year)
                     return (
                       <span
                         key={i}
                         className="inline-flex px-3 py-1.5 rounded-full text-sm font-semibold"
-                        style={{ backgroundColor: acColor.borderColor, color: acColor.textHex }}
+                        style={{ backgroundColor: cColor.borderColor, color: cColor.textHex }}
                       >
-                        {ac.course} {ac.year}°
+                        {getCourseCode(c.course)} {c.year}°
                       </span>
                     )
                   })}
@@ -190,11 +191,9 @@ export default function LessonDetailsModal({
                 </div>
               </div>
             )}
-            {!lesson.course && (
+            {allCourses.length === 0 && (
               <div>
-                <div className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1.5">
-                  Partecipanti
-                </div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1.5">Gruppo</div>
                 <span
                   className="inline-flex px-3 py-1.5 rounded-full text-sm font-semibold"
                   style={{

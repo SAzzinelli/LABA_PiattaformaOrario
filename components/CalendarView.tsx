@@ -15,6 +15,7 @@ import { Location } from '@/lib/locations'
 import { usePathname } from 'next/navigation'
 import { getCourseColor, getCourseCode } from '@/lib/courseColors'
 import { formatProfessorLines } from '@/lib/formatting'
+import { deduplicateLessonsForDisplay } from '@/lib/lessonUtils'
 
 interface Lesson {
   id: string
@@ -28,6 +29,8 @@ interface Lesson {
   year?: number
   group?: string
   notes?: string
+  additionalCourses?: Array<{ course: string; year: number }>
+  displayCourses?: Array<{ course: string; year: number }>
 }
 
 interface CalendarViewProps {
@@ -132,8 +135,9 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
       Array(classrooms.length).fill({ type: 'empty' })
     )
 
-    // Filtra lezioni del giorno corrente
-    const dayLessons = lessons.filter(l => l.dayOfWeek === currentDate.getDay())
+    // Filtra lezioni del giorno corrente e deduplica (stesso slot = una card con pill di tutti i corsi)
+    const dayLessonsRaw = lessons.filter(l => l.dayOfWeek === currentDate.getDay())
+    const dayLessons = deduplicateLessonsForDisplay(dayLessonsRaw)
 
     // Popola la matrice
     dayLessons.forEach(lesson => {
@@ -388,7 +392,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                             key={`${time}-${classroom}`} 
                             rowSpan={cell.span}
                             colSpan={colSpan}
-                            className="border-r border-gray-100 p-0 align-top relative"
+                            className="border-r border-gray-100 p-0 align-top relative overflow-hidden"
                             style={{ 
                               width: `${cellWidth}px`,
                               minWidth: `${cellWidth}px`,
@@ -399,7 +403,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                           >
                             {/* Linee orizzontali per ogni slot - dietro la card */}
                             {lines}
-                            <div style={{ marginTop: '22.5px', marginBottom: '-22.5px', height: '100%', paddingTop: '2px', paddingBottom: '2px', paddingLeft: '2px', paddingRight: '2px', position: 'relative', zIndex: 1 }}>
+                            <div className="absolute overflow-hidden" style={{ top: 22.5, left: 2, right: 2, bottom: 2, zIndex: 1 }}>
                               <EventCard 
                                 lesson={cell.lesson} 
                                 onEdit={isAuthenticated ? () => { setEditingLesson(cell.lesson); setShowForm(true) } : undefined}
@@ -508,7 +512,8 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
 
 // Componente Evento
 function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => void, onView?: () => void }) {
-  const courseColor = getCourseColor(lesson.course, lesson.year)
+  const courses = lesson.displayCourses ?? (lesson.course && lesson.year ? [{ course: lesson.course, year: lesson.year }] : [])
+  const courseColor = getCourseColor(lesson.course ?? courses[0]?.course, lesson.year ?? courses[0]?.year)
   
   const formatTime = (time: string) => time.split(':').slice(0, 2).join(':')
 
@@ -535,11 +540,14 @@ function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => 
       </div>
       
       <div className="flex flex-wrap gap-1.5 mt-1">
-        {lesson.course && lesson.year && (
-          <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap" style={{ backgroundColor: courseColor.borderColor, color: courseColor.textHex }}>
-            {getCourseCode(lesson.course)} {lesson.year}
-          </span>
-        )}
+        {courses.map((c, i) => {
+          const cColor = getCourseColor(c.course, c.year)
+          return (
+            <span key={i} className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap" style={{ backgroundColor: cColor.borderColor, color: cColor.textHex }}>
+              {getCourseCode(c.course)} {c.year}
+            </span>
+          )
+        })}
         <span
           className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
           style={{

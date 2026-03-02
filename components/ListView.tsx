@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { getCourseColor, getCourseCode } from '@/lib/courseColors'
 import { formatProfessorLines } from '@/lib/formatting'
+import { deduplicateLessonsForDisplay } from '@/lib/lessonUtils'
 
 interface Lesson {
   id: string
@@ -17,6 +18,8 @@ interface Lesson {
   year?: number
   group?: string
   notes?: string
+  additionalCourses?: Array<{ course: string; year: number }>
+  displayCourses?: Array<{ course: string; year: number }>
 }
 
 interface ListViewProps {
@@ -34,29 +37,9 @@ export default function ListView({
   onEditLesson,
   onViewLesson 
 }: ListViewProps) {
-  // Funzione per normalizzare il nome dell'aula (per evitare duplicati)
-  const normalizeClassroom = (classroom: string): string => {
-    if (classroom === 'Magna 1' || classroom === 'Magna 2') return 'Aula Magna'
-    if (classroom === 'Conference 1' || classroom === 'Conference 2') return 'Conference'
-    return classroom
-  }
-
-  // Filtra lezioni per il giorno corrente e deduplica
+  // Filtra lezioni per il giorno corrente e deduplica (stesso slot = una card con pill di tutti i corsi)
   const dayLessonsRaw = lessons.filter(lesson => lesson.dayOfWeek === currentDate.getDay())
-  
-  // Deduplica lezioni basandosi su titolo, orario, professore e aula normalizzata
-  const seen = new Set<string>()
-  const dayLessons = dayLessonsRaw
-    .filter(lesson => {
-      const normalizedClassroom = normalizeClassroom(lesson.classroom)
-      const key = `${lesson.title}-${lesson.startTime}-${lesson.endTime}-${lesson.professor}-${normalizedClassroom}-${lesson.course || ''}-${lesson.year || ''}-${lesson.group || ''}`
-      
-      if (seen.has(key)) {
-        return false // Duplicato, escludi
-      }
-      seen.add(key)
-      return true
-    })
+  const dayLessons = deduplicateLessonsForDisplay(dayLessonsRaw)
     .sort((a, b) => a.startTime.localeCompare(b.startTime))
 
   const formatTime = (time: string) => time.split(':').slice(0, 2).join(':')
@@ -76,7 +59,8 @@ export default function ListView({
   return (
     <div className="flex-1 overflow-y-auto px-2 sm:px-4 py-4 space-y-3 sm:space-y-4">
       {dayLessons.map((lesson) => {
-        const courseColor = getCourseColor(lesson.course, lesson.year)
+        const courses = lesson.displayCourses ?? (lesson.course && lesson.year ? [{ course: lesson.course, year: lesson.year }] : [])
+        const courseColor = getCourseColor(lesson.course ?? courses[0]?.course, lesson.year ?? courses[0]?.year)
         const handleClick = () => {
           if (isAuthenticated && onEditLesson) {
             onEditLesson(lesson)
@@ -108,17 +92,18 @@ export default function ListView({
                   >
                     {formatTime(lesson.startTime)} - {formatTime(lesson.endTime)}
                   </div>
-                  {lesson.course && lesson.year && (
-                    <span 
-                      className="inline-flex px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold whitespace-nowrap"
-                      style={{ 
-                        backgroundColor: courseColor.borderColor,
-                        color: courseColor.textHex 
-                      }}
-                    >
-                      {getCourseCode(lesson.course)} {lesson.year}
-                    </span>
-                  )}
+                  {courses.map((c, i) => {
+                    const cColor = getCourseColor(c.course, c.year)
+                    return (
+                      <span
+                        key={i}
+                        className="inline-flex px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold whitespace-nowrap"
+                        style={{ backgroundColor: cColor.borderColor, color: cColor.textHex }}
+                      >
+                        {getCourseCode(c.course)} {c.year}
+                      </span>
+                    )
+                  })}
                   <span
                     className="inline-flex px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-semibold whitespace-nowrap"
                     style={{ 
