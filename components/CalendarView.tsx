@@ -403,7 +403,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                           >
                             {/* Linee orizzontali per ogni slot - dietro la card */}
                             {lines}
-                            <div className="absolute overflow-hidden" style={{ top: 2, left: 2, right: 2, bottom: 2, zIndex: 1 }}>
+                            <div className="absolute overflow-hidden" style={{ top: 22.5, left: 2, right: 2, bottom: 0, zIndex: 1 }}>
                               <EventCard 
                                 lesson={cell.lesson} 
                                 onEdit={isAuthenticated ? () => { setEditingLesson(cell.lesson); setShowForm(true) } : undefined}
