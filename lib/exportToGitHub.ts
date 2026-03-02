@@ -24,7 +24,7 @@ function denormalizeClassroom(aula: string): string {
   const map: Record<string, string> = {
     'Magna 2': 'Aula Magna 2',
     'Aula Magna': 'Magna',
-    'Digital HUB': 'Digital Hub',
+    'Digital HUB': 'Digital HUB', // sempre Digital HUB
   }
   return map[aula] ?? aula
 }
@@ -88,24 +88,32 @@ function getSemesterDates(sem: number, yearStart: number): { start: Date; end: D
 function dbLessonToJsonEntries(
   lesson: DbLessonExport,
   corsoStudio: string,
+  anno: number,
+  altriCorsiCodes: Array<[string, number]>,
   sem: number,
   yearStart: number
 ): JsonLesson[] {
   const { start, end } = getSemesterDates(sem, yearStart)
   const dates = getDatesInRange(lesson.day_of_week, start, end)
-  return dates.map((d) => ({
-    corso: lesson.title,
-    oidCorso: null,
-    oidCorsi: null,
-    anno: lesson.year ?? 1,
-    gruppo: lesson.group_name ?? null,
-    aula: denormalizeClassroom(lesson.classroom),
-    docente: lesson.professor,
-    start: toIsoDateTime(d, lesson.start_time),
-    end: toIsoDateTime(d, lesson.end_time),
-    note: lesson.notes ?? null,
-    corsoStudio,
-  }))
+  return dates.map((d) => {
+    const entry: JsonLesson = {
+      corso: lesson.title,
+      oidCorso: null,
+      oidCorsi: null,
+      anno,
+      gruppo: lesson.group_name ?? null,
+      aula: denormalizeClassroom(lesson.classroom),
+      docente: lesson.professor,
+      start: toIsoDateTime(d, lesson.start_time),
+      end: toIsoDateTime(d, lesson.end_time),
+      note: lesson.notes ?? null,
+      corsoStudio,
+    }
+    if (altriCorsiCodes.length > 0) {
+      entry.altriCorsi = altriCorsiCodes
+    }
+    return entry
+  })
 }
 
 export type ExportResult = {
@@ -176,7 +184,12 @@ export async function exportToGitHub(
       const slotKey = `${l.title}-${l.day_of_week}-${l.start_time}-${l.end_time}-${l.classroom}-${l.professor}-${l.group_name ?? ''}`
       if (seen.has(slotKey)) continue
       seen.add(slotKey)
-      jsonEntries.push(...dbLessonToJsonEntries(l, corsoStudio, sem, yearStart))
+      const pairs = getCourseYearPairs(l)
+      const altriCorsiCodes: Array<[string, number]> = pairs
+        .filter((p) => !(PLATFORM_TO_CORSO[p.course] === corsoStudio && p.year === anno))
+        .map((p) => [PLATFORM_TO_CORSO[p.course], p.year] as [string, number])
+        .filter(([c]) => c)
+      jsonEntries.push(...dbLessonToJsonEntries(l, corsoStudio, anno, altriCorsiCodes, sem, yearStart))
     }
     jsonEntries.sort((a, b) => a.start.localeCompare(b.start))
     filesToCommit.push({

@@ -6,16 +6,18 @@
 
 const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/SAzzinelli/LABA_Orari/main/orari'
 
-// Corsi su GitHub (cartelle) -> nome corso nella Piattaforma
+// Corsi su GitHub (cartelle/codici) -> nome corso nella Piattaforma
 const CORSO_TO_PLATFORM: Record<string, string> = {
   DESIGN: 'Design',
   GD: 'Graphic Design & Multimedia',
+  GRAPHIC_DESIGN: 'Graphic Design & Multimedia',
   PITTURA: 'Pittura',
   FASHION: 'Fashion Design',
   FOTOGRAFIA: 'Fotografia',
   REGIA: 'Regia e Videomaking',
   CINEMA: 'Cinema e Audiovisivi',
   INTERIOR: 'Interior Design',
+  INTERIOR_DESIGN: 'Interior Design',
 }
 
 // Anni per corso: triennali 1-3, biennali 1-2
@@ -42,6 +44,8 @@ export interface JsonLesson {
   end: string
   note: string | null
   corsoStudio: string
+  /** Altri corsi dove la lezione è condivisa: [codiceCorso, anno][] es. [["PITTURA", 2]] */
+  altriCorsi?: Array<[string, number]>
 }
 
 export interface DbLesson {
@@ -89,12 +93,21 @@ function normalizeClassroom(aula: string): string {
     'Aula Magna 2': 'Magna 2',
     'Magna': 'Aula Magna',
     'Digital Hub': 'Digital HUB',
+    'Magna 1+2': 'Magna 1+2',
+    'Conference 1+2': 'Conference 1+2',
   }
   return map[aula] ?? aula
 }
 
 
 export function convertJsonToDb(json: JsonLesson, platformCourse: string, semester: number): DbLesson {
+  const ac: Array<{ course: string; year: number }> = []
+  if (Array.isArray(json.altriCorsi)) {
+    for (const [code, anno] of json.altriCorsi) {
+      const pc = CORSO_TO_PLATFORM[code]
+      if (pc && pc !== platformCourse) ac.push({ course: pc, year: anno })
+    }
+  }
   return {
     title: json.corso,
     start_time: extractTime(json.start),
@@ -107,6 +120,7 @@ export function convertJsonToDb(json: JsonLesson, platformCourse: string, semest
     group_name: json.gruppo,
     notes: json.note,
     semester,
+    additional_courses: ac.length > 0 ? ac : undefined,
   }
 }
 
