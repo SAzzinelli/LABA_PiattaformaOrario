@@ -179,29 +179,25 @@ export default function LessonDetailsModal({
                       </span>
                     )
                   })}
-                  <span
-                    className="inline-flex px-3 py-1.5 rounded-full text-sm font-semibold"
-                    style={{
-                      backgroundColor: lesson.group ? courseColor.borderColor : 'rgba(107, 114, 128, 0.25)',
-                      color: lesson.group ? courseColor.textHex : '#4b5563',
-                    }}
-                  >
-                    {lesson.group ? `Gruppo ${lesson.group}` : 'Tutti'}
-                  </span>
+                  {lesson.group && (
+                    <span
+                      className="inline-flex px-3 py-1.5 rounded-full text-sm font-semibold"
+                      style={{ backgroundColor: courseColor.borderColor, color: courseColor.textHex }}
+                    >
+                      Gruppo {lesson.group}
+                    </span>
+                  )}
                 </div>
               </div>
             )}
-            {allCourses.length === 0 && (
+            {allCourses.length === 0 && lesson.group && (
               <div>
                 <div className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1.5">Gruppo</div>
                 <span
                   className="inline-flex px-3 py-1.5 rounded-full text-sm font-semibold"
-                  style={{
-                    backgroundColor: lesson.group ? courseColor.borderColor : 'rgba(107, 114, 128, 0.25)',
-                    color: lesson.group ? courseColor.textHex : '#4b5563',
-                  }}
+                  style={{ backgroundColor: courseColor.borderColor, color: courseColor.textHex }}
                 >
-                  {lesson.group ? `Gruppo ${lesson.group}` : 'Tutti'}
+                  Gruppo {lesson.group}
                 </span>
               </div>
             )}

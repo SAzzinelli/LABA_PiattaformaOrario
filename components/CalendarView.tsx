@@ -548,15 +548,14 @@ function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => 
             </span>
           )
         })}
-        <span
-          className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
-          style={{
-            backgroundColor: lesson.group ? courseColor.borderColor : 'rgba(107, 114, 128, 0.25)',
-            color: lesson.group ? courseColor.textHex : '#4b5563',
-          }}
-        >
-          {lesson.group ? `Gruppo ${lesson.group}` : 'Tutti'}
-        </span>
+        {lesson.group && (
+          <span
+            className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap"
+            style={{ backgroundColor: courseColor.borderColor, color: courseColor.textHex }}
+          >
+            Gruppo {lesson.group}
+          </span>
+        )}
       </div>
       
       <div className="mt-auto text-xs opacity-80 truncate leading-tight" style={{ color: courseColor.textHex }}>

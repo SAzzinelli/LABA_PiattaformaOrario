@@ -151,15 +151,14 @@ export default function SearchOverlay({ isOpen, onClose, onSelectLesson, lessons
                                 </span>
                               )
                             })}
-                            <span
-                              className="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap"
-                              style={{
-                                backgroundColor: lesson.group ? courseColor.borderColor : 'rgba(107, 114, 128, 0.2)',
-                                color: lesson.group ? courseColor.textHex : '#4b5563',
-                              }}
-                            >
-                              {lesson.group ? `Gruppo ${lesson.group}` : 'Tutti'}
-                            </span>
+                            {lesson.group && (
+                              <span
+                                className="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap"
+                                style={{ backgroundColor: courseColor.borderColor, color: courseColor.textHex }}
+                              >
+                                Gruppo {lesson.group}
+                              </span>
+                            )}
                             <span
                               className="px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap"
                               style={{ backgroundColor: courseColor.bgHex, color: courseColor.textHex }}

@@ -191,9 +191,11 @@ function LessonEventCard({ lesson, startSlot, slotCount, onEdit, onView }: Lesso
                         <div className={`text-[10px] ${courseColor.text} opacity-80 truncate mt-0.5`}>
                             Prof. {lesson.professor}
                         </div>
-                        <div className={`text-[10px] font-semibold ${courseColor.text} opacity-80 truncate mt-0.5`}>
-                            {lesson.group ? `Gruppo ${lesson.group}` : 'Tutti'}
-                        </div>
+                        {lesson.group && (
+                          <div className={`text-[10px] font-semibold ${courseColor.text} opacity-80 truncate mt-0.5`}>
+                            Gruppo {lesson.group}
+                          </div>
+                        )}
                     </>
                 )}
             </div>
