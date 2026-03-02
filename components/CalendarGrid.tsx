@@ -1,5 +1,5 @@
 import { generateTimeLines, getTimePosition, getTotalCalendarHeight, getLessonSlots } from '@/lib/timeSlots'
-import { getCourseColor, getCourseCode } from '@/lib/courseColors'
+import { getCourseColor, getCourseCode, getColorForLessonCard } from '@/lib/courseColors'
 import { Lesson } from '@/hooks/useLessons'
 
 interface CalendarGridProps {
@@ -157,7 +157,17 @@ interface LessonEventCardProps {
 
 function LessonEventCard({ lesson, startSlot, slotCount, onEdit, onView }: LessonEventCardProps) {
     const formatTime = (time: string) => time.substring(0, 5)
-    const courseColor = getCourseColor(lesson.course, lesson.year)
+    const displayCourses = (lesson as { displayCourses?: { course: string; year: number }[] }).displayCourses ?? (() => {
+        const out: { course: string; year: number }[] = []
+        if (lesson.course && lesson.year != null) out.push({ course: lesson.course, year: lesson.year })
+        for (const ac of (lesson as { additionalCourses?: { course: string; year: number }[] }).additionalCourses ?? []) {
+            if (ac?.course && ac?.year != null && !out.some(c => c.course === ac.course && c.year === ac.year)) {
+                out.push({ course: ac.course, year: ac.year })
+            }
+        }
+        return out
+    })()
+    const courseColor = getColorForLessonCard(displayCourses, lesson.course, lesson.year)
 
     const handleClick = () => {
         if (onEdit) onEdit(lesson)

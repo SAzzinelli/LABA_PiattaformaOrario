@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { getCourseColor, getCourseCode } from '@/lib/courseColors'
+import { getCourseColor, getCourseCode, getColorForLessonCard } from '@/lib/courseColors'
 import { formatProfessorLines } from '@/lib/formatting'
 import { deduplicateLessonsForDisplay } from '@/lib/lessonUtils'
 
@@ -60,7 +60,7 @@ export default function ListView({
     <div className="flex-1 overflow-y-auto px-2 sm:px-4 py-4 space-y-3 sm:space-y-4">
       {dayLessons.map((lesson) => {
         const courses = lesson.displayCourses ?? (lesson.course && lesson.year ? [{ course: lesson.course, year: lesson.year }] : [])
-        const courseColor = getCourseColor(lesson.course ?? courses[0]?.course, lesson.year ?? courses[0]?.year)
+        const courseColor = getColorForLessonCard(courses, lesson.course, lesson.year)
         const handleClick = () => {
           if (isAuthenticated && onEditLesson) {
             onEditLesson(lesson)

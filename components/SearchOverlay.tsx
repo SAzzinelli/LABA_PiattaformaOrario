@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { formatProfessorLines } from '@/lib/formatting'
-import { getCourseColor, getCourseCode } from '@/lib/courseColors'
+import { getCourseColor, getCourseCode, getColorForLessonCard } from '@/lib/courseColors'
 
 interface AdditionalCourse {
   course: string
@@ -112,7 +112,17 @@ export default function SearchOverlay({ isOpen, onClose, onSelectLesson, lessons
             ) : (
               <div className="divide-y divide-slate-100">
                 {filteredLessons.map((lesson) => {
-                  const courseColor = getCourseColor(lesson.course, lesson.year)
+                  const displayCourses = (() => {
+                    const out: { course: string; year: number }[] = []
+                    if (lesson.course && lesson.year != null) out.push({ course: lesson.course, year: lesson.year })
+                    for (const ac of lesson.additionalCourses ?? []) {
+                      if (ac?.course && ac?.year != null && !out.some(c => c.course === ac.course && c.year === ac.year)) {
+                        out.push({ course: ac.course, year: ac.year })
+                      }
+                    }
+                    return out
+                  })()
+                  const courseColor = getColorForLessonCard(displayCourses, lesson.course, lesson.year)
                   const formatTime = (t: string) => t.split(':').slice(0, 2).join(':')
                   return (
                     <button

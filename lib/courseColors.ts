@@ -193,6 +193,28 @@ const defaultColor: CourseColor = {
   textHex: '#374151',
 }
 
+/** Colore neutro per lezioni condivise (più corsi) - slate/stone, diverso da tutti i colori dei corsi */
+export const sharedLessonColor: CourseColor = {
+  bg: 'bg-slate-100',
+  text: 'text-slate-700',
+  border: 'border-slate-300',
+  borderColor: '#94a3b8',
+  bgHex: '#f1f5f9',
+  textHex: '#334155',
+}
+
+/** Restituisce il colore per card/header: neutro se la lezione è per più corsi */
+export function getColorForLessonCard(
+  displayCourses: Array<{ course: string; year: number }> | undefined,
+  course?: string,
+  year?: number
+): CourseColor {
+  const count = displayCourses?.length ?? (course && year != null ? 1 : 0)
+  if (count > 1) return sharedLessonColor
+  const c = displayCourses?.[0] ?? (course && year != null ? { course, year } : null)
+  return c ? getCourseColor(c.course, c.year) : defaultColor
+}
+
 export function getCourseColor(course?: string, year?: number): CourseColor {
   if (!course) {
     return defaultColor

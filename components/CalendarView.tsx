@@ -13,7 +13,7 @@ import { getBaseClassrooms, resolveClassroomToColumns } from '@/lib/classrooms'
 import { generateTimeSlots, timeToMinutes, getLessonSlots } from '@/lib/timeSlots'
 import { Location } from '@/lib/locations'
 import { usePathname } from 'next/navigation'
-import { getCourseColor, getCourseCode } from '@/lib/courseColors'
+import { getCourseColor, getCourseCode, getColorForLessonCard } from '@/lib/courseColors'
 import { formatProfessorLines } from '@/lib/formatting'
 import { deduplicateLessonsForDisplay } from '@/lib/lessonUtils'
 
@@ -513,7 +513,7 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
 // Componente Evento
 function EventCard({ lesson, onEdit, onView }: { lesson: Lesson, onEdit?: () => void, onView?: () => void }) {
   const courses = lesson.displayCourses ?? (lesson.course && lesson.year ? [{ course: lesson.course, year: lesson.year }] : [])
-  const courseColor = getCourseColor(lesson.course ?? courses[0]?.course, lesson.year ?? courses[0]?.year)
+  const courseColor = getColorForLessonCard(courses, lesson.course, lesson.year)
   
   const formatTime = (time: string) => time.split(':').slice(0, 2).join(':')
 

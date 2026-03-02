@@ -5,7 +5,7 @@ import { getClassroomsForLocation } from '@/lib/classrooms'
 import { ALL_COURSES, getYearsForCourse } from '@/lib/courses'
 import { getGroupsForCourse } from '@/lib/courseGroups'
 import { Location, getCoursesForLocation } from '@/lib/locations'
-import { getCourseColor, getCourseCode } from '@/lib/courseColors'
+import { getCourseColor, getCourseCode, getColorForLessonCard } from '@/lib/courseColors'
 
 interface AdditionalCourse {
   course: string
@@ -165,7 +165,8 @@ export default function LessonForm({ lesson, location, onClose, onDelete }: Less
     }
   }
 
-  const courseColor = getCourseColor(
+  const courseColor = getColorForLessonCard(
+    formData.courses,
     formData.courses[0]?.course ?? lesson?.course,
     formData.courses[0]?.year ?? lesson?.year
   )

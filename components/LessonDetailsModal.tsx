@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { getCourseColor, getCourseCode } from '@/lib/courseColors'
+import { getCourseColor, getCourseCode, getColorForLessonCard } from '@/lib/courseColors'
 import { formatProfessorLines } from '@/lib/formatting'
 
 interface AdditionalCourse {
@@ -62,7 +62,7 @@ export default function LessonDetailsModal({
     }
     return out
   })()
-  const courseColor = getCourseColor(allCourses[0]?.course ?? lesson.course, allCourses[0]?.year ?? lesson.year)
+  const courseColor = getColorForLessonCard(allCourses, lesson.course, lesson.year)
   const dayName = DAYS_OF_WEEK[lesson.dayOfWeek]
   const formattedDate = format(currentDate, 'd MMMM yyyy', { locale: it })
 
