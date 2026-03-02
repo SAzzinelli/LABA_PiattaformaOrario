@@ -1,10 +1,10 @@
 /**
- * Sync orari from LABA_Orari GitHub Pages
- * Fetches JSON from https://SAzzinelli.github.io/LABA_Orari/orari/{CORSO}/{ANNO}/{SEM}sem.json
- * and imports into Supabase lessons table.
+ * Sync orari from LABA_Orari.
+ * Usa raw.githubusercontent.com (aggiornato subito al push) invece di GitHub Pages
+ * (che ha cache 1-5 min) per evitare che il webhook sovrascriva le modifiche appena salvate.
  */
 
-const GITHUB_BASE = 'https://SAzzinelli.github.io/LABA_Orari/orari'
+const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/SAzzinelli/LABA_Orari/main/orari'
 
 // Corsi su GitHub (cartelle) -> nome corso nella Piattaforma
 const CORSO_TO_PLATFORM: Record<string, string> = {
@@ -124,7 +124,7 @@ export async function fetchJsonFromGitHub(
   anno: number,
   sem: number
 ): Promise<JsonLesson[] | null> {
-  const url = `${GITHUB_BASE}/${corso}/${anno}/${sem}sem.json`
+  const url = `${GITHUB_RAW_BASE}/${corso}/${anno}/${sem}sem.json`
   try {
     const res = await fetch(url)
     if (!res.ok) return null
