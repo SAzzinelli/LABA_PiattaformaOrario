@@ -4,6 +4,11 @@ import { useState, useMemo } from 'react'
 import { formatProfessorLines } from '@/lib/formatting'
 import { getCourseColor, getCourseCode } from '@/lib/courseColors'
 
+interface AdditionalCourse {
+  course: string
+  year: number
+}
+
 interface Lesson {
   id: string
   title: string
@@ -16,6 +21,7 @@ interface Lesson {
   year?: number
   group?: string
   notes?: string
+  additionalCourses?: AdditionalCourse[]
 }
 
 interface SearchOverlayProps {
@@ -133,6 +139,18 @@ export default function SearchOverlay({ isOpen, onClose, onSelectLesson, lessons
                                 {getCourseCode(lesson.course)}{lesson.year ? ` ${lesson.year}` : ''}
                               </span>
                             )}
+                            {lesson.additionalCourses?.map((ac, i) => {
+                              const acColor = getCourseColor(ac.course, ac.year)
+                              return (
+                                <span
+                                  key={i}
+                                  className="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap"
+                                  style={{ backgroundColor: acColor.borderColor, color: acColor.textHex }}
+                                >
+                                  {getCourseCode(ac.course)}{ac.year}
+                                </span>
+                              )
+                            })}
                             <span
                               className="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap"
                               style={{

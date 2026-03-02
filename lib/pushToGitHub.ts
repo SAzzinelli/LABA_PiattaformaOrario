@@ -17,7 +17,7 @@ export function triggerPushToGitHub(): void {
     try {
       const { data: lessons, error } = await client
         .from('lessons')
-        .select('title, start_time, end_time, day_of_week, classroom, professor, course, year, group_name, notes')
+        .select('title, start_time, end_time, day_of_week, classroom, professor, course, year, group_name, notes, additional_courses')
         .not('course', 'is', null)
         .not('year', 'is', null)
       if (error || !lessons?.length) return

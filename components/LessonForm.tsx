@@ -7,6 +7,11 @@ import { getGroupsForCourse } from '@/lib/courseGroups'
 import { Location, getCoursesForLocation } from '@/lib/locations'
 import { getCourseColor } from '@/lib/courseColors'
 
+interface AdditionalCourse {
+  course: string
+  year: number
+}
+
 interface Lesson {
   id: string
   title: string
@@ -19,6 +24,7 @@ interface Lesson {
   year?: number
   group?: string
   notes?: string
+  additionalCourses?: AdditionalCourse[]
 }
 
 interface LessonFormProps {
@@ -57,6 +63,7 @@ export default function LessonForm({ lesson, location, onClose, onDelete }: Less
           year: l.year ?? null,
           group: l.group || '',
           notes: l.notes || '',
+          additionalCourses: l.additionalCourses ?? [],
         }
       : {
           title: '',
@@ -69,6 +76,7 @@ export default function LessonForm({ lesson, location, onClose, onDelete }: Less
           year: null as number | null,
           group: '',
           notes: '',
+          additionalCourses: [] as AdditionalCourse[],
         }
 
   const [formData, setFormData] = useState(() => getInitialFormData(lesson))
@@ -107,6 +115,7 @@ export default function LessonForm({ lesson, location, onClose, onDelete }: Less
         year: formData.year || undefined,
         group: formData.group || undefined,
         notes: formData.notes || undefined,
+        additionalCourses: (formData.additionalCourses?.length ?? 0) > 0 ? formData.additionalCourses : undefined,
       }
 
       const url = lesson ? `/api/lessons/${lesson.id}` : '/api/lessons'
@@ -346,6 +355,85 @@ export default function LessonForm({ lesson, location, onClose, onDelete }: Less
               </select>
             </div>
           </div>
+
+          {/* Anche per altri corsi (lezioni condivise) */}
+          {formData.course && formData.year != null && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Anche per altri corsi
+              </label>
+              <p className="text-xs text-gray-500 mb-2">
+                La stessa lezione appare in più corsi (es. Arte per Grafica 3, Pittura 2, Fotografia 2)
+              </p>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {formData.additionalCourses?.map((ac, idx) => (
+                  <span
+                    key={`${ac.course}-${ac.year}-${idx}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-100 text-indigo-800 text-sm font-medium"
+                  >
+                    {ac.course} {ac.year}°
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = [...(formData.additionalCourses ?? [])]
+                        next.splice(idx, 1)
+                        setFormData({ ...formData, additionalCourses: next })
+                      }}
+                      className="cursor-pointer hover:bg-indigo-200 rounded-full p-0.5"
+                      aria-label="Rimuovi"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <select
+                  id="addCourse"
+                  className="input-modern flex-1 px-4 py-2 rounded-lg text-sm"
+                  value={''}
+                  onChange={(e) => {
+                    const v = e.target.value
+                    if (!v) return
+                    const [course, yearStr] = v.split('|')
+                    const year = parseInt(yearStr, 10)
+                    const exists =
+                      (formData.course === course && formData.year === year) ||
+                      formData.additionalCourses?.some((a) => a.course === course && a.year === year)
+                    if (exists) return
+                    setFormData({
+                      ...formData,
+                      additionalCourses: [...(formData.additionalCourses ?? []), { course, year }],
+                    })
+                    e.target.value = ''
+                  }}
+                >
+                  <option value="">Aggiungi corso + anno...</option>
+                  {courseOptions
+                    .flatMap((c) =>
+                      getYearsForCourse(c as any).map((y) => ({
+                        course: c,
+                        year: y,
+                        label: `${c} ${y}°`,
+                        value: `${c}|${y}`,
+                      }))
+                    )
+                    .filter(
+                      (opt) =>
+                        !(formData.course === opt.course && formData.year === opt.year) &&
+                        !formData.additionalCourses?.some(
+                          (a) => a.course === opt.course && a.year === opt.year
+                        )
+                    )
+                    .map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            </div>
+          )}
 
           <div>
             <label htmlFor="group" className="block text-sm font-medium text-gray-700 mb-1">

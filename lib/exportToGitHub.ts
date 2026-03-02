@@ -66,6 +66,8 @@ export interface DbLessonExport {
   year: number | null
   group_name: string | null
   notes: string | null
+  /** Altri (course, year) dove la lezione appare */
+  additional_courses?: Array<{ course: string; year: number }>
 }
 
 /** Date semestre: anno accademico 2025-26 -> sem 1: set 2025 - gen 2026, sem 2: feb - giu 2026 */
@@ -128,16 +130,34 @@ export async function exportToGitHub(
   const yearStart = options.yearStart ?? parseInt(process.env.GITHUB_EXPORT_YEAR_START || `${new Date().getFullYear()}`, 10)
   const results: ExportResult[] = []
 
+  /** Tutte le coppie (course, year) per una lezione: primario + additional */
+  const getCourseYearPairs = (l: DbLessonExport): Array<{ course: string; year: number }> => {
+    if (!l.course || l.year == null) return []
+    const pairs: Array<{ course: string; year: number }> = [{ course: l.course, year: l.year }]
+    const ac = l.additional_courses
+    if (Array.isArray(ac)) {
+      for (const p of ac) {
+        if (p?.course && p?.year != null) {
+          const dup = pairs.some((x) => x.course === p.course && x.year === p.year)
+          if (!dup) pairs.push({ course: p.course, year: p.year })
+        }
+      }
+    }
+    return pairs
+  }
+
   // Raggruppa per (platformCourse, year, semester)
   const byFile = new Map<string, DbLessonExport[]>()
   for (const l of lessons) {
-    if (!l.course || l.year == null) continue
-    const corso = PLATFORM_TO_CORSO[l.course]
-    if (!corso) continue
-    for (const sem of [1, 2]) {
-      const key = `${corso}-${l.year}-${sem}`
-      if (!byFile.has(key)) byFile.set(key, [])
-      byFile.get(key)!.push(l)
+    const pairs = getCourseYearPairs(l)
+    for (const { course: platformCourse, year } of pairs) {
+      const corso = PLATFORM_TO_CORSO[platformCourse]
+      if (!corso) continue
+      for (const sem of [1, 2]) {
+        const key = `${corso}-${year}-${sem}`
+        if (!byFile.has(key)) byFile.set(key, [])
+        byFile.get(key)!.push({ ...l, course: platformCourse, year }) // override per corsoStudio corretto
+      }
     }
   }
 

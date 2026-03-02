@@ -3,6 +3,12 @@ import { supabase, supabaseAdmin } from './supabase'
 // Usa admin client per scritture (bypassa RLS) - la policy blocca INSERT/UPDATE/DELETE per anon
 const db = supabaseAdmin ?? supabase
 
+/** Coppia corso+anno aggiuntiva per lezioni condivise */
+export interface AdditionalCourse {
+  course: string
+  year: number
+}
+
 export interface Lesson {
   id: string
   title: string
@@ -11,10 +17,12 @@ export interface Lesson {
   dayOfWeek: number // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
   classroom: string
   professor: string
-  course?: string // Corso (es. "Graphic Design & Multimedia")
-  year?: number // Anno (1, 2, 3 per triennali, 1, 2 per biennali)
+  course?: string // Corso principale
+  year?: number // Anno principale
   group?: string // optional, if not present means "tutti"
   notes?: string
+  /** Altri corsi dove appare la stessa lezione (es. Arte: GD3, Pittura2, Fot2) */
+  additionalCourses?: AdditionalCourse[]
 }
 
 export interface LessonFilters {
@@ -26,10 +34,15 @@ export interface LessonFilters {
 
 // Convert database row to Lesson interface
 function dbRowToLesson(row: any): Lesson {
+  const raw = row.additional_courses
+  const additionalCourses: AdditionalCourse[] = Array.isArray(raw)
+    ? raw.filter((x: unknown) => x && typeof x === 'object' && 'course' in x && 'year' in x)
+        .map((x: { course: string; year: number }) => ({ course: x.course, year: Number(x.year) }))
+    : []
   return {
     id: row.id,
     title: row.title,
-    startTime: row.start_time, // Convert from TIME to HH:mm string
+    startTime: row.start_time,
     endTime: row.end_time,
     dayOfWeek: row.day_of_week,
     classroom: row.classroom,
@@ -38,6 +51,7 @@ function dbRowToLesson(row: any): Lesson {
     year: row.year || undefined,
     group: row.group_name || undefined,
     notes: row.notes || undefined,
+    additionalCourses: additionalCourses.length > 0 ? additionalCourses : undefined,
   }
 }
 
@@ -54,6 +68,10 @@ function lessonToDbRow(lesson: Omit<Lesson, 'id'> | Partial<Lesson>): any {
   if ('year' in lesson) row.year = lesson.year || null
   if ('group' in lesson) row.group_name = lesson.group || null
   if ('notes' in lesson) row.notes = lesson.notes || null
+  if ('additionalCourses' in lesson) {
+    const ac = lesson.additionalCourses
+    row.additional_courses = Array.isArray(ac) && ac.length > 0 ? ac : []
+  }
   return row
 }
 
@@ -90,7 +108,31 @@ export async function getLessons(filters?: LessonFilters): Promise<Lesson[]> {
       return []
     }
 
-    return (data || []).map(dbRowToLesson)
+    let lessons = (data || []).map(dbRowToLesson)
+
+    // Se filtri corso+anno, includi anche lezioni dove questo è in additional_courses
+    if (filters?.course && filters?.year !== undefined) {
+      const { data: extra } = await db
+        .from('lessons')
+        .select('*')
+        .contains('additional_courses', [{ course: filters.course, year: filters.year }])
+      if (filters?.date) {
+        const sem = getSemesterFromDate(filters.date)
+        const filtered = (extra || []).filter((r: any) => r.semester === sem)
+        lessons = [...lessons, ...filtered.map(dbRowToLesson)]
+      } else {
+        lessons = [...lessons, ...(extra || []).map(dbRowToLesson)]
+      }
+      // Deduplica per id
+      const byId = new Map<string, Lesson>()
+      for (const l of lessons) byId.set(l.id, l)
+      lessons = Array.from(byId.values()).sort(
+        (a, b) =>
+          (a.dayOfWeek - b.dayOfWeek) || (a.startTime.localeCompare(b.startTime))
+      )
+    }
+
+    return lessons
   } catch (error) {
     console.error('Error in getLessons:', error)
     return []

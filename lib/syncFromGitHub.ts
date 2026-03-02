@@ -56,6 +56,8 @@ export interface DbLesson {
   group_name: string | null
   notes: string | null
   semester: number  // 1 = set-gen, 2 = feb-giu
+  /** Altri (course, year) per lezioni condivise */
+  additional_courses?: Array<{ course: string; year: number }>
 }
 
 /** Estrae giorno settimana (0-6) dalla data ISO - usa solo YYYY-MM-DD, mai parsing con timezone */
@@ -108,15 +110,32 @@ export function convertJsonToDb(json: JsonLesson, platformCourse: string, semest
   }
 }
 
-/** Deduplica lezioni uguali (stesso slot, stesso semestre) - tiene la prima */
-function deduplicateLessons(lessons: DbLesson[]): DbLesson[] {
-  const seen = new Set<string>()
-  return lessons.filter((l) => {
-    const key = `${l.semester}-${l.course}-${l.year}-${l.title}-${l.day_of_week}-${l.start_time}-${l.end_time}-${l.professor}-${l.group_name ?? ''}`
-    if (seen.has(key)) return false
-    seen.add(key)
-    return true
-  })
+/** Raggruppa lezioni uguali (stesso slot) da più corsi in una sola con additional_courses */
+function mergeMultiCourseLessons(lessons: DbLesson[]): DbLesson[] {
+  const bySlot = new Map<string, DbLesson>()
+  for (const l of lessons) {
+    const slotKey = `${l.semester}-${l.title}-${l.day_of_week}-${l.start_time}-${l.end_time}-${l.professor}-${l.classroom}-${l.group_name ?? ''}`
+    const existing = bySlot.get(slotKey)
+    if (!existing) {
+      bySlot.set(slotKey, { ...l, additional_courses: [] })
+    } else {
+      const pair = { course: l.course!, year: l.year! }
+      if (l.course && l.year != null) {
+        const isPrimary = existing.course === l.course && existing.year === l.year
+        const inAdditional = existing.additional_courses?.some(
+          (a) => a.course === l.course && a.year === l.year
+        )
+        if (!isPrimary && !inAdditional) {
+          const ac = existing.additional_courses ?? []
+          existing.additional_courses = [...ac, pair]
+        }
+      }
+    }
+  }
+  return Array.from(bySlot.values()).map((l) => ({
+    ...l,
+    additional_courses: (l.additional_courses?.length ?? 0) > 0 ? l.additional_courses : undefined,
+  }))
 }
 
 export async function fetchJsonFromGitHub(
@@ -144,70 +163,86 @@ export type SyncResult = {
   errors: number
 }
 
+/** Converte DbLesson per insert Supabase (nomi colonne DB) */
+function dbLessonToRow(l: DbLesson): Record<string, unknown> {
+  const row: Record<string, unknown> = {
+    title: l.title,
+    start_time: l.start_time,
+    end_time: l.end_time,
+    day_of_week: l.day_of_week,
+    classroom: l.classroom,
+    professor: l.professor,
+    course: l.course ?? null,
+    year: l.year ?? null,
+    group_name: l.group_name ?? null,
+    notes: l.notes ?? null,
+    semester: l.semester,
+  }
+  if (l.additional_courses && l.additional_courses.length > 0) {
+    row.additional_courses = l.additional_courses
+  }
+  return row
+}
+
 export async function syncFromGitHub(supabase: any): Promise<SyncResult[]> {
   const results: SyncResult[] = []
+  const allLessons: DbLesson[] = []
 
+  // 1. Raccogli tutte le lezioni da tutti i file
   for (const [corso, platformCourse] of Object.entries(CORSO_TO_PLATFORM)) {
     const years = CORSO_YEARS[corso] ?? [1, 2, 3]
-
     for (const anno of years) {
-      const allLessons: DbLesson[] = []
-
       for (const semester of [1, 2]) {
         const json = await fetchJsonFromGitHub(corso, anno, semester)
         if (!json || json.length === 0) continue
-
         const converted = json
           .filter((j) => j.anno === anno)
           .map((j) => convertJsonToDb(j, platformCourse, semester))
         allLessons.push(...converted)
       }
-
-      if (allLessons.length === 0) {
-        results.push({ corso: `${platformCourse} ${anno}°`, anno, semester: 0, imported: 0, deleted: 0, errors: 0 })
-        continue
-      }
-
-      const unique = deduplicateLessons(allLessons)
-      let errors = 0
-
-      const { error: delError } = await supabase
-        .from('lessons')
-        .delete()
-        .eq('course', platformCourse)
-        .eq('year', anno)
-
-      if (delError) {
-        console.warn(`Delete ${platformCourse} ${anno}°:`, delError.message)
-      }
-
-      const BATCH = 200
-      let imported = 0
-      for (let i = 0; i < unique.length; i += BATCH) {
-        const batch = unique.slice(i, i + BATCH)
-        const { data, error: insertError } = await supabase
-          .from('lessons')
-          .insert(batch)
-          .select('id')
-
-        if (insertError) {
-          errors += batch.length
-          console.error(`Insert ${platformCourse} ${anno}° batch:`, insertError.message)
-        } else {
-          imported += data?.length ?? batch.length
-        }
-      }
-
-      results.push({
-        corso: `${platformCourse} ${anno}°`,
-        anno,
-        semester: 0,
-        imported,
-        deleted: 0,
-        errors,
-      })
     }
   }
 
+  // 2. Merge lezioni duplicate (stesso slot in più corsi) -> una lezione con additional_courses
+  const merged = mergeMultiCourseLessons(allLessons)
+
+  // 3. Svuota e reinserisci (full replace per supportare multi-corso)
+  const { error: delError } = await supabase
+    .from('lessons')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000')
+
+  if (delError) {
+    console.error('Sync delete error:', delError)
+    return [{ corso: 'Errore', anno: 0, semester: 0, imported: 0, deleted: 0, errors: merged.length }]
+  }
+
+  let totalImported = 0
+  let totalErrors = 0
+  const BATCH = 200
+
+  for (let i = 0; i < merged.length; i += BATCH) {
+    const batch = merged.slice(i, i + BATCH).map(dbLessonToRow)
+    const { data, error: insertError } = await supabase
+      .from('lessons')
+      .insert(batch)
+      .select('id')
+
+    if (insertError) {
+      totalErrors += batch.length
+      console.error('Sync insert batch error:', insertError.message)
+    } else {
+      totalImported += data?.length ?? batch.length
+    }
+  }
+
+  results.push({
+    corso: 'Totale',
+    anno: 0,
+    semester: 0,
+    imported: totalImported,
+    deleted: merged.length,
+    errors: totalErrors,
+  })
   return results
 }

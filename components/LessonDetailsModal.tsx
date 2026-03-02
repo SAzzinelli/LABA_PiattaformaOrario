@@ -5,6 +5,11 @@ import { it } from 'date-fns/locale'
 import { getCourseColor } from '@/lib/courseColors'
 import { formatProfessorLines } from '@/lib/formatting'
 
+interface AdditionalCourse {
+  course: string
+  year: number
+}
+
 interface Lesson {
   id: string
   title: string
@@ -17,6 +22,7 @@ interface Lesson {
   year?: number
   group?: string
   notes?: string
+  additionalCourses?: AdditionalCourse[]
 }
 
 interface LessonDetailsModalProps {
@@ -145,19 +151,33 @@ export default function LessonDetailsModal({
 
           {/* Corso e Gruppo come pill */}
           <div className="flex flex-wrap gap-2 items-center">
-            {lesson.course && (
+            {(lesson.course || (lesson.additionalCourses?.length ?? 0) > 0) && (
               <div>
                 <div className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1.5">
-                  Corso
+                  Corso{(lesson.additionalCourses?.length ?? 0) > 0 ? 'i' : ''}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <span
-                    className="inline-flex px-3 py-1.5 rounded-full text-sm font-semibold"
-                    style={{ backgroundColor: courseColor.borderColor, color: courseColor.textHex }}
-                  >
-                    {lesson.course}
-                    {lesson.year && ` ${lesson.year}°`}
-                  </span>
+                  {lesson.course && (
+                    <span
+                      className="inline-flex px-3 py-1.5 rounded-full text-sm font-semibold"
+                      style={{ backgroundColor: courseColor.borderColor, color: courseColor.textHex }}
+                    >
+                      {lesson.course}
+                      {lesson.year && ` ${lesson.year}°`}
+                    </span>
+                  )}
+                  {lesson.additionalCourses?.map((ac, i) => {
+                    const acColor = getCourseColor(ac.course, ac.year)
+                    return (
+                      <span
+                        key={i}
+                        className="inline-flex px-3 py-1.5 rounded-full text-sm font-semibold"
+                        style={{ backgroundColor: acColor.borderColor, color: acColor.textHex }}
+                      >
+                        {ac.course} {ac.year}°
+                      </span>
+                    )
+                  })}
                   <span
                     className="inline-flex px-3 py-1.5 rounded-full text-sm font-semibold"
                     style={{
