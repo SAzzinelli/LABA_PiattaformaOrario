@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { format, isSameDay } from 'date-fns'
 import { it } from 'date-fns/locale'
 import LessonForm from './LessonForm'
@@ -327,9 +327,8 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
         {/* Vista Calendario o Lista */}
         {viewMode === 'calendar' ? (
           <>
-            {/* Tabella Calendario - Scrollabile + linea ora attuale */}
-            <div className="flex-1 min-w-0 relative bg-white" style={{ height: 'calc(100vh - 240px)' }}>
-              <div className="absolute inset-0 overflow-x-auto overflow-y-auto touch-pan-x overscroll-contain hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
+            {/* Tabella Calendario - Scrollabile (linea ora attuale dentro la tabella, scorre con l'orario) */}
+            <div className="flex-1 min-w-0 overflow-x-auto overflow-y-auto bg-white touch-pan-x overscroll-contain hide-scrollbar" style={{ height: 'calc(100vh - 240px)', WebkitOverflowScrolling: 'touch' }}>
           <table className="border-collapse" style={{ width: `${tableWidth}px`, tableLayout: 'fixed', minWidth: `${tableWidth}px`, maxWidth: `${tableWidth}px` }}>
             {/* Intestazione Aule - Sticky Top */}
             <thead className="sticky top-0 z-20 bg-white shadow-sm">
@@ -354,8 +353,32 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
             <tbody>
               {timeSlots.map((time, timeIndex) => {
                 const isHour = time.endsWith(':00')
+                const rowHeight = 45
+                const showNowLine = isSameDay(currentDate, now)
+                const nowPosSlots = showNowLine ? (() => {
+                  const pos = getCurrentTimeLinePositionPx(rowHeight)
+                  if (pos == null) return null
+                  return pos / rowHeight
+                })() : null
+                const nowLineInThisSlot = showNowLine && nowPosSlots != null && nowPosSlots >= timeIndex && nowPosSlots < timeIndex + 1
+                const nowLineOffsetPx = nowLineInThisSlot ? Math.round((nowPosSlots - timeIndex) * rowHeight) : 0
+
                 return (
-                  <tr key={time} style={{ height: '45px', position: 'relative' }}>
+                  <React.Fragment key={time}>
+                    {/* Riga sottile con la linea "ora attuale" (ferma all'orario, scorre con la tabella) */}
+                    {nowLineInThisSlot && (
+                      <tr key={`now-${timeIndex}`} style={{ height: `${Math.max(nowLineOffsetPx, 2)}px` }}>
+                        <td colSpan={classrooms.length + 1} className="p-0 border-none align-top relative" style={{ verticalAlign: 'top', border: 'none' }}>
+                          <div className="absolute left-0 right-0 bottom-0 flex items-center pointer-events-none z-10">
+                            <span className="sticky left-0 z-20 bg-red-500 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-r shadow-sm">
+                              {getCurrentTimeFormatted()}
+                            </span>
+                            <div className="flex-1 border-t-2 border-red-500" />
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    <tr key={time} style={{ height: '45px', position: 'relative' }}>
                     {/* Colonna Orari - Sticky Left - senza righe */}
                     <td className="sticky left-0 z-10 bg-white border-r border-gray-200 p-0" style={{ verticalAlign: 'middle', width: '80px', minWidth: '80px', maxWidth: '80px' }}>
                       <div className="relative h-full w-full flex items-center justify-end pr-3">
@@ -444,28 +467,11 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                       )
                     })}
                   </tr>
+                  </React.Fragment>
                 )
               })}
             </tbody>
           </table>
-              </div>
-              {/* Linea orizzontale "ora attuale" (solo se giorno selezionato = oggi, in range 9–21) */}
-              {isSameDay(currentDate, now) && (() => {
-                const topPx = getCurrentTimeLinePositionPx(45)
-                if (topPx == null) return null
-                const headerH = 45
-                return (
-                  <div
-                    className="absolute left-0 right-0 pointer-events-none z-10 flex items-center"
-                    style={{ top: `${headerH + topPx}px` }}
-                  >
-                    <span className="sticky left-0 z-20 bg-red-500 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-r shadow-sm">
-                      {getCurrentTimeFormatted()}
-                    </span>
-                    <div className="flex-1 border-t-2 border-red-500" />
-                  </div>
-                )
-              })()}
             </div>
           </>
         ) : (
