@@ -10,7 +10,7 @@ import LessonDetailsModal from './LessonDetailsModal'
 import ListView from './ListView'
 import ViewSelector from './ViewSelector'
 import { getBaseClassrooms, resolveClassroomToColumns } from '@/lib/classrooms'
-import { generateTimeSlots, timeToMinutes, getLessonSlots } from '@/lib/timeSlots'
+import { generateTimeSlots, timeToMinutes, getLessonSlots, getCurrentTimeLinePositionPx, getCurrentTimeFormatted } from '@/lib/timeSlots'
 import { Location } from '@/lib/locations'
 import { usePathname } from 'next/navigation'
 import { getCourseColor, getCourseCode, getColorForLessonCard } from '@/lib/courseColors'
@@ -122,6 +122,13 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
     loadLessons()
     // eslint-disable-next-line react-hooks/exhaustive-deps -- load when filters/date change
   }, [filterCourse, filterYear, selectedLocation, currentDate])
+
+  // Aggiorna ogni minuto per la linea "ora attuale"
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 60 * 1000)
+    return () => clearInterval(interval)
+  }, [])
 
   // --- LOGICA DI CALCOLO DELLA GRIGLIA ---
   
@@ -320,8 +327,9 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
         {/* Vista Calendario o Lista */}
         {viewMode === 'calendar' ? (
           <>
-            {/* Tabella Calendario - Scrollabile */}
-            <div className="flex-1 min-w-0 overflow-x-auto overflow-y-auto bg-white touch-pan-x overscroll-contain hide-scrollbar" style={{ height: 'calc(100vh - 240px)', WebkitOverflowScrolling: 'touch' }}>
+            {/* Tabella Calendario - Scrollabile + linea ora attuale */}
+            <div className="flex-1 min-w-0 relative bg-white" style={{ height: 'calc(100vh - 240px)' }}>
+              <div className="absolute inset-0 overflow-x-auto overflow-y-auto touch-pan-x overscroll-contain hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
           <table className="border-collapse" style={{ width: `${tableWidth}px`, tableLayout: 'fixed', minWidth: `${tableWidth}px`, maxWidth: `${tableWidth}px` }}>
             {/* Intestazione Aule - Sticky Top */}
             <thead className="sticky top-0 z-20 bg-white shadow-sm">
@@ -440,7 +448,25 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
               })}
             </tbody>
           </table>
-        </div>
+              </div>
+              {/* Linea orizzontale "ora attuale" (solo se giorno selezionato = oggi, in range 9–21) */}
+              {isSameDay(currentDate, now) && (() => {
+                const topPx = getCurrentTimeLinePositionPx(45)
+                if (topPx == null) return null
+                const headerH = 45
+                return (
+                  <div
+                    className="absolute left-0 right-0 pointer-events-none z-10 flex items-center"
+                    style={{ top: `${headerH + topPx}px` }}
+                  >
+                    <span className="sticky left-0 z-20 bg-red-500 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-r shadow-sm">
+                      {getCurrentTimeFormatted()}
+                    </span>
+                    <div className="flex-1 border-t-2 border-red-500" />
+                  </div>
+                )
+              })()}
+            </div>
           </>
         ) : (
           <ListView

@@ -82,3 +82,28 @@ export function getTotalCalendarHeight(rowHeight: number = 60): number {
   return slots.length * rowHeight
 }
 
+/** Minuti dall'inizio del giorno (0:00) per l'orario corrente. */
+export function getCurrentMinutesOfDay(): number {
+  const now = new Date()
+  return now.getHours() * 60 + now.getMinutes()
+}
+
+/**
+ * Posizione in pixel della linea "ora attuale" nella griglia (origine = inizio 9:00).
+ * rowHeight = altezza di uno slot da 30 min (es. 45).
+ * Ritorna null se fuori range 9:00–21:00.
+ */
+export function getCurrentTimeLinePositionPx(rowHeight: number = 45): number | null {
+  const minutes = getCurrentMinutesOfDay()
+  const startMinutes = 9 * 60
+  const endMinutes = 21 * 60
+  if (minutes < startMinutes || minutes >= endMinutes) return null
+  const minutesFromStart = minutes - startMinutes
+  return (minutesFromStart / 30) * rowHeight
+}
+
+/** Orario corrente formattato HH:mm per la label sulla linea. */
+export function getCurrentTimeFormatted(): string {
+  return getCurrentTime()
+}
+
