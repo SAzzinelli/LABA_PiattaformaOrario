@@ -2,7 +2,7 @@
  * Export orari da Supabase verso LABA_Orari su GitHub.
  * Converte le lezioni DB (slot settimanali) in JSON con date ISO per ogni settimana del semestre.
  *
- * Richiede: GITHUB_TOKEN (PAT con scope repo), GITHUB_ORARI_REPO (es. SAzzinelli/LABA_Orari)
+ * Richiede: GITHUB_TOKEN (PAT con scope repo), GITHUB_ORARI_REPO (es. LABA-Firenze/LABA_Orari)
  */
 
 import type { JsonLesson } from './syncFromGitHub'
@@ -134,7 +134,7 @@ export async function exportToGitHub(
     yearStart?: number
   }
 ): Promise<ExportResult[]> {
-  const repo = options.repo ?? process.env.GITHUB_ORARI_REPO ?? 'SAzzinelli/LABA_Orari'
+  const repo = options.repo ?? process.env.GITHUB_ORARI_REPO ?? 'LABA-Firenze/LABA_Orari'
   const yearStart = options.yearStart ?? parseInt(process.env.GITHUB_EXPORT_YEAR_START || `${new Date().getFullYear()}`, 10)
   const results: ExportResult[] = []
 

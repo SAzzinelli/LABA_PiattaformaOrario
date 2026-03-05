@@ -4,7 +4,7 @@
  * (che ha cache 1-5 min) per evitare che il webhook sovrascriva le modifiche appena salvate.
  */
 
-const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/SAzzinelli/LABA_Orari/main/orari'
+const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/LABA-Firenze/LABA_Orari/main/orari'
 
 // Corsi su GitHub (cartelle/codici) -> nome corso nella Piattaforma
 const CORSO_TO_PLATFORM: Record<string, string> = {

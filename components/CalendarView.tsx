@@ -123,10 +123,10 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
     // eslint-disable-next-line react-hooks/exhaustive-deps -- load when filters/date change
   }, [filterCourse, filterYear, selectedLocation, currentDate])
 
-  // Aggiorna ogni minuto per la linea "ora attuale"
+  // Aggiorna ogni secondo per la linea "ora attuale" (posizione precisa)
   const [now, setNow] = useState(() => new Date())
   useEffect(() => {
-    const interval = setInterval(() => setNow(new Date()), 60 * 1000)
+    const interval = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(interval)
   }, [])
 
@@ -361,13 +361,13 @@ export default function CalendarView({ initialLocation }: CalendarViewProps = {}
                   return pos / rowHeight
                 })() : null
                 const nowLineInThisSlot = showNowLine && nowPosSlots != null && nowPosSlots >= timeIndex && nowPosSlots < timeIndex + 1
-                const nowLineOffsetPx = nowLineInThisSlot ? Math.round((nowPosSlots - timeIndex) * rowHeight) : 0
+                const nowLineOffsetPx = nowLineInThisSlot ? (nowPosSlots - timeIndex) * rowHeight : 0
 
                 return (
                   <React.Fragment key={time}>
                     {/* Riga sottile con la linea "ora attuale" (ferma all'orario, scorre con la tabella) */}
                     {nowLineInThisSlot && (
-                      <tr key={`now-${timeIndex}`} style={{ height: `${Math.max(nowLineOffsetPx, 2)}px` }}>
+                      <tr key={`now-${timeIndex}`} style={{ height: `${Math.max(nowLineOffsetPx, 1)}px` }}>
                         <td colSpan={classrooms.length + 1} className="p-0 border-none align-top relative" style={{ verticalAlign: 'top', border: 'none' }}>
                           <div className="absolute left-0 right-0 bottom-0 flex items-center pointer-events-none z-10">
                             <span className="sticky left-0 z-20 bg-red-500 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-r shadow-sm">

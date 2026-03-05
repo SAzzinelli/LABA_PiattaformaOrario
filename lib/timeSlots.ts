@@ -82,10 +82,10 @@ export function getTotalCalendarHeight(rowHeight: number = 60): number {
   return slots.length * rowHeight
 }
 
-/** Minuti dall'inizio del giorno (0:00) per l'orario corrente. */
+/** Minuti (con frazione da secondi) dall'inizio del giorno per posizione precisa. */
 export function getCurrentMinutesOfDay(): number {
   const now = new Date()
-  return now.getHours() * 60 + now.getMinutes()
+  return now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60
 }
 
 /**

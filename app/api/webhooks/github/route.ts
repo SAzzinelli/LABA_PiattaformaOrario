@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
   const repoName = payload.repository?.full_name
   const ref = payload.ref || ''
 
-  // Solo push su main/master del repo LABA_Orari (o SAzzinelli/LABA_Orari)
+  // Solo push su main/master del repo LABA_Orari (LABA-Firenze/LABA_Orari)
   const isLabOrari =
     repoName?.endsWith(`/${LABA_ORARI_REPO}`) || repoName === LABA_ORARI_REPO
   const isMainBranch = ref.endsWith('/main') || ref.endsWith('/master')

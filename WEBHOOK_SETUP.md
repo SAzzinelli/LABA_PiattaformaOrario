@@ -2,7 +2,7 @@
 
 ## Sync automatico (GitHub → Piattaforma)
 
-Quando modifichi i JSON degli orari nel repo **LABA_Orari** su GitHub, la piattaforma può sincronizzarsi automaticamente senza dover cliccare "Sync" da Admin.
+Quando modifichi i JSON degli orari nel repo [**LABA-Firenze/LABA_Orari**](https://github.com/LABA-Firenze/LABA_Orari) su GitHub, la piattaforma può sincronizzarsi automaticamente senza dover cliccare "Sync" da Admin.
 
 ## Configurazione
 
@@ -24,7 +24,7 @@ Copia il risultato (es. `a1b2c3d4e5f6...`).
 
 ### 3. Configura il webhook su GitHub
 
-1. Apri il repo **LABA_Orari** su GitHub
+1. Apri il repo [**LABA-Firenze/LABA_Orari**](https://github.com/LABA-Firenze/LABA_Orari) su GitHub
 2. **Settings** → **Webhooks** → **Add webhook**
 3. Compila:
    - **Payload URL**: `https://orario.laba.biz/api/webhooks/github`
@@ -40,14 +40,14 @@ Dopo aver creato il webhook, GitHub invia un "ping" per testare. Controlla che c
 ## Comportamento
 
 - **Nessun doppione**: il sync elimina le lezioni esistenti per corso+anno e reinserisce i dati da GitHub. Non si creano duplicati.
-- **Solo push su main**: il sync parte solo quando fai push sul branch `main` (o `master`) di LABA_Orari.
+- **Solo push su main**: il sync parte solo quando fai push sul branch `main` (o `master`) di [LABA-Firenze/LABA_Orari](https://github.com/LABA-Firenze/LABA_Orari).
 - **Risposta immediata**: la piattaforma risponde subito a GitHub (entro pochi secondi) e esegue il sync in background.
 
 ---
 
 ## Pubblicazione su GitHub (Piattaforma → GitHub)
 
-Quando modifichi le lezioni su orario.laba.biz, puoi pubblicarle su LABA_Orari con il pulsante **"Pubblica su GitHub"** nella sezione Admin → Orari.
+Quando modifichi le lezioni su orario.laba.biz, puoi pubblicarle su [LABA-Firenze/LABA_Orari](https://github.com/LABA-Firenze/LABA_Orari) con il pulsante **"Pubblica su GitHub"** nella sezione Admin → Orari.
 
 ### Configurazione
 
