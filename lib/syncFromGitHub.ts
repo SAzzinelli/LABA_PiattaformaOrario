@@ -87,7 +87,8 @@ function expandNuovoToJsonLessons(entries: NuovoLessonEntry[], corsoStudio: stri
       out.push({
         corso: entry.corso,
         oidCorso: entry.oidCorso ?? null,
-        oidCorsi: Array.isArray(entry.oidCorsi) ? entry.oidCorsi[0] ?? null : (entry.oidCorsi as string) ?? null,
+        // In piattaforma teniamo un solo OID "primario": se arriva un array prendiamo il primo, altrimenti null.
+        oidCorsi: Array.isArray(entry.oidCorsi) ? (entry.oidCorsi[0] ?? null) : null,
         anno: entry.anno,
         gruppo: entry.gruppo ?? null,
         aula: entry.aula ?? '',
